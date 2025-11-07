@@ -1,0 +1,79 @@
+{
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": true,
+  "typescript.suggest.enabled": true,
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true,
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "eslint.useESLintClass": true,
+  "eslint.useFlatConfig": false,
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": true,
+  "todohighlight.keywords": [
+    {
+      "text": "@read",
+      "color": "#58ff3b",
+      "backgroundColor": "rgba(88, 255, 59,0.03)",
+      "isWholeLine": true
+    },
+    {
+      "text": "@test",
+      "color": "#faa0e9",
+      "backgroundColor": "rgba(250, 160, 233,0.03)",
+      "isWholeLine": true
+    },
+    {
+      "text": "@todo",
+      "color": "orange",
+      "backgroundColor": "rgba(66, 135, 245,0.1)",
+      "isWholeLine": true
+    }
+  ],
+  "auto-close-tag.excludedTags": [
+    "area",
+    "base",
+    "br",
+    "col",
+    "command",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "keygen",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr"
+  ],
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "[markdown]": {
+    "editor.formatOnSave": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

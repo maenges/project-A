@@ -1,0 +1,28 @@
+# ANSI 색상 코드
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# 커밋 메시지 검증을 비활성화했습니다.
+# 필요 시 아래 코드를 활성화하세요.
+
+# 설정 변수
+# COMMIT_MSG_PATTERN="^(NO-ISSUE |PRJETSOMS-[0-9]+ )"  # 올바른 커밋 메시지 정규식
+
+# 커밋 메시지를 읽어옴
+# commit_msg=$(cat "$1")
+
+# 커밋 메시지는 "NO-ISSUE " 또는 "PRJETSOMS-<issue number> "로 시작해야 한다.
+# if ! echo "$commit_msg" | grep -qE "$COMMIT_MSG_PATTERN"; then
+#     echo "${RED}Error: Invalid commit message format!"
+#     echo "${YELLOW}커밋 메시지는 아래와 같은 문구로 시작되어야 합니다.:${NC}"
+#     echo "  - NO-ISSUE "
+#     echo "  - PRJETSOMS-<issue number> "
+#     echo "\nExamples:"
+#     echo "  ${GREEN}✓ ${NC}NO-ISSUE Update README.md"
+#     echo "  ${GREEN}✓ ${NC}PRJETSOMS-123 Implement login feature"
+#     echo "  ${RED}✗ ${NC}update: Add new files"
+#     echo "  ${RED}✗ ${NC}fix login bug\n"
+#     exit 1
+# fi

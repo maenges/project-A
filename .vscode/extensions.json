@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "arcanis.vscode-zipfs",
+    "esbenp.prettier-vscode",
+    "jgclark.vscode-todo-highlight",
+    "styled-components.vscode-styled-components",
+    "vitest.explorer",
+    "formulahendry.auto-close-tag",
+    "nucllear.vscode-extension-auto-import",
+    "dbaeumer.vscode-eslint",
+    "christian-kohler.path-intellisense"
+  ]
+}
