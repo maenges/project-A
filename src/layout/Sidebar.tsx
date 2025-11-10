@@ -130,20 +130,20 @@ const MenuList = styled(List)`
 
     /* 하위 메뉴 선택 스타일 (회색) */
     &.child-selected {
-      background-color: ${({ theme }) => theme.colors.neutral[30]};
+      background-color: ${({ theme }) => theme.colors.neutral[20]};
       color: ${({ theme }) => theme.colors.text.primary};
       font-weight: ${({ theme }) => theme.fonts.weight.bold};
       .MuiListItemIcon-root {
         color: ${({ theme }) => theme.colors.text.primary};
       }
       &:hover {
-        background-color: ${({ theme }) => theme.colors.neutral[50]};
+        background-color: ${({ theme }) => theme.colors.neutral[30]};
       }
     }
 
     /* 기본 호버 */
     &:hover {
-      background-color: ${({ theme }) => theme.colors.neutral[30]};
+      background-color: ${({ theme }) => theme.colors.neutral[20]};
     }
   }
 `;
