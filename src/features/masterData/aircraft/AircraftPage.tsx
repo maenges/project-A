@@ -555,7 +555,7 @@ const AircraftPage = () => {
       buttonComponent={buttonComponent}
       totalCount={totalCount}
       gridRef={gridRef}
-      size="sm-two-header"
+      // size="sm-two-header"
     />
   );
 };

@@ -363,7 +363,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .label-lg {
-    color: var(--color-text-primary-darkblue, ${(props) => props.theme.colors.text.primary}) !important;
+    color: ${(props) => props.theme.colors.text.primary} !important;
     font-family: ${(props) => props.theme.fonts.family.primary} !important;
     font-size: var(--font-size-title-md, ${(props) => props.theme.fonts.size['2xl']}) !important;
     font-style: normal !important;

@@ -110,7 +110,7 @@ export const theme: ThemeInterface = {
       90: '#252525',
     },
     text: {
-      primary: '#051766',
+      primary: '#252525',
       secondary: '#666666',
       disabled: '#999999',
       title: '#051766',

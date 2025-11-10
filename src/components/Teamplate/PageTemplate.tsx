@@ -4,9 +4,9 @@ import { ColDef, IDatasource, GridReadyEvent } from 'ag-grid-community';
 import SearchPanel from './SearchPanel';
 import ButtonPanel from './ButtonPanel';
 import { EtsGrid } from '../EtsGrid';
-import { useLocation } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import chevronRight from '@/assets/images/chevron-right.svg';
+// import chevronRight from '@/assets/images/chevron-right.svg';
 
 const HeaderArea = styled(Stack)`
   display: flex;
@@ -14,12 +14,12 @@ const HeaderArea = styled(Stack)`
   align-items: end;
 `;
 
-const NavigationItem = styled(Typography)`
-  color: var(--color-brand-darkblue-100, #051766);
-  font-weight: 700;
-  font-size: 12px !important;
-  line-height: 24px;
-`;
+// const NavigationItem = styled(Typography)`
+//   color: var(--color-brand-darkblue-100, #051766);
+//   font-weight: 700;
+//   font-size: 12px !important;
+//   line-height: 24px;
+// `;
 
 export interface PageTemplateProps {
   title?: string;
@@ -199,69 +199,69 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   // 편집 가능한 컬럼에 대해 헤더 스타일 적용
   const editColumnDefs = columnDefs?.map((col) => col);
 
-  const { pathname } = useLocation();
+  // const { pathname } = useLocation();
 
   // 메뉴에서 현재 경로에 맞는 타이틀 찾기
-  const getMenuTitle = (currentPath: string) => {
-    try {
-      const userMenus = JSON.parse(sessionStorage.getItem('userMenus') || '[]');
-      const menu = userMenus.find((menu: any) => menu.menuPath === currentPath);
-      return menu?.menuName || null;
-    } catch {
-      return null;
-    }
-  };
+  // const getMenuTitle = (currentPath: string) => {
+  //   try {
+  //     const userMenus = JSON.parse(sessionStorage.getItem('userMenus') || '[]');
+  //     const menu = userMenus.find((menu: any) => menu.menuPath === currentPath);
+  //     return menu?.menuName || null;
+  //   } catch {
+  //     return null;
+  //   }
+  // };
 
   // pathname과 메뉴 정보를 기반으로 네비게이션 생성
-  const createNavigation = () => {
-    const pathSegments = pathname.split('/').filter((segment) => segment.length > 0);
-    const navigationItems = ['Home']; // 항상 Home으로 시작
+  // const createNavigation = () => {
+  //   const pathSegments = pathname.split('/').filter((segment) => segment.length > 0);
+  //   const navigationItems = ['Home']; // 항상 Home으로 시작
 
-    // 각 path segment를 처리하여 네비게이션 아이템 생성
-    pathSegments.forEach((segment, index) => {
-      // 현재까지의 경로 구성
-      const currentPath = '/' + pathSegments.slice(0, index + 1).join('/');
+  //   // 각 path segment를 처리하여 네비게이션 아이템 생성
+  //   pathSegments.forEach((segment, index) => {
+  //     // 현재까지의 경로 구성
+  //     const currentPath = '/' + pathSegments.slice(0, index + 1).join('/');
 
-      // 마지막 세그먼트인 경우 메뉴 타이틀 -> prop title -> 포맷팅된 세그먼트 순으로 시도
-      if (index === pathSegments.length - 1) {
-        const menuTitle = getMenuTitle(currentPath);
-        if (menuTitle) {
-          navigationItems.push(menuTitle);
-          return;
-        } else if (title) {
-          navigationItems.push(title);
-          return;
-        }
-      }
+  //     // 마지막 세그먼트인 경우 메뉴 타이틀 -> prop title -> 포맷팅된 세그먼트 순으로 시도
+  //     if (index === pathSegments.length - 1) {
+  //       const menuTitle = getMenuTitle(currentPath);
+  //       if (menuTitle) {
+  //         navigationItems.push(menuTitle);
+  //         return;
+  //       } else if (title) {
+  //         navigationItems.push(title);
+  //         return;
+  //       }
+  //     }
 
-      // 중간 세그먼트이거나 메뉴/prop title이 없는 경우 포맷팅된 세그먼트 사용
-      let formattedSegment = segment
-        .replace(/-/g, ' ') // '-'를 ' '로 치환
-        .replace(/\b\w/g, (l) => l.toUpperCase()) // 각 단어의 첫 글자를 대문자로
-        .replace(/\B\w+/g, (l) => l.toLowerCase()); // 첫 글자를 제외한 나머지를 소문자로
+  //     // 중간 세그먼트이거나 메뉴/prop title이 없는 경우 포맷팅된 세그먼트 사용
+  //     let formattedSegment = segment
+  //       .replace(/-/g, ' ') // '-'를 ' '로 치환
+  //       .replace(/\b\w/g, (l) => l.toUpperCase()) // 각 단어의 첫 글자를 대문자로
+  //       .replace(/\B\w+/g, (l) => l.toLowerCase()); // 첫 글자를 제외한 나머지를 소문자로
 
-      // 2자리 이하 단어는 모두 대문자로 변환
-      formattedSegment = formattedSegment.replace(/\b\w{1,2}\b/g, (word) => word.toUpperCase());
+  //     // 2자리 이하 단어는 모두 대문자로 변환
+  //     formattedSegment = formattedSegment.replace(/\b\w{1,2}\b/g, (word) => word.toUpperCase());
 
-      navigationItems.push(formattedSegment);
-    });
+  //     navigationItems.push(formattedSegment);
+  //   });
 
-    return navigationItems;
-  };
+  //   return navigationItems;
+  // };
 
-  const navigationItems = createNavigation();
+  // const navigationItems = createNavigation();
 
   return (
     <Container maxWidth={false} disableGutters sx={{ width: '100%', mx: 0 }}>
       <HeaderArea direction={'row'}>
         {/* 페이지 제목 */}
         {title && (
-          <Typography className="label-lg" component="h1" sx={{ mt: 3 }}>
+          <Typography className="label-lg" component="h1">
             {title}
           </Typography>
         )}
         {/* 네비게이션 영역 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {navigationItems.map((item, index) => (
             <React.Fragment key={index}>
               <NavigationItem
@@ -276,7 +276,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               )}
             </React.Fragment>
           ))}
-        </Box>
+        </Box> */}
       </HeaderArea>
 
       {/* 검색/필터 영역 */}
