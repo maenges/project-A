@@ -252,7 +252,17 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   // const navigationItems = createNavigation();
 
   return (
-    <Container maxWidth={false} disableGutters sx={{ width: '100%', mx: 0 }}>
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={(theme) => ({
+        width: '100%',
+        mx: 0,
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        minHeight: '100%',
+      })}
+    >
       <HeaderArea direction={'row'}>
         {/* 페이지 제목 */}
         {title && (

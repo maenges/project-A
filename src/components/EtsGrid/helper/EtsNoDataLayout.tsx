@@ -36,13 +36,24 @@ export default function EtsNoDataLayout(props: Props) {
         gap: '4px',
       }}
     >
-      <img src={icNodata} alt="NO DATA ICON" style={{ height: '36px', width: '36px' }} />
+      <Box
+        component="img"
+        src={icNodata}
+        alt="NO DATA ICON"
+        sx={(theme) => ({
+          height: '36px',
+          width: '36px',
+          userSelect: 'none',
+          filter:
+            theme.palette.mode === 'dark' ? 'invert(1) brightness(1.6) contrast(1.1)' : 'none',
+        })}
+      />
       <Typography
-        sx={{
+        sx={(theme) => ({
           fontSize: '14px',
           fontWeight: 700,
-          color: '#252525',
-        }}
+          color: theme.palette.mode === 'dark' ? '#ffffff' : theme.palette.text.primary,
+        })}
       >
         {noRowsMessage}
       </Typography>

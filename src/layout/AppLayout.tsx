@@ -31,7 +31,7 @@ const MainContent = styled.main`
   padding: 104px 50px 20px; /* 헤더 높이(84px) + 상단 여백(20px) */
   /* background-color: #d6d6d6; */
   border-top-left-radius: 24px;
-  background-color: #ffffff;
+  background-color: ${({ theme }) => theme.colors.background.default};
   /* @media (max-width: 768px) {
     padding: 84px 20px 20px;
   } */

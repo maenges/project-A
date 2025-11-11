@@ -9,7 +9,7 @@ import TextField from '@mui/material/TextField';
 import { Paper, Box } from '@mui/material';
 import type { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import type { TextFieldProps } from '@mui/material/TextField';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/ko';
 import icArrowLeft from '@images/ic-arrow-left.svg?inline';
@@ -52,7 +52,7 @@ export interface EtsDatePickerProps extends Omit<DatePickerProps<Dayjs>, 'render
 
 const StyledTextField = styled(TextField, {
   shouldForwardProp: (prop) => prop !== 'isReadOnly' && prop !== 'ownerState',
-})<{ isReadOnly?: boolean }>(({ isReadOnly }) => ({
+})<{ isReadOnly?: boolean }>(({ isReadOnly, theme }) => ({
   '& .MuiOutlinedInput-root': {
     height: '36px !important',
     minHeight: '36px !important',
@@ -60,35 +60,32 @@ const StyledTextField = styled(TextField, {
     boxSizing: 'border-box',
     borderRadius: 'var(--radius-sm, 8px)',
     backgroundColor: isReadOnly
-      ? 'var(--color-background-disabled, #EDEDED)'
-      : 'var(--color-background-base-white, #FFF)',
+      ? theme.palette.action.disabledBackground
+      : theme.palette.mode === 'light'
+        ? '#FFFFFF'
+        : theme.palette.background.paper,
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
     fontFamily: '"Hanjin Group Sans"',
     lineHeight: '130%',
     '& fieldset': {
-      border: isReadOnly
-        ? '1px solid var(--color-border-base, #D9D9D9)'
-        : '1px solid var(--color-border-base, #D9D9D9)',
+      border: `1px solid ${theme.palette.divider}`,
     },
+    // 요구: hover일 때만 테마색, focus는 기본 divider 유지 (Autocomplete와 일관)
     '&:hover fieldset': {
-      borderColor: isReadOnly
-        ? 'var(--color-border-base, #D9D9D9)'
-        : 'var(--color-border-primary-darkblue, #051766)',
+      borderColor: theme.palette.primary.main,
     },
     '&.Mui-focused fieldset': {
-      borderColor: isReadOnly
-        ? 'var(--color-border-base, #D9D9D9)'
-        : 'var(--color-border-primary-darkblue, #051766)',
+      borderColor: theme.palette.divider,
       borderWidth: '1px',
     },
     '&.Mui-error fieldset': {
       borderColor: '#ef4444',
     },
     '&.Mui-disabled': {
-      backgroundColor: 'var(--color-background-disabled, #EDEDED)',
+      backgroundColor: theme.palette.action.disabledBackground,
       '& fieldset': {
-        border: '1px solid var(--color-border-base, #D9D9D9)',
+        border: `1px solid ${theme.palette.divider}`,
       },
     },
   },
@@ -99,13 +96,13 @@ const StyledTextField = styled(TextField, {
     lineHeight: '130%',
     padding: '7px 12px',
     height: '20px !important',
-    color: isReadOnly ? 'var(--color-text-base, #252525)' : '#000000',
+    color: theme.palette.text.primary,
     '&.Mui-disabled': {
       color: 'var(--color-text-disabled, #A4A4A4)',
       WebkitTextFillColor: 'var(--color-text-disabled, #A4A4A4)',
     },
     '&::placeholder': {
-      color: 'var(--color-text-placeholder, #A4A4A4)',
+      color: theme.palette.text.secondary,
       opacity: 1,
     },
   },
@@ -113,9 +110,9 @@ const StyledTextField = styled(TextField, {
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-placeholder, #A4A4A4)',
+    color: theme.palette.mode === 'dark' ? '#FFFFFF' : theme.palette.text.secondary,
     '&.Mui-focused': {
-      color: 'var(--color-text-placeholder, #A4A4A4)',
+      color: theme.palette.mode === 'dark' ? '#FFFFFF' : theme.palette.text.secondary,
     },
     '&.Mui-error': {
       color: '#ef4444',
@@ -136,8 +133,9 @@ const StyledTextField = styled(TextField, {
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       backgroundSize: '24px 24px',
+      filter: theme.palette.mode === 'dark' ? 'invert(1) brightness(2)' : 'none',
       '&:hover': {
-        backgroundColor: isReadOnly ? 'transparent' : 'rgba(0, 0, 0, 0.04)',
+        backgroundColor: isReadOnly ? 'transparent' : theme.palette.action.hover,
       },
       '&.Mui-disabled': {
         backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_916_48137)'%3E%3Cpath d='M20.0777 17.5113L20.5575 16.9681C21.1312 16.3156 21.4333 15.5642 21.4333 14.8001V7.80877C21.4333 6.94818 20.7352 6.25007 19.8746 6.25007H17.76V4.4375H16.4044V6.25007H7.59539V4.4375H6.23977V6.25007H4.12511C3.26452 6.25007 2.56641 6.94818 2.56641 7.80877V18.0064C2.56641 18.8669 3.26452 19.5651 4.12511 19.5651L18.6764 19.56C19.4202 19.5448 20.1488 19.2452 20.786 18.6867L21.3293 18.2069H4.12511C4.01341 18.2094 3.92202 18.1206 3.92202 18.0064V11.4237H20.0777V17.5113ZM3.92202 10.0681V7.80623C3.92202 7.69453 4.01341 7.60314 4.12511 7.60314H6.23977V8.83437H7.59539V7.60314H16.4044V8.83437H17.76V7.60314H19.8746C19.9863 7.60314 20.0777 7.69453 20.0777 7.80623V10.0681H3.92202Z' fill='%23A4A4A4'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_916_48137'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E")`,
@@ -152,11 +150,14 @@ const StyledTextField = styled(TextField, {
 }));
 
 // 모달 스타일링
-const StyledModalPaper = styled(Paper)(() => ({
+const StyledModalPaper = styled(Paper)(({ theme }) => ({
   borderRadius: '12px !important',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15) !important',
+  boxShadow:
+    theme.palette.mode === 'dark'
+      ? '0 6px 24px rgba(0,0,0,0.6) !important'
+      : '0 4px 20px rgba(0, 0, 0, 0.15) !important',
   overflow: 'hidden !important',
-  backgroundColor: '#FFFFFF !important',
+  backgroundColor: `${theme.palette.mode === 'dark' ? '#141A21' : theme.palette.background.paper} !important`,
   position: 'relative',
 
   // 전체 캘린더 컨테이너 - 스크롤 방지를 위한 고정 높이
@@ -180,7 +181,7 @@ const StyledModalPaper = styled(Paper)(() => ({
     fontSize: '12px',
     fontWeight: '600',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-secondary, #666666)',
+    color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
     '&:first-of-type': {
       color: '#FF0000 !important', // 일요일(S)를 빨간색으로
     },
@@ -198,26 +199,26 @@ const StyledModalPaper = styled(Paper)(() => ({
   '& .MuiPickersDay-root': {
     fontSize: '14px',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-base, #252525)',
+    color: theme.palette.text.primary,
     width: '36px',
     height: '36px',
     margin: '2px',
     '&:hover': {
-      backgroundColor: 'var(--color-background-primary-lightblue, #E8F4FD)',
+      backgroundColor: theme.palette.action.hover,
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff',
       '&:hover': {
-        backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+        backgroundColor: `${theme.palette.primary.main} !important`,
       },
     },
     '&.MuiPickersDay-today': {
-      border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+      border: `1px solid ${theme.palette.primary.main} !important`,
       boxSizing: 'border-box !important',
       '&:not(.Mui-selected)': {
         backgroundColor: 'transparent',
-        color: 'var(--color-text-primary-darkblue, #051766)',
+        color: theme.palette.primary.main,
       },
     },
   },
@@ -226,12 +227,12 @@ const StyledModalPaper = styled(Paper)(() => ({
   '& .MuiDayCalendar-weekContainer .MuiPickersDay-root:first-of-type': {
     color: '#FF0000 !important',
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff !important',
     },
     '&.MuiPickersDay-today:not(.Mui-selected)': {
       color: '#FF0000 !important',
-      border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+      border: `1px solid ${theme.palette.primary.main} !important`,
       boxSizing: 'border-box !important',
     },
     '&.Mui-disabled': {
@@ -243,28 +244,31 @@ const StyledModalPaper = styled(Paper)(() => ({
   '& .MuiPickersYear-yearButton, & .MuiPickersMonth-monthButton': {
     fontSize: '14px',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-base, #252525)',
+    color: theme.palette.text.primary,
     '&:hover': {
-      backgroundColor: 'var(--color-background-primary-lightblue, #E8F4FD)',
+      backgroundColor: theme.palette.action.hover,
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff',
       '&:hover': {
-        backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+        backgroundColor: `${theme.palette.primary.main} !important`,
       },
     },
   },
 }));
 
 // 데스크탑 팝오버 스타일링
-const StyledPopperPaper = styled(Paper)(() => ({
+const StyledPopperPaper = styled(Paper)(({ theme }) => ({
   marginTop: '8px !important',
   borderRadius: '12px !important',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15) !important',
+  boxShadow:
+    theme.palette.mode === 'dark'
+      ? '0 6px 24px rgba(0,0,0,0.6) !important'
+      : '0 4px 20px rgba(0, 0, 0, 0.15) !important',
   overflow: 'hidden !important',
-  border: '1px solid var(--color-border-base, #D9D9D9)',
-  backgroundColor: '#FFFFFF !important',
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: `${theme.palette.mode === 'dark' ? '#141A21' : theme.palette.background.paper} !important`,
   position: 'relative',
 
   // 달력 컨테이너
@@ -280,7 +284,7 @@ const StyledPopperPaper = styled(Paper)(() => ({
     fontSize: '12px',
     fontWeight: '600',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-secondary, #666666)',
+    color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
     '&:first-of-type': {
       color: '#FF0000 !important', // 일요일(S)를 빨간색으로
     },
@@ -290,26 +294,26 @@ const StyledPopperPaper = styled(Paper)(() => ({
   '& .MuiPickersDay-root': {
     fontSize: '14px',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-base, #252525)',
+    color: theme.palette.text.primary,
     width: '36px',
     height: '36px',
     margin: '2px',
     '&:hover': {
-      backgroundColor: 'var(--color-background-primary-lightblue, #E8F4FD)',
+      backgroundColor: theme.palette.action.hover,
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff',
       '&:hover': {
-        backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+        backgroundColor: `${theme.palette.primary.main} !important`,
       },
     },
     '&.MuiPickersDay-today': {
-      border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+      border: `1px solid ${theme.palette.primary.main} !important`,
       boxSizing: 'border-box !important',
       '&:not(.Mui-selected)': {
         backgroundColor: 'transparent',
-        color: 'var(--color-text-primary-darkblue, #051766)',
+        color: theme.palette.primary.main,
       },
     },
   },
@@ -318,12 +322,12 @@ const StyledPopperPaper = styled(Paper)(() => ({
   '& .MuiDayCalendar-weekContainer .MuiPickersDay-root:first-of-type': {
     color: '#FF0000 !important',
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff !important',
     },
     '&.MuiPickersDay-today:not(.Mui-selected)': {
       color: '#FF0000 !important',
-      border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+      border: `1px solid ${theme.palette.primary.main} !important`,
       boxSizing: 'border-box !important',
     },
     '&.Mui-disabled': {
@@ -334,15 +338,15 @@ const StyledPopperPaper = styled(Paper)(() => ({
   '& .MuiPickersYear-yearButton, & .MuiPickersMonth-monthButton': {
     fontSize: '14px',
     fontFamily: '"Hanjin Group Sans"',
-    color: 'var(--color-text-base, #252525)',
+    color: theme.palette.text.primary,
     '&:hover': {
-      backgroundColor: 'var(--color-background-primary-lightblue, #E8F4FD)',
+      backgroundColor: theme.palette.action.hover,
     },
     '&.Mui-selected': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+      backgroundColor: `${theme.palette.primary.main} !important`,
       color: '#fff',
       '&:hover': {
-        backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+        backgroundColor: `${theme.palette.primary.main} !important`,
       },
     },
   },
@@ -354,10 +358,10 @@ const StyledActionBar = styled(Box, {
     !['onAccept', 'onClear', 'onCancel', 'onSetToday', 'actions', 'ownerState'].includes(
       prop as string
     ),
-})(() => ({
+})(({ theme }) => ({
   padding: '12px 16px',
   borderTop: 'none', // 거슬리는 라인 제거
-  backgroundColor: '#FFFFFF',
+  backgroundColor: theme.palette.background.paper,
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -371,24 +375,23 @@ const StyledActionBar = styled(Box, {
     minWidth: 'auto',
 
     '&.MuiButton-text': {
-      color: 'var(--color-text-secondary, #666666)',
+      color: theme.palette.text.secondary,
       '&:hover': {
-        backgroundColor: 'var(--color-background-hover, #F5F5F5)',
+        backgroundColor: theme.palette.action.hover,
       },
     },
 
     '&.MuiButton-contained': {
-      backgroundColor: 'var(--color-background-primary-darkblue, #051766)',
+      backgroundColor: theme.palette.primary.main,
       color: '#fff',
       boxShadow: 'none',
       '&:hover': {
-        backgroundColor: 'var(--color-background-primary-darkblue, #051766)',
+        backgroundColor: theme.palette.primary.main,
         boxShadow: '0 2px 8px rgba(5, 23, 102, 0.3)',
       },
     },
   },
 }));
-
 // textField 컴포넌트를 분리 - 렌더링마다 재생성되지 않도록
 const CustomTextField = React.forwardRef<HTMLInputElement, any>((params, forwardedRef) => {
   const isReadOnly = params.inputProps?.readOnly || false;
@@ -400,6 +403,7 @@ CustomTextField.displayName = 'CustomTextField';
 // 커스텀 캘린더 헤더 - (화살표) 2025.09 (화살표) 형식
 const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
   const { currentMonth, onMonthChange, onViewChange } = props;
+  const theme = useTheme();
 
   // currentMonth가 없으면 헤더를 렌더링하지 않음
   if (!currentMonth || !onMonthChange) {
@@ -435,7 +439,7 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
       ref={ref}
       className="MuiPickersCalendarHeader-root"
       style={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.palette.mode === 'dark' ? '#141A21' : '#FFFFFF',
         padding: '32px 44px 16px 44px',
         margin: '0',
         borderBottom: 'none',
@@ -463,9 +467,11 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
           backgroundSize: '24px 24px',
           width: '28px',
           height: '28px',
+          filter: theme.palette.mode === 'dark' ? 'invert(1) brightness(2)' : 'none',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+          e.currentTarget.style.backgroundColor =
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
@@ -483,7 +489,7 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
           fontSize: '16px',
           fontWeight: '600',
           fontFamily: '"Hanjin Group Sans"',
-          color: 'var(--color-text-base, #252525)',
+          color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
         }}
       >
         <button
@@ -496,12 +502,13 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
             fontSize: '16px',
             fontWeight: '600',
             fontFamily: '"Hanjin Group Sans"',
-            color: 'var(--color-text-base, #252525)',
+            color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
             // padding: '4px 8px',
             borderRadius: '4px',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+            e.currentTarget.style.backgroundColor =
+              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
@@ -520,12 +527,13 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
             fontSize: '16px',
             fontWeight: '600',
             fontFamily: '"Hanjin Group Sans"',
-            color: 'var(--color-text-base, #252525)',
+            color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
             // padding: '4px 8px',
             borderRadius: '4px',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+            e.currentTarget.style.backgroundColor =
+              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'transparent';
@@ -551,9 +559,11 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
           backgroundSize: '24px 24px',
           width: '28px',
           height: '28px',
+          filter: theme.palette.mode === 'dark' ? 'invert(1) brightness(2)' : 'none',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+          e.currentTarget.style.backgroundColor =
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent';
@@ -590,6 +600,7 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
     },
     ref
   ) => {
+    const theme = useTheme();
     // 기본 미디어 쿼리: 포인터가 fine한 경우 데스크탑 모드
     const defaultDesktopQuery = '@media (pointer: fine)';
 
@@ -636,8 +647,9 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
         layout: {
           ...props.slotProps?.layout,
           sx: {
-            backgroundColor: '#FFFFFF',
-            border: '1px solid var(--color-border-base, #D9D9D9)',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? '#141A21' : theme.palette.background.paper,
+            border: `1px solid ${theme.palette.divider}`,
             borderRadius: '12px',
             overflow: 'hidden !important',
             position: 'relative',
@@ -656,7 +668,8 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
               fontSize: '12px',
               fontWeight: '600',
               fontFamily: '"Hanjin Group Sans"',
-              color: 'var(--color-text-secondary, #666666)',
+              color:
+                theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
               '&:first-of-type': {
                 color: '#FF0000 !important',
               },
@@ -666,13 +679,13 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
             '& .MuiPickersDay-root': {
               fontSize: '14px',
               fontFamily: '"Hanjin Group Sans"',
-              color: 'var(--color-text-base, #252525)',
+              color: theme.palette.text.primary,
               '&.MuiPickersDay-today': {
-                border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+                border: `1px solid ${theme.palette.primary.main} !important`,
                 boxSizing: 'border-box !important',
                 '&:not(.Mui-selected)': {
                   backgroundColor: 'transparent',
-                  color: 'var(--color-text-primary-darkblue, #051766)',
+                  color: theme.palette.primary.main,
                 },
               },
             },
@@ -681,12 +694,12 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
             '& .MuiDayCalendar-weekContainer .MuiPickersDay-root:first-of-type': {
               color: '#FF0000 !important',
               '&.Mui-selected': {
-                backgroundColor: 'var(--color-background-primary-darkblue, #051766) !important',
+                backgroundColor: `${theme.palette.primary.main} !important`,
                 color: '#fff !important',
               },
               '&.MuiPickersDay-today:not(.Mui-selected)': {
                 color: '#FF0000 !important',
-                border: '1px solid var(--color-border-primary-darkblue, #051766) !important',
+                border: `1px solid ${theme.palette.primary.main} !important`,
                 boxSizing: 'border-box !important',
               },
               '&.Mui-disabled': {

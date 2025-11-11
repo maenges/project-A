@@ -585,7 +585,7 @@ const StatisticsPage = () => {
       gridRef={gridRef}
       subSelect={subSelect}
       onGridReady={handleGridReady}
-      size="md"
+      size="lg"
     />
   );
 };

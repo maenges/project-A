@@ -61,7 +61,9 @@ const AircraftPage = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const actypeOptions = useCommonOptionsStore((s) => s.acTypeOptions);
-  const [yearOptions, setYearOptions] = useState([]);
+  // 기본 연도 범위(서버 실패 대비 더미) 최근 5년
+  const defaultYears = Array.from({ length: 5 }, (_, i) => dayjs().year() - i);
+  const [yearOptions, setYearOptions] = useState<number[]>(defaultYears);
 
   useActivate(() => {
     // 편집 상태 초기화
@@ -76,19 +78,132 @@ const AircraftPage = () => {
   });
 
   useEffect(() => {
+    // 서버가 동작하지 않아도 기본 연도는 보이도록 처리
     callApi({
       service: Service.POSTMAN,
       url: '/api/v1/common/operation-years',
       method: Method.GET,
       params: {},
-      config: { isLoading: true },
-    }).then((res) => {
-      if (res.successOrNot !== 'Y') {
-        return toast.error(res.HeaderMsg);
-      }
-      setYearOptions(res.data);
-    });
+      config: { isLoading: false },
+    })
+      .then((res) => {
+        if (res.successOrNot !== 'Y') return;
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setYearOptions(res.data);
+        }
+      })
+      .catch(() => {
+        // ignore - fallback(defaultYears) 유지
+      });
   }, []);
+
+  // 더미 데이터 (DB 미가동 시 스타일 확인용)
+  const DUMMY_DATA: AircraftData[] = [
+    {
+      id: 1,
+      icaoActyp: 'A320',
+      sactyp: 'A320',
+      gactyp: 'A320',
+      acver: 'NEO',
+      regno: 'HL8001',
+      paxY: true,
+      mtowLb: 162000,
+      bodyType: 'N',
+      acarsY: true,
+      obdUncertainty: 'Low',
+      uncertaintySrc: 'Airbus Spec',
+      fuelType: 'Jet A1',
+      fuelUpliftSrc: 'Fuel Slip',
+      fuelUpliftMsr: 'Fuel Supplier',
+      fuelDensitySrc: 'Fuel Slip',
+      fuelConsumptionMthd: 'Method A ',
+      maxUncertainty: 'Tier 1',
+      registationDate: '2020-01-01',
+      cancelDate: null,
+      createdAt: '2020-01-01',
+      createdBy: 'system',
+      updatedAt: '2020-06-01',
+      updatedBy: 'system',
+    },
+    {
+      id: 2,
+      icaoActyp: 'B738',
+      sactyp: 'B738',
+      gactyp: 'B738',
+      acver: 'MAX',
+      regno: 'HL8002',
+      paxY: true,
+      mtowLb: 174000,
+      bodyType: 'N',
+      acarsY: false,
+      obdUncertainty: 'Medium',
+      uncertaintySrc: 'Boeing Spec',
+      fuelType: 'Jet A1',
+      fuelUpliftSrc: 'Log Sheet',
+      fuelUpliftMsr: 'On-board',
+      fuelDensitySrc: 'On-board',
+      fuelConsumptionMthd: 'Method B',
+      maxUncertainty: 'Tier 2',
+      registationDate: '2021-02-14',
+      cancelDate: null,
+      createdAt: '2021-02-14',
+      createdBy: 'system',
+      updatedAt: '2021-03-01',
+      updatedBy: 'system',
+    },
+    {
+      id: 3,
+      icaoActyp: 'A359',
+      sactyp: 'A359',
+      gactyp: 'A359',
+      acver: '900',
+      regno: 'HL8003',
+      paxY: true,
+      mtowLb: 617300,
+      bodyType: 'W',
+      acarsY: true,
+      obdUncertainty: 'Low',
+      uncertaintySrc: 'Airbus Spec',
+      fuelType: 'Jet A1',
+      fuelUpliftSrc: 'Fuel Slip',
+      fuelUpliftMsr: 'Fuel Supplier',
+      fuelDensitySrc: 'Fuel Slip',
+      fuelConsumptionMthd: 'Method A ',
+      maxUncertainty: 'Tier 1',
+      registationDate: '2022-05-20',
+      cancelDate: null,
+      createdAt: '2022-05-20',
+      createdBy: 'system',
+      updatedAt: '2022-10-01',
+      updatedBy: 'system',
+    },
+    {
+      id: 4,
+      icaoActyp: 'B77W',
+      sactyp: 'B77W',
+      gactyp: 'B77W',
+      acver: '300ER',
+      regno: 'HL8004',
+      paxY: true,
+      mtowLb: 775000,
+      bodyType: 'W',
+      acarsY: false,
+      obdUncertainty: 'High',
+      uncertaintySrc: 'Other',
+      fuelType: 'Jet A1',
+      fuelUpliftSrc: 'Fuel Slip',
+      fuelUpliftMsr: 'On-board',
+      fuelDensitySrc: 'On-board',
+      fuelConsumptionMthd: 'Method B',
+      maxUncertainty: 'Tier 2',
+      registationDate: '2019-07-11',
+      cancelDate: null,
+      createdAt: '2019-07-11',
+      createdBy: 'system',
+      updatedAt: '2020-01-05',
+      updatedBy: 'system',
+    },
+  ];
 
   const exportOptions: EtsExportButtonOption[] = [
     {
@@ -215,7 +330,6 @@ const AircraftPage = () => {
     },
     {
       headerName: 'ETS Information',
-      headerClass: 'bg-orange',
       children: [
         EtsColumnPreset.SelectPreset({
           field: 'acarsY',
@@ -223,7 +337,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 100,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: acarsOption,
           },
@@ -234,7 +347,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
         }),
         EtsColumnPreset.SelectPreset({
           field: 'uncertaintySrc',
@@ -242,7 +354,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: uncrntnySourceOption,
           },
@@ -253,7 +364,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: fuelTypeOption,
           },
@@ -264,7 +374,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: upliftSourceOption,
           },
@@ -275,7 +384,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: upliftMeasureOption,
           },
@@ -286,7 +394,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: densitySourceOption,
           },
@@ -297,7 +404,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: consMethodOption,
           },
@@ -308,7 +414,6 @@ const AircraftPage = () => {
           editable: isEditable,
           width: 133.75,
           flex: 1,
-          headerClass: 'bg-orange',
           context: {
             options: maxUncrntnyOption,
           },
@@ -357,36 +462,17 @@ const AircraftPage = () => {
   });
 
   const onSearch: SubmitHandler<FormValues> = async () => {
-    const year = watch('year');
+    // DB 미가동 시 더미 데이터로 검색 결과 대체
     const actyp = watch('actyp');
 
-    const sendParams = {
-      year,
-      actyp: actyp === 'ALL' ? '' : actyp, // 수정된 부분
-    };
+    // 간단한 타입 필터링 (연도는 현재 더미에서 사용하지 않음)
+    const filtered = DUMMY_DATA.filter((row) =>
+      actyp === 'ALL' ? true : row.icaoActyp?.toUpperCase().includes(actyp.toUpperCase())
+    );
 
-    callApi({
-      service: Service.POSTMAN,
-      url: '/api/v1/aircraft',
-      method: Method.GET,
-      params: {
-        queryParams: sendParams,
-      },
-      config: { isLoading: true },
-    }).then((res) => {
-      if (res.successOrNot !== 'Y') {
-        return toast.error(res.HeaderMsg);
-      }
-
-      // 데이터 치환 표기
-      const convertedData = res.data.map((row: AircraftData) => ({
-        ...row,
-        acarsY: row.acarsY ? 'Y' : 'N', // Y: Yes, N: No
-      }));
-
-      setRowData(convertedData);
-      setTotalCount(res.TotalCount ?? 0);
-    });
+    // rowData state는 AircraftData[] (acarsY: boolean) 필요하므로 변환없이 그대로 사용
+    setRowData(filtered);
+    setTotalCount(filtered.length);
   };
 
   // 모든 컬럼에서 editable: true인 field만 추출
@@ -482,7 +568,7 @@ const AircraftPage = () => {
       <searchForm.ButtonContainer>
         <searchForm.Row sx={{ justifyContent: 'flex-end' }}>
           <EtsButton
-            type="blue"
+            type="green"
             onClick={() => {
               handleSubmit(onSearch)();
               setIsEditable(false);

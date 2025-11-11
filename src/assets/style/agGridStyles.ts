@@ -1,4 +1,5 @@
 import { css } from 'styled-components';
+import { alpha } from '@mui/material/styles';
 
 export const agGridStyles = css`
   /**
@@ -15,8 +16,8 @@ export const agGridStyles = css`
     --ag-font-size: 20px;
     /* --ag-font-weight: 500; */
 
-    /* 그리드 전체 배경색 */
-    --ag-background-color: #ffffff;
+    /* 그리드 전체 배경색 - 테마 기반 */
+    --ag-background-color: ${(props) => props.theme.colors.background.paper};
 
     /* 컬럼 헤더 기본 스타일 */
     --ag-header-background-color: #f7f7f7; /* 헤더 배경색  */
@@ -28,9 +29,9 @@ export const agGridStyles = css`
     /* 행(Row) 기본 스타일 */
     --ag-row-height: 40px; /* 행 높이 */
 
-    /* 홀수/짝수 행 색상 (Zebra Striping) */
-    --ag-odd-row-background-color: #ffffff; /* 홀수 행 배경색 - 흰색 */
-    --ag-even-row-background-color: #ffffff; /* 짝수 행 배경색 - 흰색 */
+    /* 홀수/짝수 행 색상 (Zebra Striping) - 테마 배경 사용 */
+    --ag-odd-row-background-color: ${(props) => props.theme.colors.background.paper};
+    --ag-even-row-background-color: ${(props) => props.theme.colors.background.paper};
 
     /* 마우스 호버 시 행 색상 */
     --ag-row-hover-color: #eff6ff; /* 행 호버 배경색 - 연한 파란색 */
@@ -63,6 +64,17 @@ export const agGridStyles = css`
   .ag-header-group-cell-with-group,
   .ag-header-cell {
     border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
+  }
+
+  /* 다크모드: 행 호버 변수 색상 (공통) */
+  body[data-theme='dark'] .ag-theme-material {
+    /* MUI action.hover 계열 느낌: rgba(145,158,171,0.08) */
+    --ag-row-hover-color: rgba(145, 158, 171, 0.08);
+    /* 다크모드: 기본 전경/셀 텍스트를 흰색으로 */
+    --ag-foreground-color: #ffffff;
+    --ag-cell-text-color: #ffffff;
+    /* 다크모드: 선택 행 중립톤 (hover보다 약간 진함) */
+    --ag-selected-row-background-color: rgba(145, 158, 171, 0.12);
   }
 
   .ag-header-row .ag-header-row-column {
@@ -145,6 +157,14 @@ export const agGridStyles = css`
     justify-content: center !important;
   }
 
+  /* 그리드 컨텐츠 영역(뷰포트/컨테이너) 배경을 테마로 강제 적용 */
+  .ag-theme-material .ag-root-wrapper-body,
+  .ag-theme-material .ag-center-cols-viewport,
+  .ag-theme-material .ag-center-cols-container,
+  .ag-theme-material .ag-body-viewport {
+    background-color: ${(props) => props.theme.colors.background.paper} !important;
+  }
+
   .ag-theme-material .ag-cell.ag-right-aligned-cell {
     text-align: right !important;
     justify-content: flex-end !important;
@@ -175,6 +195,22 @@ export const agGridStyles = css`
   .ag-theme-material .ag-header-cell {
     transition: none !important;
     animation: none !important;
+    /* background-color: #eef7f2 !important; */
+  }
+
+  // default
+  .ag-theme-material .ag-header-cell,
+  .ag-theme-material .ag-header-group-cell {
+    /* SearchPanel과 동일한 브랜드 틴트 적용 (라이트:0.08) */
+    background-color: ${(props) =>
+      alpha(props.theme.colors?.primary?.main || '#ffffff', 0.08)} !important;
+  }
+
+  /* 다크모드용 더 옅은 틴트 (0.06) */
+  body[data-theme='dark'] .ag-theme-material .ag-header-cell,
+  body[data-theme='dark'] .ag-theme-material .ag-header-group-cell {
+    background-color: ${(props) =>
+      alpha(props.theme.colors?.primary?.main || '#1976d2', 0.06)} !important;
   }
 
   .ag-theme-material .ag-header-cell.bg-orange,
@@ -257,7 +293,7 @@ export const agGridStyles = css`
     height: 40px !important;
     border: none !important;
     box-shadow: none !important;
-    background-color: #ffffff !important;
+    background-color: ${(props) => props.theme.colors.background.paper} !important;
   }
   .ag-cell,
   .ag-full-width-row .ag-cell-wrapper.ag-row-group .ets-grid-editor-text-cell {
@@ -351,6 +387,12 @@ export const agGridStyles = css`
     ) !important;
   }
 
+  /* 다크모드 헤더 텍스트 흰색 처리 */
+  body[data-theme='dark'] .ag-theme-material .ag-header-cell-label,
+  body[data-theme='dark'] .ag-theme-material .ag-header-group-cell-label {
+    color: #ffffff !important;
+  }
+
   .editable-header {
     background-color: var(--color-brand-lightblue-20, #e3f2fd) !important;
     color: var(--color-brand-darkblue-100, #1976d2) !important;
@@ -365,29 +407,78 @@ export const agGridStyles = css`
     color: var(--color-text-base, ${(props) => props.theme.colors.text.base}) !important;
   }
 
+  /* 다크모드: 셀 텍스트를 확실히 흰색으로 강제 */
+  body[data-theme='dark'] .ag-theme-material .ag-cell {
+    color: #ffffff !important;
+  }
+
+  /* 다크모드: 커스텀 통계 폰트 셀도 흰색으로 */
+  body[data-theme='dark'] .ag-theme-material .ag-cell.statistics-grid-font {
+    color: #ffffff !important;
+  }
+
   .ag-theme-material .ag-cell.ag-cell-focus,
   .ag-theme-material .ag-cell.ag-cell-range-selected,
   .ag-theme-material .ag-cell.ag-cell-range-selected-1,
   .ag-theme-material .ag-cell.ag-cell-range-selected-2,
   .ag-theme-material .ag-cell.ag-cell-range-selected-3,
   .ag-theme-material .ag-cell.ag-cell-range-selected-4 {
-    background-color: var(
-      --color-background-interaction-selected-tertiary,
-      ${(props) => props.theme.colors.neutral[20]}
-    ) !important;
     border-color: var(--color-border-divider-primary, #e5e7eb) !important;
     box-shadow: none !important;
   }
 
-  .ag-theme-material .ag-row-hover {
-    background-color: var(--color-background-interaction-hovered, #f5f5f5) !important;
+  /* 라이트 모드: 행 호버 - primary.light 색상 기반 매우 옅은 배경 (선택 대비, hue 일치) */
+  body[data-theme='light'] .ag-theme-material .ag-row-hover {
+    background-color: ${(props) =>
+      alpha(props.theme.colors?.primary?.light || '#F4ECF9', 0.5)} !important;
+  }
+  body[data-theme='light'] .ag-theme-material .ag-row-hover .ag-cell {
+    background-color: ${(props) =>
+      alpha(props.theme.colors?.primary?.light || '#F4ECF9', 0.5)} !important;
   }
 
-  .ag-theme-material .ag-row-selected {
-    background-color: var(
-      --color-background-interaction-selected-secondary,
-      rgba(87, 187, 235, 0.1)
-    ) !important;
+  /* 다크모드: 행 호버 공통 컬러 적용 (행과 셀 모두) */
+  body[data-theme='dark'] .ag-theme-material .ag-row-hover {
+    background-color: rgba(145, 158, 171, 0.08) !important;
+  }
+  body[data-theme='dark'] .ag-theme-material .ag-row-hover .ag-cell {
+    background-color: rgba(145, 158, 171, 0.08) !important;
+  }
+
+  /* 라이트 모드: 선택 행은 호버보다 진한 브랜드 틴트
+     일부 전역 규칙(.css-**** .ag-row-selected .ag-cell)이 강해져 덮는 경우가 있어
+     body[data-theme]를 포함해 특이성을 높여 셀 배경까지 강제한다. */
+  body[data-theme='light'] .ag-theme-material .ag-row-selected {
+    background-color: ${(props) =>
+      props.theme.colors?.primary?.light ||
+      alpha(props.theme.colors?.primary?.main || '#1976d2', 0.1)} !important;
+  }
+  body[data-theme='light'] .ag-theme-material .ag-row-selected .ag-cell {
+    background-color: ${(props) =>
+      props.theme.colors?.primary?.light ||
+      alpha(props.theme.colors?.primary?.main || '#1976d2', 0.1)} !important;
+  }
+
+  /* 선택 + 호버 동시일 때도 선택 컬러 유지 */
+  body[data-theme='light'] .ag-theme-material .ag-row-selected.ag-row-hover,
+  body[data-theme='light'] .ag-theme-material .ag-row-selected.ag-row-hover .ag-cell {
+    background-color: ${(props) =>
+      props.theme.colors?.primary?.light ||
+      alpha(props.theme.colors?.primary?.main || '#1976d2', 0.1)} !important;
+  }
+
+  /* 다크 모드: 선택 행은 호버 중립톤(rgba(145,158,171,0.08))보다 살짝만 진하게 같은 hue 사용 */
+  body[data-theme='dark'] .ag-theme-material .ag-row-selected,
+  body[data-theme='dark'] .ag-theme-material .ag-row-selected .ag-cell {
+    background-color: rgba(145, 158, 171, 0.12) !important; /* fallback */
+    /* 변수 우선 강제 (일부 테마가 변수 값을 읽어가는 경우) */
+    --ag-selected-row-background-color: rgba(145, 158, 171, 0.12);
+  }
+
+  /* 다크 모드: 선택 + 호버 동시에도 동일 강도/톤 유지 */
+  body[data-theme='dark'] .ag-theme-material .ag-row-selected.ag-row-hover,
+  body[data-theme='dark'] .ag-theme-material .ag-row-selected.ag-row-hover .ag-cell {
+    background-color: rgba(145, 158, 171, 0.12) !important;
   }
 
   .ag-theme-material .ag-checkbox-input-wrapper {
@@ -544,7 +635,7 @@ export const agGridStyles = css`
   }
   /* rowSpan 병합 셀 시각화 */
   .ag-theme-material .ag-cell.merged-cell {
-    background: #ffffff !important; /* 순수 흰색 */
+    background: ${(props) => props.theme.colors.background.paper} !important; /* 테마 배경 */
     display: flex;
     align-items: center;
     justify-content: flex-start;

@@ -106,6 +106,11 @@ const Label = styled(Typography)`
     ${(props) => props.theme.fonts.weight.regular}
   ) !important;
   line-height: 130% !important;
+  background-color: transparent !important;
+  user-select: none;
+  body[data-theme='dark'] & {
+    color: #ffffff !important;
+  }
 `;
 
 export const searchForm = {

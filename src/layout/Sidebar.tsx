@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import { useThemeMode } from '@/contexts/ThemeContext';
+import styled, { useTheme } from 'styled-components';
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import {
   ChevronRight,
@@ -46,25 +47,39 @@ const LogoContainer = styled.div`
 const LogoText = styled.span`
   font-size: 22px;
   font-weight: bold;
-  color: #2c2c2cff;
+  /* 브랜드 컬러 대신 모드에 따른 기본 텍스트 컬러 사용 */
+  color: ${({ theme }) => theme.colors.text.primary};
   margin-left: 12px;
 `;
 
-const Logo = () => (
-  <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#00AB55', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#007B55', stopOpacity: 1 }} />
-      </linearGradient>
-    </defs>
-    <path
-      d="M50 5 L61.2 35.5 L95 35.5 L68.5 58 L79.7 88.5 L50 67 L20.3 88.5 L31.5 58 L5 35.5 L38.8 35.5 Z"
-      fill="url(#starGradient)"
-      transform="rotate(10 50 50)"
-    />
-  </svg>
-);
+const Logo: React.FC = () => {
+  const theme = useTheme() as any;
+  const main = theme?.colors?.primary?.main ?? '#00AB55';
+  const dark = theme?.colors?.primary?.dark ?? main;
+  return (
+    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: main, stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: dark, stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
+      <path
+        d="M50 5 L61.2 35.5 L95 35.5 L68.5 58 L79.7 88.5 L50 67 L20.3 88.5 L31.5 58 L5 35.5 L38.8 35.5 Z"
+        fill="url(#starGradient)"
+        transform="rotate(10 50 50)"
+      />
+    </svg>
+  );
+};
+
+// hex color + alpha(0~1) -> 8-digit hex (#RRGGBBAA)
+const withAlpha = (hex: string, alpha: number) => {
+  const a = Math.round(Math.min(Math.max(alpha, 0), 1) * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `${hex}${a}`;
+};
 
 const MenuList = styled(List)`
   flex-grow: 1; /* 메뉴 리스트가 남은 공간을 모두 차지하도록 설정 */
@@ -117,14 +132,15 @@ const MenuList = styled(List)`
 
     /* 기본 선택 스타일 (녹색) - 부모 열림, 단일 메뉴 선택 */
     &.Mui-selected {
-      background-color: rgba(0, 171, 85, 0.16);
-      color: #00ab55;
+      background-color: ${({ theme }) => withAlpha(theme.colors.primary.main, 0.16)};
+      color: ${({ theme }) => theme.colors.primary.main};
       font-weight: ${({ theme }) => theme.fonts.weight.bold};
       .MuiListItemIcon-root {
-        color: #00ab55;
+        color: ${({ theme }) => theme.colors.primary.main};
       }
       &:hover {
-        background-color: rgba(0, 171, 85, 0.24);
+        /* 선택된 항목에 다시 호버 시 색 왜곡 방지를 위해 동일 톤 유지 */
+        background-color: ${({ theme }) => withAlpha(theme.colors.primary.main, 0.16)} !important;
       }
     }
 
@@ -137,7 +153,8 @@ const MenuList = styled(List)`
         color: ${({ theme }) => theme.colors.text.primary};
       }
       &:hover {
-        background-color: ${({ theme }) => theme.colors.neutral[30]};
+        /* 이미 선택된 하위 항목은 hover 시 배경 변화 억제 */
+        background-color: ${({ theme }) => theme.colors.neutral[20]} !important;
       }
     }
 
@@ -285,8 +302,94 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             </React.Fragment>
           );
         })}
+        {/* Dark mode toggle button area */}
+        <DarkModeToggle />
+        {/* Brand color switcher */}
+        <BrandSwitcher />
       </MenuList>
     </SidebarContainer>
+  );
+};
+
+// Toggle button component (placed here to access hook without prop drilling)
+const ToggleButtonContainer = styled.div`
+  margin: 12px 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.background.default}; /* 사이드바 배경과 동일 */
+  border: none; /* 박스 경계 제거로 자연스럽게 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.primary};
+  transition: background 0.2s;
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral[20]};
+  }
+`;
+
+const DarkModeToggle: React.FC = () => {
+  const { mode, toggle } = useThemeMode();
+  return (
+    <ToggleButtonContainer onClick={toggle}>
+      <span>{mode === 'light' ? '🌙 다크 모드' : '☀️ 라이트 모드'}</span>
+    </ToggleButtonContainer>
+  );
+};
+
+// Brand color switcher
+const BrandRow = styled.div`
+  margin: 8px 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.background.default}; /* 사이드바와 동일 */
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const BrandLabel = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-right: 6px;
+`;
+
+const ColorDot = styled.button<{ $color: string; $active?: boolean }>`
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: ${({ $color }) => $color};
+  border: ${({ $active, theme }) =>
+    $active ? `2px solid ${theme.colors.text.base}` : '2px solid transparent'};
+  box-shadow: ${({ $active }) => ($active ? '0 0 0 2px rgba(0,0,0,0.08)' : 'none')};
+  cursor: pointer;
+`;
+
+const BrandSwitcher: React.FC = () => {
+  const { brand, setBrand } = useThemeMode();
+  const palette = {
+    green: '#00AB55',
+    blue: '#1976d2',
+    purple: '#7C09CE',
+  } as const;
+
+  return (
+    <BrandRow>
+      <BrandLabel>Theme color</BrandLabel>
+      {Object.entries(palette).map(([key, color]) => (
+        <ColorDot
+          key={key}
+          aria-label={`set ${key} theme`}
+          $color={color}
+          $active={brand === (key as any)}
+          onClick={() => setBrand(key as any)}
+        />
+      ))}
+    </BrandRow>
   );
 };
 
