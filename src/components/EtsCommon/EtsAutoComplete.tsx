@@ -52,20 +52,46 @@ const StyledAutocomplete = styled(Autocomplete, {
       padding: '0 !important',
 
       '& fieldset': {
-        border: `1px solid ${theme.palette.divider}`,
+        // 다크 모드에서는 기본 보더 숨김, 라이트 모드는 기본 보더 유지
+        border:
+          theme.palette.mode === 'dark'
+            ? '1px solid transparent !important'
+            : `1px solid ${theme.palette.divider}`,
       },
-      // 요구사항: hover에서만 테마색, focus는 기본 보더 유지
+      // 전역 테마 오버라이드보다 우선하도록 notchedOutline에도 명시
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor:
+          theme.palette.mode === 'dark' ? 'transparent !important' : `${theme.palette.divider}`,
+      },
+      // 요구사항: hover/focus에서만 테마색 보더 노출 (DatePicker와 동일한 톤)
       '&:hover fieldset': {
-        borderColor: isReadOnly ? theme.palette.divider : theme.palette.primary.main,
+        borderColor: isReadOnly
+          ? theme.palette.divider
+          : `${theme.palette.primary.main} !important`,
         borderWidth: '1px',
       },
       '&.Mui-focused fieldset': {
-        borderColor: theme.palette.divider,
+        borderColor: isReadOnly
+          ? theme.palette.divider
+          : `${theme.palette.primary.main} !important`,
         borderWidth: '1px !important',
       },
       '&.Mui-error fieldset': {
         borderColor: '#ef4444',
         borderWidth: '1px !important',
+      },
+      // 다크 모드에서 기본 notchedOutline을 투명 처리했기 때문에
+      // 에러 상태에서는 notchedOutline에도 명시적으로 빨간색을 강제한다
+      '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#ef4444 !important',
+        borderWidth: '1px !important',
+      },
+      // 에러 + 호버/포커스 시에도 빨간색 유지
+      '&.Mui-error:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#ef4444 !important',
+      },
+      '&.Mui-focused.Mui-error .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#ef4444 !important',
       },
       '&.Mui-disabled': {
         backgroundColor: `${theme.palette.action.disabledBackground} !important`,

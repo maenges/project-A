@@ -39,7 +39,7 @@ export const GlobalStyles = createGlobalStyle`
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 12px;
+    width: 8px;
     background: ${(props) => props.theme.colors.neutral[20]};
   }
 

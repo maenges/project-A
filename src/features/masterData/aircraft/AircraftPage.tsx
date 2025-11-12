@@ -642,6 +642,7 @@ const AircraftPage = () => {
       totalCount={totalCount}
       gridRef={gridRef}
       // size="sm-two-header"
+      tree={true}
     />
   );
 };

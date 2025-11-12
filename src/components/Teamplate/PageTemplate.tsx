@@ -1,12 +1,11 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Container, Typography, Box, Stack } from '@mui/material';
+import { Container, Typography, Box, Stack, TextField } from '@mui/material';
 import { ColDef, IDatasource, GridReadyEvent } from 'ag-grid-community';
 import SearchPanel from './SearchPanel';
 import ButtonPanel from './ButtonPanel';
 import { EtsGrid } from '../EtsGrid';
-// import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-// import chevronRight from '@/assets/images/chevron-right.svg';
+import EtsLeftTree, { EtsTreeNode } from '@/components/EtsCommon/EtsLeftTree';
 
 const HeaderArea = styled(Stack)`
   display: flex;
@@ -27,6 +26,8 @@ export interface PageTemplateProps {
   searchComponent?: React.ReactNode;
   buttonComponent?: React.ReactNode;
   tabComponent?: React.ReactNode;
+  /** 좌측 조직 트리 표시 여부 (기본: false) */
+  tree?: boolean;
   columnDefs?: ColDef[];
   rowData?: any[];
   onCellValueChanged?: (_params: any) => void;
@@ -79,6 +80,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   suppressRowClickSelection,
   size = 'sm',
   onGridReady,
+  tree = false,
 }) => {
   // --- size prop에 따라 그리드 높이를 결정하는 로직 ---
   const gridHeight = useMemo(() => {
@@ -199,57 +201,114 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   // 편집 가능한 컬럼에 대해 헤더 스타일 적용
   const editColumnDefs = columnDefs?.map((col) => col);
 
-  // const { pathname } = useLocation();
+  // 조직 계층 트리 (본사 > 부본사 > 지사 > 총판 > 매장)
+  const treeItems: EtsTreeNode[] = [
+    {
+      id: 'hq',
+      label: '본사',
+      children: [
+        {
+          id: 'sub-hq-1',
+          label: '부본사 A',
+          children: [
+            {
+              id: 'branch-1',
+              label: '지사 1',
+              children: [
+                {
+                  id: 'dealer-1',
+                  label: '총판 1',
+                  children: [
+                    { id: 'store-1', label: '매장 1' },
+                    { id: 'store-2', label: '매장 2' },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'branch-2',
+              label: '지사 2',
+              children: [
+                {
+                  id: 'dealer-2',
+                  label: '총판 2',
+                  children: [
+                    { id: 'store-3', label: '매장 3' },
+                    { id: 'store-4', label: '매장 4' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'sub-hq-2',
+          label: '부본사 B',
+          children: [
+            {
+              id: 'branch-3',
+              label: '지사 3',
+              children: [
+                {
+                  id: 'dealer-3',
+                  label: '총판 3',
+                  children: [
+                    { id: 'store-5', label: '매장 5' },
+                    { id: 'store-6', label: '매장 6' },
+                    { id: 'store-7', label: '매장 7' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
-  // 메뉴에서 현재 경로에 맞는 타이틀 찾기
-  // const getMenuTitle = (currentPath: string) => {
-  //   try {
-  //     const userMenus = JSON.parse(sessionStorage.getItem('userMenus') || '[]');
-  //     const menu = userMenus.find((menu: any) => menu.menuPath === currentPath);
-  //     return menu?.menuName || null;
-  //   } catch {
-  //     return null;
-  //   }
-  // };
+  // 현재 페이지 로직과 직접 연결되지 않는 별도 선택 로직 (향후 연동 가능)
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('hq');
+  const [orgQuery, setOrgQuery] = useState<string>('');
 
-  // pathname과 메뉴 정보를 기반으로 네비게이션 생성
-  // const createNavigation = () => {
-  //   const pathSegments = pathname.split('/').filter((segment) => segment.length > 0);
-  //   const navigationItems = ['Home']; // 항상 Home으로 시작
+  // 트리 필터링 유틸
+  const filterTree = (nodes: EtsTreeNode[], q: string): EtsTreeNode[] => {
+    const query = q.trim().toLowerCase();
+    if (!query) return nodes;
+    const walk = (node: EtsTreeNode): EtsTreeNode | null => {
+      const labelMatch = node.label.toLowerCase().includes(query);
+      const children = node.children?.map(walk).filter((n): n is EtsTreeNode => !!n) || [];
+      if (labelMatch || children.length > 0) {
+        return { ...node, children };
+      }
+      return null;
+    };
+    return nodes.map(walk).filter((n): n is EtsTreeNode => !!n);
+  };
 
-  //   // 각 path segment를 처리하여 네비게이션 아이템 생성
-  //   pathSegments.forEach((segment, index) => {
-  //     // 현재까지의 경로 구성
-  //     const currentPath = '/' + pathSegments.slice(0, index + 1).join('/');
+  const findFirstMatchId = (nodes: EtsTreeNode[], q: string): string | null => {
+    const query = q.trim().toLowerCase();
+    if (!query) return null;
+    const stack: EtsTreeNode[] = [...nodes];
+    while (stack.length) {
+      const n = stack.shift()!;
+      if (n.label.toLowerCase().includes(query)) return n.id;
+      if (n.children) stack.unshift(...n.children);
+    }
+    return null;
+  };
 
-  //     // 마지막 세그먼트인 경우 메뉴 타이틀 -> prop title -> 포맷팅된 세그먼트 순으로 시도
-  //     if (index === pathSegments.length - 1) {
-  //       const menuTitle = getMenuTitle(currentPath);
-  //       if (menuTitle) {
-  //         navigationItems.push(menuTitle);
-  //         return;
-  //       } else if (title) {
-  //         navigationItems.push(title);
-  //         return;
-  //       }
-  //     }
+  const filteredTreeItems = useMemo(() => filterTree(treeItems, orgQuery), [treeItems, orgQuery]);
 
-  //     // 중간 세그먼트이거나 메뉴/prop title이 없는 경우 포맷팅된 세그먼트 사용
-  //     let formattedSegment = segment
-  //       .replace(/-/g, ' ') // '-'를 ' '로 치환
-  //       .replace(/\b\w/g, (l) => l.toUpperCase()) // 각 단어의 첫 글자를 대문자로
-  //       .replace(/\B\w+/g, (l) => l.toLowerCase()); // 첫 글자를 제외한 나머지를 소문자로
+  useEffect(() => {
+    if (!orgQuery) return; // 쿼리 없으면 선택 유지
+    const firstId = findFirstMatchId(treeItems, orgQuery);
+    if (firstId) setSelectedOrgId(firstId);
+  }, [orgQuery]);
 
-  //     // 2자리 이하 단어는 모두 대문자로 변환
-  //     formattedSegment = formattedSegment.replace(/\b\w{1,2}\b/g, (word) => word.toUpperCase());
-
-  //     navigationItems.push(formattedSegment);
-  //   });
-
-  //   return navigationItems;
-  // };
-
-  // const navigationItems = createNavigation();
+  const handleTreeSelect = (id: string) => {
+    setSelectedOrgId(id);
+    // TODO: 선택된 조직 id 기반 데이터 재조회 로직 연결 가능
+  };
 
   return (
     <Container
@@ -270,81 +329,142 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
             {title}
           </Typography>
         )}
-        {/* 네비게이션 영역 */}
-        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {navigationItems.map((item, index) => (
-            <React.Fragment key={index}>
-              <NavigationItem
-                sx={{ fontWeight: index === navigationItems.length - 1 ? '700' : '500' }}
-              >
-                {item}
-              </NavigationItem>
-              {index < navigationItems.length - 1 && (
-                <NavigationItem sx={{ display: 'flex', alignItems: 'end' }}>
-                  <img src={chevronRight} alt="chevron-right" />
-                </NavigationItem>
-              )}
-            </React.Fragment>
-          ))}
-        </Box> */}
       </HeaderArea>
 
-      {/* 검색/필터 영역 */}
-      {searchComponent && (
-        <Box sx={{ mt: 3, mb: 3 }}>
-          <SearchPanel searchComponent={searchComponent} />
-        </Box>
-      )}
-
-      {/* 탭 영역 (공통) */}
-      {tabComponent && <Box sx={{ mb: 2 }}>{tabComponent}</Box>}
-
-      <Box
-        sx={{
-          display: 'flex',
-          paddingBottom: '12px',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          alignSelf: 'stretch',
-        }}
-      >
-        {subSelect ? (
-          subSelect
-        ) : (
-          <Typography className="label">Total: {Number(totalCount).toLocaleString()}</Typography>
+      {/* Left Tree Sidebar with Search (tree=true 일 때만 표시) */}
+      <Box sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'stretch' }}>
+        {tree && (
+          <Box
+            sx={{
+              mt: 3,
+              width: 240,
+              minWidth: 240,
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              // 좌측 패널 자체의 높이를 뷰포트 기준으로 고정하여 내부 스크롤만 발생하도록 처리
+              maxHeight: 'calc(100vh - 220px)',
+              overflow: 'hidden',
+            }}
+          >
+            <TextField
+              size="small"
+              placeholder="조직명 검색"
+              value={orgQuery}
+              onChange={(e) => setOrgQuery(e.target.value)}
+              variant="outlined"
+              sx={(theme) => ({
+                '& .MuiOutlinedInput-root': {
+                  height: '36px !important',
+                  minHeight: '36px',
+                  maxHeight: '36px',
+                  boxSizing: 'border-box',
+                  borderRadius: 8,
+                  backgroundColor:
+                    theme.palette.mode === 'light' ? '#FFFFFF' : theme.palette.background.paper,
+                  '& fieldset': {
+                    border: `1px solid ${theme.palette.divider}`,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                    borderWidth: '1px',
+                  },
+                  '& input': {
+                    padding: '7px 12px',
+                    height: '20px !important',
+                  },
+                },
+              })}
+            />
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+              <EtsLeftTree
+                items={filteredTreeItems}
+                selectedId={selectedOrgId}
+                width={'100%'}
+                onSelect={handleTreeSelect}
+                sx={{ flexShrink: 0 }}
+              />
+            </Box>
+          </Box>
         )}
-        {buttonComponent && <ButtonPanel buttonComponent={buttonComponent} />}
-      </Box>
 
-      <Box
-        ref={gridContainerRef}
-        sx={{
-          width: '100%',
-          flex: 1,
-        }}
-      >
-        <EtsGrid
-          height={gridHeight}
-          isInfiniteScroll={isInfiniteScroll}
-          ref={gridRef}
-          columnDefs={editColumnDefs}
-          rowData={enhancedRowData}
-          onCellValueChanged={onCellValueChanged}
-          onCellClicked={onCellClicked}
-          onGridReady={onGridReady}
-          suppressRowTransform={suppressRowTransform}
-          suppressRowClickSelection={suppressRowClickSelection}
-          pinnedBottomRowData={pinnedBottomRowData}
-          domLayout="normal" // pinnedBottom row가 항상 표시되도록 normal 사용
-          datasource={dataSource}
-          cacheBlockSize={cacheBlockSize}
-          cacheOverflowSize={cacheOverflowSize}
-          maxConcurrentDatasourceRequests={maxConcurrentDatasourceRequests}
-          infiniteInitialRowCount={infiniteInitialRowCount}
-          maxBlocksInCache={maxBlocksInCache}
-          rowSelection={rowSelection}
-          rowMultiSelectWithClick={rowMultiSelectWithClick}
-        />
+        {/* Right Content Area */}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            // 우측 전체 영역이 뷰 높이에 맞게 확장되고 내부 스크롤은 그리드/리스트가 담당
+            maxHeight: 'calc(100vh - 160px)',
+          }}
+        >
+          {/* 검색/필터 영역 */}
+          {searchComponent && (
+            <Box sx={{ mt: 3, mb: 3, flexShrink: 0 }}>
+              <SearchPanel searchComponent={searchComponent} />
+            </Box>
+          )}
+
+          {/* 탭 영역 (공통) */}
+          {tabComponent && <Box sx={{ mb: 2, flexShrink: 0 }}>{tabComponent}</Box>}
+
+          <Box
+            sx={{
+              display: 'flex',
+              paddingBottom: '12px',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              alignSelf: 'stretch',
+              flexShrink: 0,
+            }}
+          >
+            {subSelect ? (
+              subSelect
+            ) : (
+              <Typography className="label">
+                Total: {Number(totalCount).toLocaleString()}
+              </Typography>
+            )}
+            {buttonComponent && <ButtonPanel buttonComponent={buttonComponent} />}
+          </Box>
+
+          <Box
+            ref={gridContainerRef}
+            sx={{
+              width: '100%',
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
+            <EtsGrid
+              height={gridHeight}
+              isInfiniteScroll={isInfiniteScroll}
+              ref={gridRef}
+              columnDefs={editColumnDefs}
+              rowData={enhancedRowData}
+              onCellValueChanged={onCellValueChanged}
+              onCellClicked={onCellClicked}
+              onGridReady={onGridReady}
+              suppressRowTransform={suppressRowTransform}
+              suppressRowClickSelection={suppressRowClickSelection}
+              pinnedBottomRowData={pinnedBottomRowData}
+              domLayout="normal" // pinnedBottom row가 항상 표시되도록 normal 사용
+              datasource={dataSource}
+              cacheBlockSize={cacheBlockSize}
+              cacheOverflowSize={cacheOverflowSize}
+              maxConcurrentDatasourceRequests={maxConcurrentDatasourceRequests}
+              infiniteInitialRowCount={infiniteInitialRowCount}
+              maxBlocksInCache={maxBlocksInCache}
+              rowSelection={rowSelection}
+              rowMultiSelectWithClick={rowMultiSelectWithClick}
+            />
+          </Box>
+        </Box>
       </Box>
     </Container>
   );

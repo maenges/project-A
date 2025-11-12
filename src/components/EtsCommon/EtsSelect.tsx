@@ -46,6 +46,32 @@ const StyledSelect = styled(Select, {
         theme.palette.mode === 'dark' ? 'transparent' : 'var(--color-border-base, #D9D9D9)',
       borderWidth: '1px !important',
     },
+    // Hover: 라이트/다크 모두 시각적으로 보이도록 강조 (readOnly면 중립 유지)
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor:
+        theme.palette.mode === 'dark'
+          ? isReadOnly
+            ? 'var(--color-border-base, #D9D9D9)'
+            : `${theme.palette.primary.main} !important`
+          : isReadOnly
+            ? 'var(--color-border-base, #D9D9D9)'
+            : `${theme.palette.primary.main} !important`,
+      borderWidth: '1px',
+    },
+    '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor:
+        theme.palette.mode === 'dark'
+          ? isReadOnly
+            ? 'var(--color-border-base, #D9D9D9)'
+            : `${theme.palette.primary.main} !important`
+          : isReadOnly
+            ? 'var(--color-border-base, #D9D9D9)'
+            : `${theme.palette.primary.main} !important`,
+      borderWidth: '1px',
+    },
+    '&.Mui-disabled:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'var(--color-border-base, #D9D9D9)',
+    },
     // 다크 모드에서 전역적으로 notchedOutline 테두리 제거
     ...(theme.palette.mode === 'dark'
       ? { '& .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent !important' } }
@@ -54,80 +80,7 @@ const StyledSelect = styled(Select, {
       borderColor: '#ef4444 !important',
       borderWidth: '1px !important',
     },
-    '& .MuiOutlinedInput-root': {
-      height: '36px !important',
-      minHeight: '36px !important',
-      maxHeight: '36px !important',
-      boxSizing: 'border-box',
-      borderRadius: 'var(--radius-sm, 8px)',
-      backgroundColor: isReadOnly
-        ? 'var(--color-background-disabled, #EDEDED) !important'
-        : theme.palette.mode === 'dark'
-          ? `${theme.palette.background.paper} !important`
-          : 'var(--color-background-base-white, #FFF) !important',
-      fontSize: 'var(--font-size-label-md, 14px)',
-      fontWeight: 'var(--font-weight-regular, 400)',
-      fontFamily: '"Hanjin Group Sans"',
-      lineHeight: '130%',
-      '& fieldset': {
-        border:
-          theme.palette.mode === 'dark'
-            ? '1px solid transparent'
-            : isReadOnly
-              ? '1px solid var(--color-border-base, #D9D9D9)'
-              : '1px solid var(--color-border-base, #D9D9D9)',
-      },
-      '&:hover fieldset': {
-        borderColor:
-          theme.palette.mode === 'dark'
-            ? 'transparent'
-            : isReadOnly
-              ? 'var(--color-border-base, #D9D9D9)'
-              : theme.palette.primary.main,
-        borderWidth: '1px',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor:
-          theme.palette.mode === 'dark'
-            ? 'transparent'
-            : isReadOnly
-              ? 'var(--color-border-base, #D9D9D9)'
-              : theme.palette.primary.main,
-        borderWidth: '1px !important',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor:
-          theme.palette.mode === 'dark'
-            ? 'transparent'
-            : isReadOnly
-              ? 'var(--color-border-base, #D9D9D9)'
-              : theme.palette.primary.main,
-        borderWidth: '1px !important',
-      },
-      '&.Mui-error fieldset': {
-        borderColor: '#ef4444',
-        borderWidth: '1px !important',
-      },
-      '&.Mui-focused.Mui-error fieldset': {
-        borderColor: '#ef4444 !important',
-        borderWidth: '1px !important',
-      },
-      '&.Mui-focused.Mui-error .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#ef4444 !important',
-        borderWidth: '1px !important',
-      },
-      '&.Mui-disabled': {
-        backgroundColor: 'var(--color-background-disabled, #EDEDED) !important',
-        '& fieldset': {
-          border: '1px solid var(--color-border-base, #D9D9D9)',
-        },
-      },
-      // Multiple select일 때만 높이 자동 조정
-      '&.MuiSelect-multiple': {
-        height: 'auto',
-        minHeight: '36px',
-      },
-    },
+
     '& .MuiSelect-select': {
       fontFamily: '"Hanjin Group Sans"',
       fontSize: 'var(--font-size-label-md, 14px)',
@@ -212,6 +165,23 @@ const StyledSelect = styled(Select, {
     },
   })
 );
+
+// 다크 모드에서만 Select 주변에 hover 테두리를 그리는 래퍼
+const HoverWrap = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'disableHover',
+})<{ disableHover?: boolean }>(({ disableHover = false, theme }) => ({
+  width: '100%',
+  display: 'block',
+  borderRadius: 'var(--radius-sm, 8px)',
+  ...(theme.palette.mode === 'dark' && !disableHover
+    ? {
+        '&:hover': {
+          boxShadow: `inset 0 0 0 1px ${theme.palette.primary.main}`,
+          borderRadius: 'var(--radius-sm, 8px)',
+        },
+      }
+    : {}),
+}));
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => {
   const hoverBg =
@@ -420,58 +390,64 @@ const EtsSelect = React.forwardRef<HTMLInputElement, EtsSelectProps>(
         // --- FormControl의 너비를 '100%'로 설정하여 부모로부터 전달된 너비를 따르도록 합니다. ---
         sx={{ width: width || '100%', position: 'relative' }}
       >
-        <StyledSelect
-          ref={ref}
-          {...props}
-          error={error}
-          customWidth={width}
-          isReadOnly={readOnly}
-          multiple={multiple}
-          value={currentValue}
-          displayEmpty={displayEmpty}
-          disabled={props.disabled || readOnly}
-          MenuProps={menuProps}
-          renderValue={(selected) => renderValue(selected, options, multiple, placeholder)}
-          SelectDisplayProps={
-            {
-              'data-placeholder': isPlaceholderShowing,
-              'data-readonly': readOnly,
-            } as any
-          }
-          // --- StyledSelect가 FormControl의 전체 너비를 사용하도록 합니다. ---
-          sx={{
-            width: '100%',
-            ...(readOnly && {
-              '& .MuiSelect-select.Mui-disabled': {
-                color: 'var(--color-text-base, #252525) !important',
-                WebkitTextFillColor: 'var(--color-text-base, #252525) !important',
-              },
-              '& .MuiOutlinedInput-root.Mui-disabled': {
-                backgroundColor: 'var(--color-background-disabled, #EDEDED)',
-                '& fieldset': {
-                  border: '1px solid var(--color-border-base, #D9D9D9)',
+        <HoverWrap disableHover={props.disabled || readOnly}>
+          <StyledSelect
+            ref={ref}
+            {...props}
+            error={error}
+            customWidth={width}
+            isReadOnly={readOnly}
+            multiple={multiple}
+            value={currentValue}
+            displayEmpty={displayEmpty}
+            disabled={props.disabled || readOnly}
+            MenuProps={menuProps}
+            renderValue={(selected) => renderValue(selected, options, multiple, placeholder)}
+            SelectDisplayProps={
+              {
+                'data-placeholder': isPlaceholderShowing,
+                'data-readonly': readOnly,
+              } as any
+            }
+            // --- StyledSelect가 FormControl의 전체 너비를 사용하도록 합니다. ---
+            sx={{
+              width: '100%',
+              ...(readOnly && {
+                '& .MuiSelect-select.Mui-disabled': {
+                  color: 'var(--color-text-base, #252525) !important',
+                  WebkitTextFillColor: 'var(--color-text-base, #252525) !important',
                 },
-              },
-              '& .MuiSelect-icon.Mui-disabled': {
-                backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_885_68168)'%3E%3Cpath d='M19.0732 8.47837H19.8105L15.7539 12.535L15.75 12.5311L11.9922 16.2704L8.29004 12.5272L8.2832 12.535L4.50293 8.75376L4.45312 8.70493L4.22656 8.47837H4.96387C5.35186 8.45464 5.74105 8.5086 6.10742 8.63852C6.47371 8.76844 6.81036 8.97141 7.09668 9.23422L9.3418 11.4793L9.33594 11.4842L12 14.1756L14.7051 11.4862L14.6992 11.4803L16.9414 9.23422C17.2274 8.97088 17.5633 8.76749 17.9297 8.63755C18.2961 8.50762 18.6853 8.45402 19.0732 8.47837Z' fill='%23252525'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_885_68168'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E")`,
-              },
-            }),
-            ...props.sx,
-          }}
-        >
-          {children ||
-            (options.length > 0 ? (
-              options.map((option) => (
-                <StyledMenuItem key={option.value} value={option.value} disabled={option.disabled}>
-                  {option.label}
+                '& .MuiOutlinedInput-root.Mui-disabled': {
+                  backgroundColor: 'var(--color-background-disabled, #EDEDED)',
+                  '& fieldset': {
+                    border: '1px solid var(--color-border-base, #D9D9D9)',
+                  },
+                },
+                '& .MuiSelect-icon.Mui-disabled': {
+                  backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_885_68168)'%3E%3Cpath d='M19.0732 8.47837H19.8105L15.7539 12.535L15.75 12.5311L11.9922 16.2704L8.29004 12.5272L8.2832 12.535L4.50293 8.75376L4.45312 8.70493L4.22656 8.47837H4.96387C5.35186 8.45464 5.74105 8.5086 6.10742 8.63852C6.47371 8.76844 6.81036 8.97141 7.09668 9.23422L9.3418 11.4793L9.33594 11.4842L12 14.1756L14.7051 11.4862L14.6992 11.4803L16.9414 9.23422C17.2274 8.97088 17.5633 8.76749 17.9297 8.63755C18.2961 8.50762 18.6853 8.45402 19.0732 8.47837Z' fill='%23252525'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_885_68168'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E")`,
+                },
+              }),
+              ...props.sx,
+            }}
+          >
+            {children ||
+              (options.length > 0 ? (
+                options.map((option) => (
+                  <StyledMenuItem
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                  >
+                    {option.label}
+                  </StyledMenuItem>
+                ))
+              ) : (
+                <StyledMenuItem disabled value="" sx={{ fontStyle: 'italic', textAlign: 'center' }}>
+                  No Data
                 </StyledMenuItem>
-              ))
-            ) : (
-              <StyledMenuItem disabled value="" sx={{ fontStyle: 'italic', textAlign: 'center' }}>
-                No Data
-              </StyledMenuItem>
-            ))}
-        </StyledSelect>
+              ))}
+          </StyledSelect>
+        </HoverWrap>
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
     );
