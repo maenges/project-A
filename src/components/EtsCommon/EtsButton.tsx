@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 
 export interface EtsButtonProps {
   children: React.ReactNode;
@@ -26,6 +26,8 @@ const EtsButton = ({
 }: EtsButtonProps) => {
   const muiTheme = useTheme();
   const isDark = muiTheme.palette.mode === 'dark';
+  const themeActionBg = (muiTheme as any).palette.primary.main;
+  // primary.light 토큰이 없어 alpha로 밝기 조정하므로 기존 fallback 변수 제거
 
   // 기본 스타일: 라이트 모드 -> 흰 배경 + 검은 테두리/텍스트, 다크 모드 -> 흰 배경 + 테두리 제거 + 검은 텍스트
   const baseStyle = {
@@ -49,11 +51,15 @@ const EtsButton = ({
     lineHeight: '150%',
     boxShadow: 'none',
     '&:hover': {
-      background: '#FFFFFF',
-      filter: 'brightness(0.95)',
+      background: '#F7F8FA',
+      filter: 'none',
     },
     // pressed (누를때)
-    '&:active': { backgroundColor: '#051766 !important', color: '#FFFFFF !important' },
+    '&:active': {
+      // 사용자가 요청한 alpha 적용으로 살짝 연한 톤
+      backgroundColor: `${alpha(themeActionBg, 0.2)} !important`,
+      color: '#000000 !important',
+    },
     '&:focus': { outline: 'none' },
     ...sx,
   } as const;

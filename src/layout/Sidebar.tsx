@@ -50,8 +50,11 @@ const SidebarContainer = styled.div<{ isOpen: boolean }>`
 const LogoContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center; /* 로고 가로 중앙 정렬 */
   gap: 10px;
-  padding: 8px 12px 20px 12px;
+  width: 100%;
+  padding: 8px 12px 16px 12px; /* 좌우 동일 패딩으로 치우침 제거 */
+  margin-top: 12px; /* 살짝 아래로 */
 `;
 
 const LogoText = styled.span`
@@ -69,6 +72,11 @@ const withAlpha = (hex: string, alpha: number) => {
 };
 
 // ===== 모드 토글 & 브랜드 색상 스위처 (컴포넌트 먼저 선언: 타입 인식용) =====
+const MenuSpacer = styled.div<{ $collapsed: boolean }>`
+  height: ${({ $collapsed }) => ($collapsed ? '16px' : '80px')};
+  width: 100%;
+`;
+
 const ToggleButtonContainer = styled.div<{ $collapsed: boolean }>`
   cursor: pointer;
   color: ${({ theme }) => theme.colors.text.primary};
@@ -185,11 +193,18 @@ function BrandSwitcher({ collapsed }: BrandSwitcherProps) {
 }
 
 const MenuList = styled(List)<{ $collapsed: boolean }>`
-  flex-grow: 1; /* 메뉴 리스트가 남은 공간을 모두 차지하도록 설정 */
-  overflow-y: auto; /* 내용이 넘칠 경우 자동으로 스크롤바 생성 */
-  scrollbar-gutter: stable;
+  /* 컨테이너 높이 변동을 막아 Collapse 전개 시 상단 '위로 밀림' 현상 제거 */
+  flex: 0 0 auto; /* flex-grow 제거 */
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges; /* 스크롤바 너비 변동 억제 */
+  margin-top: 0;
+  box-sizing: border-box;
   padding-right: ${({ $collapsed }) => ($collapsed ? '0' : '14px')};
   padding-left: 0;
+  /* 추후 실제 로고/토글/브랜드 영역 픽셀 측정 후 미세조정 가능 */
+  height: ${({ $collapsed }) => ($collapsed ? 'calc(100vh - 160px)' : 'calc(100vh - 210px)')};
+  max-height: ${({ $collapsed }) => ($collapsed ? 'calc(100vh - 160px)' : 'calc(100vh - 210px)')};
+  overflow-anchor: none; /* 자동 앵커링 비활성화로 상단 기준 고정 */
 
   /* 카테고리(글로벌) 스타일과 동일하게 스크롤바 적용 */
   &::-webkit-scrollbar {
@@ -389,6 +404,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           <LogoText>스타솔루션</LogoText>
         </LogoContainer>
       )}
+      <MenuSpacer $collapsed={collapsed} />
       <MenuList $collapsed={collapsed}>
         {menuItems.map((item) => {
           // 현재 활성화된 항목이 이 부모 메뉴의 자식인지 확인
