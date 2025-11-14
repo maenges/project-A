@@ -195,7 +195,7 @@ function BrandSwitcher({ collapsed }: BrandSwitcherProps) {
 const MenuList = styled(List)<{ $collapsed: boolean }>`
   /* 컨테이너 높이 변동을 막아 Collapse 전개 시 상단 '위로 밀림' 현상 제거 */
   flex: 0 0 auto; /* flex-grow 제거 */
-  overflow-y: auto;
+  overflow-y: ${({ $collapsed }) => ($collapsed ? 'none' : 'auto')};
   scrollbar-gutter: stable both-edges; /* 스크롤바 너비 변동 억제 */
   margin-top: 0;
   box-sizing: border-box;
@@ -338,8 +338,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       children: [
         { text: '공지사항', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
         { text: '입금계좌', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '문구', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
+        { text: '문구관리', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
         { text: 'IP차단', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
+        { text: '게임사제한', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
         { text: '로그인 기록', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
       ],
     },

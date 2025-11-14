@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { searchForm, buttonForm } from '@/assets/style';
@@ -10,10 +10,10 @@ import {
   EtsExport,
   EtsSelectOption,
 } from '@/components/EtsCommon';
-import { EtsYearSelectComponent, EtsSelectComponent } from '@/components/EtsComponents';
+import { EtsYearSelectComponent } from '@/components/EtsComponents';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { PageTemplate } from '@/components/Teamplate';
-import { useCommonOptionsStore } from '@/store/commonCodes';
+// import { useCommonOptionsStore } from '@/store/commonCodes';
 import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
 import { useNotify } from '@hooks/useNotify';
@@ -60,10 +60,10 @@ const AircraftPage = () => {
   const { confirm, toast } = useNotify();
   const [totalCount, setTotalCount] = useState(0);
 
-  const actypeOptions = useCommonOptionsStore((s) => s.acTypeOptions);
+  // const actypeOptions = useCommonOptionsStore((s) => s.acTypeOptions);
   // 기본 연도 범위(서버 실패 대비 더미) 최근 5년
   const defaultYears = Array.from({ length: 5 }, (_, i) => dayjs().year() - i);
-  const [yearOptions, setYearOptions] = useState<number[]>(defaultYears);
+  const [yearOptions, _] = useState<number[]>(defaultYears);
 
   useActivate(() => {
     // 편집 상태 초기화
@@ -77,25 +77,25 @@ const AircraftPage = () => {
     }
   });
 
-  useEffect(() => {
-    // 서버가 동작하지 않아도 기본 연도는 보이도록 처리
-    callApi({
-      service: Service.POSTMAN,
-      url: '/api/v1/common/operation-years',
-      method: Method.GET,
-      params: {},
-      config: { isLoading: false },
-    })
-      .then((res) => {
-        if (res.successOrNot !== 'Y') return;
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setYearOptions(res.data);
-        }
-      })
-      .catch(() => {
-        // ignore - fallback(defaultYears) 유지
-      });
-  }, []);
+  // useEffect(() => {
+  //   // 서버가 동작하지 않아도 기본 연도는 보이도록 처리
+  //   callApi({
+  //     service: Service.POSTMAN,
+  //     url: '/api/v1/common/operation-years',
+  //     method: Method.GET,
+  //     params: {},
+  //     config: { isLoading: false },
+  //   })
+  //     .then((res) => {
+  //       if (res.successOrNot !== 'Y') return;
+  //       if (Array.isArray(res.data) && res.data.length > 0) {
+  //         setYearOptions(res.data);
+  //       }
+  //     })
+  //     .catch(() => {
+  //       // ignore - fallback(defaultYears) 유지
+  //     });
+  // }, []);
 
   // 더미 데이터 (DB 미가동 시 스타일 확인용)
   const DUMMY_DATA: AircraftData[] = [
@@ -557,12 +557,12 @@ const AircraftPage = () => {
             minYear={yearOptions[yearOptions.length - 1]}
             maxYear={yearOptions[0]}
           />
-          <EtsSelectComponent
+          {/* <EtsSelectComponent
             control={control}
             name="actyp"
             label="A/C Type"
             options={actypeOptions}
-          />
+          /> */}
         </searchForm.Row>
       </searchForm.Container>
       <searchForm.ButtonContainer>

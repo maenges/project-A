@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AliveScope, KeepAlive } from 'react-activation';
-import { callApi, Method } from '@utils/ApiUtil';
-import { Service } from '@models/common/Service';
+// import { callApi, Method } from '@utils/ApiUtil';
+// import { Service } from '@models/common/Service';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useCommonOptionsStore } from '@/store/commonCodes';
 // import { setLocalRefreshToken, isInvalidRefreshToken } from '@/services/auth/authUtil';
@@ -100,14 +100,14 @@ function App() {
         //   console.log('localStorage에 유효한 Refresh Token이 존재합니다.');
         // }
 
-        const optRes = await callApi({
-          service: Service.POSTMAN,
-          url: '/api/v1/common/options',
-          method: Method.GET,
-        });
+        // const optRes = await callApi({
+        //   service: Service.POSTMAN,
+        //   url: '/api/v1/common/options',
+        //   method: Method.GET,
+        // });
 
-        // 공통 옵션을 스토어에 저장
-        setFromApi(optRes.data ?? {});
+        // // 공통 옵션을 스토어에 저장
+        // setFromApi(optRes.data ?? {});
 
         // 세션 로드 완료 표시
         setSessionLoaded(true);
