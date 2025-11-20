@@ -45,9 +45,24 @@ export interface ApiRequest {
   redirect?: string;
 }
 
+/**
+ * 런타임/빌드 환경 변수 헬퍼
+ * - 1순위: window.__ENV (env-config.js에서 주입)
+ * - 2순위: Vite 빌드 타임 환경변수 (import.meta.env)
+ */
+const runtimeEnv: Record<string, string> =
+  (typeof window !== 'undefined' && (window as any).__ENV) || {};
+
+const getEnv = (key: string): string | undefined => {
+  if (runtimeEnv && key in runtimeEnv) {
+    return runtimeEnv[key];
+  }
+  return (import.meta.env as any)[key];
+};
+
 /* istanbul ignore next */
 const getInstance = (
-  serviceName: string,
+  serviceName: Service,
   isLoading: boolean,
   params?: any,
   isFile?: boolean
@@ -62,31 +77,34 @@ const getInstance = (
   axios.defaults.headers.put['Content-Type'] = 'application/json';
   axios.defaults.headers.patch['Content-Type'] = 'application/json';
   axios.defaults.withCredentials = true;
-  // const apiUrl = import.meta.env.REACT_APP_API_URL
-  //   ? JSON.parse(import.meta.env.REACT_APP_API_URL)
-  //   : {};
 
-  let baseURL: string = '';
+  let baseURL = '';
   const sessionUtil = new SessionUtil();
 
   switch (serviceName) {
-    // case Service.KAL_BE:
-    //   baseURL =
-    //     import.meta.env.REACT_APP_NODE_ENV === 'local'
-    //       ? apiUrl['KAL_BE'] + ':' + ServicePort.KAL_BE.toString()
-    //       : apiUrl['KAL_BE'];
-    //   break;
     case Service.POSTMAN:
+      // 여기서만 사용하니까 이 값만 잘 주입되면 됨
+      baseURL = getEnv('VITE_API_BASE_URL') || getEnv('REACT_APP_API_URL') || '';
       break;
+
     case Service.HOST:
-      baseURL = import.meta.env.REACT_APP_AUTHORIZATION_REDIRECT_URL!;
+      baseURL = getEnv('REACT_APP_AUTHORIZATION_REDIRECT_URL') || '';
       break;
+
     default:
+      baseURL = '';
       break;
   }
 
+  // 디버깅용 로그 (원하면 나중에 제거)
+  if (!baseURL) {
+    console.warn('[API] baseURL 이 비어 있습니다. service =', serviceName);
+  } else {
+    console.log('[API] baseURL =', baseURL, 'service =', serviceName);
+  }
+
   const instance = axios.create({
-    baseURL: baseURL,
+    baseURL,
     params: params || {},
     withCredentials: true,
     // timeout: 1000, // 사용시 timeout 관련 주석 해제 필요
@@ -96,17 +114,6 @@ const getInstance = (
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
       if (config?.headers) {
-        // 기존 authorization 헤더 주석 처리
-        // const accessToken: string | undefined =
-        //   sessionUtil.getAccessTokenRefreshTokenInfo().accessToken;
-        // if (accessToken) config.headers['authorization'] = `Bearer ${accessToken}`;
-
-        // Postman 방식: accessToken을 idToken 쿠키로 추가
-        // const accessToken = sessionStorage.getItem('accessToken');
-        // if (accessToken) {
-        //   config.headers['Cookie'] = `idToken=${accessToken}`;
-        // }
-
         if (sessionUtil.getSessionInfo().sessionId) {
           config.headers['x-session-id'] = sessionUtil.getSessionInfo().sessionId || '';
         }
@@ -169,17 +176,6 @@ const getInstance = (
         data: {},
       };
 
-      // timeout 에러 처리
-      // if (error.code === 'ECONNABORTED') {
-      //   console.error('API 요청 시간 초과:', error);
-      //   return {
-      //     successOrNot: 'N',
-      //     statusCode: StatusCode.UNKNOWN_ERROR,
-      //     data: {},
-      //     HeaderMsg: '서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.',
-      //   } as CommonResponse;
-      // }
-
       if (error.response && error.response.status.toString().indexOf('50') === 0) {
         // updown excel download exceeds error
         if (
@@ -236,19 +232,11 @@ const getInstance = (
           error.response.data.errorCode.toString() === '301'
         ) {
           try {
-            // 1. 새로운 토큰 재발급 함수를 호출합니다.
             await refreshAccessToken();
-
-            // 2. 원래 실패했던 요청을 가져옵니다.
             const originalRequest = error.config;
-
-            // 3. 헤더를 수정할 필요 없이, 원래 요청을 그대로 다시 보냅니다.
-            //    NGINX가 갱신된 HttpOnly 쿠키를 사용하여 자동으로 새 토큰을 헤더에 넣어줍니다.
             const retryResponse = await axios.request(originalRequest as AxiosRequestConfig);
             return retryResponse.data as CommonResponse;
           } catch (refreshError) {
-            // 토큰 재발급 실패 시, 로그인 페이지로 보내거나 에러를 반환합니다.
-            // refreshAccessToken 함수 내부에서 이미 리디렉션 처리를 하므로 여기서는 에러만 반환해도 됩니다.
             return Promise.reject(refreshError);
           }
         } else {
@@ -256,13 +244,10 @@ const getInstance = (
         }
       }
 
-      if (error.response.status.toString() === '401') {
+      if (error.response?.status?.toString() === '401') {
         return expiredError;
       }
-      //  else {
-      // sessionUtil.deleteSessionInfo();
-      // return unknownError;
-      // }
+
       return unknownError;
     }
   );
@@ -326,7 +311,6 @@ export const callApi = async (apiRequest: ApiRequest): Promise<CommonResponse> =
       break;
   }
 
-  // check session expired
   if (response.successOrNot === 'N' && response.statusCode === 'SESSION_EXPIRE') {
     sessionUtil.deleteSessionInfo();
     window.location.href = '/login';
