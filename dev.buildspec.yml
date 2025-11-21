@@ -8,10 +8,11 @@ phases:
       - yarn -v
       - corepack enable
       - yarn install
+
   build:
     commands:
       - |
-        cat > public/env-config.js << 'EOF'
+        cat > public/env-config.js << EOF
         window.__ENV = {
           VITE_API_BASE_URL: "${VITE_API_BASE_URL}",
           VITE_API_ORIGIN: "${VITE_API_ORIGIN}",
@@ -21,6 +22,14 @@ phases:
       - echo "==== Generated env-config.js ===="
       - cat public/env-config.js
       - yarn build:dev
+
+  post_build:
+    commands:
+      - echo "==== Deploy to S3 ===="
+      # ⚠️ 여기 버킷 이름을 네 CloudFront가 바라보는 정적 웹 버킷으로 바꿔
+      - aws s3 sync dist/ s3://YOUR-FRONTEND-BUCKET-NAME/ --delete
+      # 선택: CloudFront 캐시 날리기 (분배 ID 바꾸고 주석 해제하면 됨)
+      # - aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
 
 artifacts:
   files:
