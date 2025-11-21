@@ -6,6 +6,7 @@ phases:
       - node -v
       - npm -v
       - yarn -v
+      - corepack enable
       - yarn install
   build:
     commands:
