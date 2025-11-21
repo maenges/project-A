@@ -13,9 +13,9 @@ phases:
       - |
         cat > public/env-config.js << 'EOF'
         window.__ENV = {
-          VITE_API_BASE_URL: "$VITE_API_BASE_URL",
-          VITE_API_ORIGIN: "$VITE_API_ORIGIN",
-          NODE_ENV: "$NODE_ENV"
+          VITE_API_BASE_URL: "${VITE_API_BASE_URL}",
+          VITE_API_ORIGIN: "${VITE_API_ORIGIN}",
+          NODE_ENV: "${NODE_ENV}"
         };
         EOF
       - echo "==== Generated env-config.js ===="
