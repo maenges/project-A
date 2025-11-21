@@ -30,8 +30,3 @@ phases:
       - aws s3 sync dist/ s3://projecta-front-01/ --delete
       # 선택: CloudFront 캐시 날리기 (분배 ID 바꾸고 주석 해제하면 됨)
       # - aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
-
-artifacts:
-  files:
-    - '**/*'
-  base-directory: dist
