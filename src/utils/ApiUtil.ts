@@ -50,15 +50,8 @@ export interface ApiRequest {
  * - 1순위: window.__ENV (env-config.js에서 주입)
  * - 2순위: Vite 빌드 타임 환경변수 (import.meta.env)
  */
-// Extend the Window interface to include __ENV
-declare global {
-  interface Window {
-    __ENV?: Record<string, string>;
-  }
-}
-
-console.log(window.__ENV?.VITE_API_BASE_URL);
-const runtimeEnv: Record<string, string> = (typeof window !== 'undefined' && window.__ENV) || {};
+const runtimeEnv: Record<string, string> =
+  (typeof window !== 'undefined' && (window as any).__ENV) || {};
 
 const getEnv = (key: string): string | undefined => {
   if (runtimeEnv && key in runtimeEnv) {
@@ -111,7 +104,7 @@ const getInstance = (
   }
 
   const instance = axios.create({
-    baseURL,
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
     withCredentials: true,
     // timeout: 1000, // 사용시 timeout 관련 주석 해제 필요
