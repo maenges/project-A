@@ -37,8 +37,12 @@ const TreeNode: React.FC<{
   const isSelected = selectedId === node.id;
 
   const handleClick = () => {
+    if (onSelect) onSelect(node.id);
+  };
+
+  const handleIconClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (hasChildren) setOpen((o) => !o);
-    if (!hasChildren && onSelect) onSelect(node.id);
   };
 
   const getLevelIcon = (lvl: number) => {
@@ -100,11 +104,7 @@ const TreeNode: React.FC<{
             color: 'inherit',
             ml: level * 2,
           }}
-          onClick={(e) => {
-            if (!hasChildren) return;
-            e.stopPropagation();
-            setOpen((o) => !o);
-          }}
+          onClick={handleIconClick}
         >
           {hasChildren ? (
             open ? (
@@ -132,7 +132,12 @@ const TreeNode: React.FC<{
         {/* Label with indentation based on level */}
         <ListItemText
           primary={node.label}
-          primaryTypographyProps={{ noWrap: true }}
+          primaryTypographyProps={{
+            sx: {
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+            },
+          }}
           sx={{ ml: 1 }}
         />
       </ListItemButton>
@@ -192,12 +197,13 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({ onSelect }) => {
   useEffect(() => {
     callApi({
       service: Service.POSTMAN,
-      url: '/api/group/tree',
+      url: '/api/group/',
       method: Method.GET,
       params: {},
       config: { isLoading: false },
     })
       .then((res) => {
+        console.log('Fetched organization tree:', res);
         if (res.successOrNot !== 'Y') {
           toast.error(res.HeaderMsg);
           return Promise.reject(res.HeaderMsg);

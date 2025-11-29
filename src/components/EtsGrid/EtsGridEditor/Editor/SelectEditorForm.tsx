@@ -87,7 +87,7 @@ const StyledSelect = styled(Select, {
       fontWeight: 'var(--font-weight-regular, 400)',
       lineHeight: '130%',
       padding: '7px 12px',
-      paddingRight: '32px', // 아이콘 공간 확보
+      paddingRight: '8px', // 아이콘 제거로 공간 축소
       height: '20px !important',
       minHeight: '20px !important',
       color: theme.palette.mode === 'dark' ? theme.palette.text.primary : '#000000',
@@ -131,19 +131,11 @@ const StyledSelect = styled(Select, {
     },
 
     '& .MuiSelect-icon': {
-      color: 'transparent', // 기본 아이콘 숨김
-      fontSize: '18px',
-      right: '4px',
-      width: '24px',
-      height: '20px',
-      transition: 'all 0.2s ease',
-      backgroundImage:
-        theme.palette.mode === 'dark'
-          ? `url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_885_68168)'%3E%3Cpath d='M19.0732 8.47837H19.8105L15.7539 12.535L15.75 12.5311L11.9922 16.2704L8.29004 12.5272L8.2832 12.535L4.50293 8.75376L4.45312 8.70493L4.22656 8.47837H4.96387C5.35186 8.45464 5.74105 8.5086 6.10742 8.63852C6.47371 8.76844 6.81036 8.97141 7.09668 9.23422L9.3418 11.4793L9.33594 11.4842L12 14.1756L14.7051 11.4862L14.6992 11.4803L16.9414 9.23422C17.2274 8.97088 17.5633 8.76749 17.9297 8.63755C18.2961 8.50762 18.6853 8.45402 19.0732 8.47837Z' fill='${encodeURIComponent(theme.palette.text.primary)}'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_885_68168'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E")`
-          : `url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_885_68168)'%3E%3Cpath d='M19.0732 8.47837H19.8105L15.7539 12.535L15.75 12.5311L11.9922 16.2704L8.29004 12.5272L8.2832 12.535L4.50293 8.75376L4.45312 8.70493L4.22656 8.47837H4.96387C5.35186 8.45464 5.74105 8.5086 6.10742 8.63852C6.47371 8.76844 6.81036 8.97141 7.09668 9.23422L9.3418 11.4793L9.33594 11.4842L12 14.1756L14.7051 11.4862L14.6992 11.4803L16.9414 9.23422C17.2274 8.97088 17.5633 8.76749 17.9297 8.63755C18.2961 8.50762 18.6853 8.45402 19.0732 8.47837Z' fill='%23252525'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_885_68168'%3E%3Crect width='24' height='24' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E")`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      backgroundSize: '24px 24px',
+      display: 'none !important',
+      width: 0,
+      height: 0,
+      backgroundImage: 'none !important',
+      backgroundSize: '0 !important',
     },
     '&.Mui-disabled .MuiSelect-icon': {
       backgroundImage:
@@ -402,7 +394,11 @@ const EtsSelect = React.forwardRef<HTMLInputElement, EtsSelectProps>(
           displayEmpty={displayEmpty}
           disabled={props.disabled || readOnly}
           MenuProps={menuProps}
-          renderValue={(selected) => renderValue(selected, options, multiple, placeholder)}
+          renderValue={
+            (props as any).renderValue
+              ? (props as any).renderValue
+              : (selected: any) => renderValue(selected, options, multiple, placeholder)
+          }
           SelectDisplayProps={
             {
               'data-placeholder': isPlaceholderShowing,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AliveScope, KeepAlive } from 'react-activation';
 // import { callApi, Method } from '@utils/ApiUtil';
 // import { Service } from '@models/common/Service';
@@ -12,7 +12,7 @@ import { GlobalStyles } from '@style/GlobalStyles';
 import { ThemeModeProvider } from '@/contexts/ThemeContext';
 // import axios from 'axios';
 
-import { DashboardPage } from '@/features/dashboard';
+// import { DashboardPage } from '@/features/dashboard';
 // import DashboardLoginPage from '@/features/DashboardLoginPage';
 import {
   AircraftPage,
@@ -56,6 +56,26 @@ import EtsGridEditorTestPage from '@/features/EtsGridEditorTestPage';
 import GridPaginationTestPage from '@/features/GridPaginationTestPage';
 import EventLogManagementPage from '@/features/admin/eventLogManagement/EventLogManagementPage';
 import PayloadCleansingPage from './../features/management/payloadCleansing/PayloadCleansingPage';
+
+import {
+  SystemNoticePage,
+  SystemAccountPage,
+  SystemAccountChangePage,
+  SystemLoginRecordPage,
+  SystemAnswerPage,
+  SystemMessagePage,
+  SystemIpBlockPage,
+} from '@/features/system';
+import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
+import { PartnerPartnerListPage } from '@/features/partner';
+import {
+  CustomerWaitPage,
+  CustomerAccessorPage,
+  CustomerCustomerListPage,
+} from '@features/customer';
+import { BetBetListPage, BetLosePage } from '@features/bet';
+import { GameRecordStatisticsPage } from '@/features/gameRecord';
+import { SettlementLoosingPage } from '@/features/settlement';
 
 function App() {
   const { isLoading } = useLoadingStore();
@@ -135,14 +155,7 @@ function App() {
                   <AppLayout>
                     <div className="App">
                       <Routes>
-                        <Route
-                          path="/"
-                          element={
-                            <PrivateRoute>
-                              <DashboardPage />
-                            </PrivateRoute>
-                          }
-                        />
+                        <Route path="/" />
                         <Route
                           path="/testbob"
                           element={
@@ -443,7 +456,151 @@ function App() {
                             </KeepAlive>
                           }
                         />
-                        {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
+                        <Route
+                          path="/system/notice"
+                          element={
+                            <PrivateRoute>
+                              <SystemNoticePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/account"
+                          element={
+                            <PrivateRoute>
+                              <SystemAccountPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/accountChange"
+                          element={
+                            <PrivateRoute>
+                              <SystemAccountChangePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/loginRecord"
+                          element={
+                            <PrivateRoute>
+                              <SystemLoginRecordPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/answer"
+                          element={
+                            <PrivateRoute>
+                              <SystemAnswerPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/message"
+                          element={
+                            <PrivateRoute>
+                              <SystemMessagePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/trans/transfer"
+                          element={
+                            <PrivateRoute>
+                              <TransTransferPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/trans/recharge"
+                          element={
+                            <PrivateRoute>
+                              <TransRechargePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/trans/exchange"
+                          element={
+                            <PrivateRoute>
+                              <TransExchangePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/partner/partnerList"
+                          element={
+                            <PrivateRoute>
+                              <PartnerPartnerListPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/customer/wait"
+                          element={
+                            <PrivateRoute>
+                              <CustomerWaitPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/customer/accessor"
+                          element={
+                            <PrivateRoute>
+                              <CustomerAccessorPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/bet/betList"
+                          element={
+                            <PrivateRoute>
+                              <BetBetListPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/bet/lose"
+                          element={
+                            <PrivateRoute>
+                              <BetLosePage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/gameRecord/statistics"
+                          element={
+                            <PrivateRoute>
+                              <GameRecordStatisticsPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/system/ipBlock"
+                          element={
+                            <PrivateRoute>
+                              <SystemIpBlockPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/customer/cutomerList"
+                          element={
+                            <PrivateRoute>
+                              <CustomerCustomerListPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route
+                          path="/settlement/loosing"
+                          element={
+                            <PrivateRoute>
+                              <SettlementLoosingPage />
+                            </PrivateRoute>
+                          }
+                        />
+                        <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                     </div>
                   </AppLayout>

@@ -336,7 +336,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .label {
-    color: var(--color-text-base, ${(props) => props.theme.colors.text.base}) !important;
+    color: ${(props) => props.theme.colors.text.primary} !important;
     font-family: ${(props) => props.theme.fonts.family.primary} !important;
     font-size: var(--font-size-label-md, ${(props) => props.theme.fonts.size.sm}) !important;
     font-style: normal !important;

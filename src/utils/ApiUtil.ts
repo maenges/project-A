@@ -106,8 +106,7 @@ const getInstance = (
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
-    withCredentials: true,
-    // timeout: 1000, // 사용시 timeout 관련 주석 해제 필요
+    withCredentials: import.meta.env.VITE_API_WITH_CREDENTIALS === 'true',
   });
 
   // 공통 요청 처리

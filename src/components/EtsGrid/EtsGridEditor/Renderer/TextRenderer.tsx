@@ -1,8 +1,8 @@
 import { ICellRendererParams } from 'ag-grid-community';
 import type { EtsInputProps } from '../../../EtsCommon/EtsInput';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 
-const TextLayout = styled('div')({
+const TextLayout = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   width: '100%',
@@ -11,7 +11,10 @@ const TextLayout = styled('div')({
   border: '1px solid var(--color-border-base, #D9D9D9)',
   borderRadius: '8px',
   margin: '0px 2px',
-  backgroundColor: 'var(--color-background-base-white, #FFF) !important',
+  backgroundColor:
+    theme.palette.mode === 'dark'
+      ? theme.palette.background.paper || '#222' // 다크모드 배경
+      : 'var(--color-background-base-white, #FFF)',
   padding: '6px 8px',
   color: 'var(--color-text-secondary, #666)',
   fontSize: '14px',
@@ -21,20 +24,29 @@ const TextLayout = styled('div')({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-});
+}));
 
 export interface EtsTextRendererProps extends ICellRendererParams {
   inputProps?: Omit<EtsInputProps, 'value' | 'onChange'>;
 }
 
 export default function TextRenderer(props: EtsTextRendererProps) {
+  const theme = useTheme();
   const hasValue = props.value !== undefined && props.value !== null && props.value !== '';
   const displayValue = hasValue ? props.value : props.inputProps?.placeholder || '';
+
+  const textColor = hasValue
+    ? theme.palette.mode === 'dark'
+      ? '#FFF'
+      : 'var(--color-text-secondary, #666)'
+    : theme.palette.mode === 'dark'
+      ? '#FFF'
+      : 'var(--color-text-tertiary, #999)';
 
   return (
     <TextLayout
       style={{
-        color: hasValue ? 'var(--color-text-secondary, #666)' : 'var(--color-text-tertiary, #999)',
+        color: textColor,
         fontStyle: hasValue ? 'normal' : 'italic',
       }}
     >

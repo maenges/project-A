@@ -13,20 +13,12 @@ const HeaderArea = styled(Stack)`
   align-items: end;
 `;
 
-// const NavigationItem = styled(Typography)`
-//   color: var(--color-brand-darkblue-100, #051766);
-//   font-weight: 700;
-//   font-size: 12px !important;
-//   line-height: 24px;
-// `;
-
 export interface PageTemplateProps {
   title?: string;
   description?: string;
   searchComponent?: React.ReactNode;
   buttonComponent?: React.ReactNode;
   tabComponent?: React.ReactNode;
-  /** 좌측 조직 트리 표시 여부 (기본: false) */
   tree?: boolean;
   columnDefs?: ColDef[];
   rowData?: any[];
@@ -48,7 +40,7 @@ export interface PageTemplateProps {
   rowSelection?: 'single' | 'multiple';
   rowMultiSelectWithClick?: boolean;
   suppressRowClickSelection?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'sm-two-header';
+  size?: 'sm' | 'md' | 'lg' | 'sm-two-header' | 'no-search';
   loading?: boolean;
   onGridReady?: (params: GridReadyEvent) => void;
 }
@@ -67,7 +59,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   isInfiniteScroll,
   suppressRowTransform = true,
   showPinnedBottom,
-  subSelect,
+  // subSelect,
   totalCount,
   dataSource,
   cacheBlockSize,
@@ -85,6 +77,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   // --- size prop에 따라 그리드 높이를 결정하는 로직 ---
   const gridHeight = useMemo(() => {
     switch (size) {
+      case 'no-search':
+        return 'calc(100vh - 250px)';
       case 'sm-two-header':
         return 'calc(100vh - 420px)';
       case 'md':
@@ -250,6 +244,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
           <Box
             sx={{
               display: 'flex',
+              marginTop: '24px',
               paddingBottom: '12px',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
@@ -257,13 +252,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               flexShrink: 0,
             }}
           >
-            {subSelect ? (
-              subSelect
-            ) : (
-              <Typography className="label">
-                Total: {Number(totalCount).toLocaleString()}
-              </Typography>
-            )}
+            <Typography className="label">Total: {Number(totalCount).toLocaleString()}</Typography>
             {buttonComponent && <ButtonPanel buttonComponent={buttonComponent} />}
           </Box>
 

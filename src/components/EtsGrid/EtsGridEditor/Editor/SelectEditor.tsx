@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ICellEditorParams } from 'ag-grid-community';
-import EtsSelect from '../../../EtsCommon/EtsSelect';
-import type { EtsSelectProps, EtsSelectOption } from '../../../EtsCommon/EtsSelect';
+import EtsSelect from './SelectEditorForm';
+import type { EtsSelectProps, EtsSelectOption } from './SelectEditorForm';
 import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 
 const SelectLayout = styled('div')({
   display: 'flex',
@@ -24,6 +25,7 @@ export interface EtsSelectEditorProps {
 export default function SelectEditor(props: ICellEditorParams & EtsSelectEditorProps) {
   const { options, selectProps, onValueChange, stopEditing, initialValue } = props;
   const [localValue, setLocalValue] = useState<string | string[]>('');
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleValueType = () => {
@@ -57,8 +59,88 @@ export default function SelectEditor(props: ICellEditorParams & EtsSelectEditorP
     }
   };
 
+  const renderValue = (
+    selected: any,
+    options?: EtsSelectOption[],
+    multiple?: boolean,
+    placeholder?: string
+  ) => {
+    if (multiple) {
+      const selectedArray = Array.isArray(selected) ? selected : [];
+      if (selectedArray.length === 0) {
+        return (
+          <span style={{ color: 'var(--color-text-placeholder, #A4A4A4)' }}>{placeholder}</span>
+        );
+      }
+      return (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          {selectedArray.map((value) => {
+            const option = options?.find((opt) => opt.value === value);
+            return (
+              <Box
+                key={value}
+                sx={{
+                  height: '24px',
+                  margin: '2px',
+                  fontFamily: '"Hanjin Group Sans"',
+                  fontSize: '12px',
+                  fontWeight: 'var(--font-weight-regular, 400)',
+                  padding: '0 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {option?.label || value}
+              </Box>
+            );
+          })}
+        </Box>
+      );
+    }
+
+    const displayText = (() => {
+      // 빈 문자열도 유효한 값으로 처리하되, undefined나 null인 경우에만 placeholder 표시
+      if ((selected === undefined || selected === null) && placeholder) {
+        return placeholder;
+      }
+      if (options) {
+        const option = options.find((opt) => opt.value === selected);
+        return option?.label || selected;
+      }
+      return selected;
+    })();
+
+    return (
+      <Box
+        component="div"
+        sx={{
+          overflow: 'visible',
+          textOverflow: 'clip',
+          whiteSpace: 'nowrap',
+          width: '100%',
+          display: 'block',
+          color:
+            (selected === undefined || selected === null) && placeholder
+              ? 'var(--color-text-placeholder, #A4A4A4)'
+              : 'inherit',
+        }}
+        title={typeof displayText === 'string' ? displayText : undefined}
+      >
+        {displayText}
+      </Box>
+    );
+  };
+
   return (
-    <SelectLayout>
+    <SelectLayout
+      ref={containerRef}
+      onMouseEnter={() => {
+        const row = containerRef.current?.closest('.ag-row');
+        if (row) {
+          row.classList.remove('ag-row-hover');
+        }
+      }}
+    >
       <EtsSelect
         value={localValue}
         options={options}
@@ -69,6 +151,7 @@ export default function SelectEditor(props: ICellEditorParams & EtsSelectEditorP
         open={true}
         autoFocus
         width="100%"
+        renderValue={renderValue}
         MenuProps={{
           autoFocus: false,
           disableAutoFocus: true,
@@ -94,6 +177,9 @@ export default function SelectEditor(props: ICellEditorParams & EtsSelectEditorP
           '& .MuiSelect-select': {
             padding: '6px 8px !important',
             paddingRight: '32px !important',
+            overflow: 'visible !important',
+            textOverflow: 'clip !important',
+            whiteSpace: 'normal !important',
           },
           ...selectProps?.sx,
         }}

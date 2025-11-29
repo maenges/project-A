@@ -151,7 +151,7 @@ export const agGridStyles = css`
 
   /* 모든 셀 데이터 중앙 정렬 */
   .ag-theme-material .ag-cell {
-    text-align: center !important; /* 모든 셀 텍스트 중앙 정렬 */
+    /* text-align: center !important; 모든 셀 텍스트 중앙 정렬 */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -210,7 +210,7 @@ export const agGridStyles = css`
   body[data-theme='dark'] .ag-theme-material .ag-header-cell,
   body[data-theme='dark'] .ag-theme-material .ag-header-group-cell {
     background-color: ${(props) =>
-      alpha(props.theme.colors?.primary?.main || '#1976d2', 0.06)} !important;
+      alpha(props.theme.colors?.primary?.main || '#ffffff', 0.06)} !important;
   }
 
   .ag-theme-material .ag-header-cell.bg-orange,
@@ -417,13 +417,20 @@ export const agGridStyles = css`
     color: #ffffff !important;
   }
 
-  .ag-theme-material .ag-cell.ag-cell-focus,
+  /* .ag-theme-material .ag-cell.ag-cell-focus,
   .ag-theme-material .ag-cell.ag-cell-range-selected,
   .ag-theme-material .ag-cell.ag-cell-range-selected-1,
   .ag-theme-material .ag-cell.ag-cell-range-selected-2,
   .ag-theme-material .ag-cell.ag-cell-range-selected-3,
   .ag-theme-material .ag-cell.ag-cell-range-selected-4 {
     border-color: var(--color-border-divider-primary, #e5e7eb) !important;
+    box-shadow: none !important;
+  } */
+
+  .ag-theme-material .ag-cell.ag-cell-focus:not(.ag-cell-range-selected) {
+    border: 0 !important;
+    border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
+    outline: none !important;
     box-shadow: none !important;
   }
 
@@ -687,7 +694,7 @@ export const agGridStyles = css`
   }
 
   /* 편집 모드일 때 셀의 패딩 제거 */
-  .ag-theme-material .ag-cell.ag-number-editor-styled.ag-cell-inline-editing {
+  /* ag-cell ag-cell-normal-height ag-cell-value ag-cell-focus center ag-cell-not-inline-editing {
     padding: 2px !important;
-  }
+  } */
 `;

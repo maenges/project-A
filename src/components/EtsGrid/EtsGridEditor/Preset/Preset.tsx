@@ -48,25 +48,6 @@ export const EtsColumnPreset = {
             const num = Number(value);
             const decimalPlaces = params?.context?.decimalPlaces;
 
-            // unit 값에 따라 분기 처리
-            if (rendererParams.data && rendererParams.data.unit) {
-              switch (rendererParams.data.unit.toLowerCase()) {
-                case 'km':
-                  return num.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  });
-                case 'ea':
-                  return num.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  });
-                default:
-                  // 특별히 처리할 unit이 아니면 아래의 기본 로직을 따름
-                  break;
-              }
-            }
-
             // decimalPlaces가 지정된 경우 (기존 로직 유지)
             if (typeof decimalPlaces === 'number') {
               return num.toLocaleString(undefined, {
@@ -88,64 +69,8 @@ export const EtsColumnPreset = {
           }
           return value;
         };
-
-        // const isNumeric = params?.context?.formatType === 'number';
-        // const isEmpty =
-        //   rendererParams.value === undefined ||
-        //   rendererParams.value === null ||
-        //   rendererParams.value === '';
-
-        // if (isEditable) {
-        //   // 편집 모드일 때
-        //   if (isNumeric && isEmpty) {
-        //     // 숫자 타입이고 값이 비어있으면, TextRenderer에 value: 0을 전달
-        //     return EtsRenderer.TextRenderer({
-        //       ...rendererParams,
-        //       value: 0, // value를 0으로 덮어씁니다.
-        //       inputProps: params?.context?.inputProps,
-        //       type: params?.context?.formatType,
-        //     });
-        //   }
-        //   // 값이 있거나 숫자 타입이 아니면, 원래 값으로 TextRenderer를 호출
-        //   return EtsRenderer.TextRenderer({
-        //     ...rendererParams,
-        //     inputProps: params?.context?.inputProps,
-        //     type: params?.context?.formatType,
-        //   });
-        // } else {
-        //   // 읽기 전용 모드일 때
-        //   if (isNumeric && isEmpty) {
-        //     // 숫자 타입이고 값이 비어있으면, 0을 포맷팅
-        //     return formatNumber(0);
-        //   }
-        //   // 값이 있으면, 해당 값을 포맷팅
-        //   return formatNumber(rendererParams.value);
-        // }
         return isEditable
-          ? // ? rendererParams.value !== undefined && rendererParams.value !== null
-            //   ? EtsRenderer.TextRenderer({
-            //       ...rendererParams,
-            //       inputProps: params?.context?.inputProps,
-            //       // --- 아래 코드를 수정합니다 ---
-            //       type: params?.context?.formatType,
-            //     })
-            //   : params?.context?.formatType === 'number'
-            //     ? EtsRenderer.TextRenderer({
-            //         ...rendererParams,
-            //         inputProps: params?.context?.inputProps,
-            //         // --- 아래 코드를 수정합니다 ---
-            //         type: params?.context?.formatType,
-            //         value: formatNumber(0),
-            //       })
-            //     : ''
-            // : rendererParams.value !== undefined && rendererParams.value !== null
-            //   ? params?.context?.formatType === 'number'
-            //     ? formatNumber(rendererParams.value)
-            //     : rendererParams.value
-            //   : params?.context?.formatType === 'number'
-            //     ? formatNumber(0)
-            //     : '';
-            EtsRenderer.TextRenderer({
+          ? EtsRenderer.TextRenderer({
               ...rendererParams,
               inputProps: params?.context?.inputProps,
               type: params?.context?.type,
@@ -167,17 +92,6 @@ export const EtsColumnPreset = {
         type: params?.context?.formatType,
         decimalPlaces: params?.context?.decimalPlaces,
       }),
-      // valueSetter: (setterParams) => {
-      //   // setterParams.colDef.field가 없을 경우를 대비한 방어 코드
-      //   console.log(setterParams.colDef.field);
-      //   if (!setterParams.colDef.field) {
-      //     return false;
-      //   }
-      //   // 새로운 값을 데이터 객체의 해당 필드에 저장합니다.
-      //   setterParams.data[setterParams.colDef.field] = setterParams.newValue;
-      //   // true를 반환하여 그리드에 변경이 성공했음을 알립니다.
-      //   return true;
-      // },
       ...params,
     };
   },

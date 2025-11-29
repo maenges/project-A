@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useThemeMode } from '@/contexts/ThemeContext';
 import styled from 'styled-components';
 import {
@@ -23,6 +24,8 @@ import {
   FiberManualRecord,
   Star,
 } from '@mui/icons-material';
+import { Service } from '@/models/common/Service';
+import { callApi, Method } from '@/utils/ApiUtil';
 
 const RAIL_WIDTH = 72; // 접힘 상태 고정 폭
 const SidebarContainer = styled.div<{ isOpen: boolean }>`
@@ -296,6 +299,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+  const navigate = useNavigate();
+
   // '활성화'된 항목을 추적하는 단일 상태 (부모 또는 자식 메뉴의 텍스트)
   const [activeItem, setActiveItem] = useState<string>('');
   // 열려있는 부모 메뉴들을 추적하는 상태
@@ -303,7 +308,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const collapsed = !isOpen;
   const [flyout, setFlyout] = useState<{
     anchorEl: HTMLElement | null;
-    items: { text: string; icon?: React.ReactNode }[];
+    items: { text: string; icon?: React.ReactNode; path?: string }[];
     parentText: string;
   } | null>(null);
   const flyoutTimer = useRef<number | null>(null);
@@ -326,70 +331,102 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   };
 
   // 하위 메뉴 또는 단일 메뉴 클릭 핸들러
-  const handleItemClick = (text: string) => {
+  const handleItemClick = (text: string, path: string) => {
     // 해당 항목을 '활성' 항목으로 설정합니다.
     setActiveItem(text);
+    if (path) navigate(path);
   };
 
-  const menuItems = [
-    {
-      text: '시스템',
-      icon: <AdminPanelSettings />,
-      children: [
-        { text: '공지사항', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '입금계좌', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '문구관리', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: 'IP차단', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '게임사제한', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '로그인 기록', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-      ],
-    },
-    {
-      text: '충/환전',
-      icon: <CurrencyExchange />,
-      children: [
-        { text: '충전', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '환전', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '자금이동', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-      ],
-    },
-    {
-      text: '파트너',
-      icon: <Handshake />,
-      children: [
-        { text: '파트너 목록', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '알 이동', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-      ],
-    },
-    {
-      text: '회원',
-      icon: <Group />,
-      children: [
-        { text: '회원 목록', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '승인대기', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '현재 접속자', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-      ],
-    },
-    {
-      text: '베팅',
-      icon: <SportsEsports />,
-      children: [
-        { text: '베팅 목록', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '로스 조정', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-        { text: '로스 복구', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> },
-      ],
-    },
-    {
-      text: '게임 기록',
-      icon: <History />,
-      children: [{ text: '통계', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> }],
-    },
-    {
-      text: '정산',
-      icon: <Calculate />,
-      children: [{ text: '루징', icon: <FiberManualRecord sx={{ fontSize: 6 }} /> }],
-    },
-  ];
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+
+  // 메뉴 아이콘 매핑
+  const getIcon = (menuName: string) => {
+    switch (menuName) {
+      case '시스템':
+        return <AdminPanelSettings />;
+      case '충환전':
+        return <CurrencyExchange />;
+      case '파트너':
+        return <Handshake />;
+      case '회원':
+        return <Group />;
+      case '베팅':
+        return <SportsEsports />;
+      case '게임기록':
+        return <History />;
+      case '정산':
+        return <Calculate />;
+      default:
+        return <Star />;
+    }
+  };
+
+  // API 데이터 변환 함수
+  const transformMenuData = (data: any[]) => {
+    const menuMap: { [key: string]: any } = {};
+    const roots: any[] = [];
+
+    data.forEach((item) => {
+      const menuItem = {
+        text: item.menu_name,
+        icon: getIcon(item.menu_name),
+        children: [],
+        path: item.menu_url || '',
+        menu_key: item.menu_key,
+        parent_menu_key: item.parent_menu_key,
+        level: item.level,
+        menu_order: item.menu_order,
+        sort_path: item.sort_path,
+      };
+
+      menuMap[item.menu_key] = menuItem;
+
+      if (item.parent_menu_key === null) {
+        roots.push(menuItem);
+      } else {
+        if (menuMap[item.parent_menu_key]) {
+          menuMap[item.parent_menu_key].children.push({
+            text: item.menu_name,
+            icon: <FiberManualRecord sx={{ fontSize: 6 }} />,
+            path: item.menu_url || '',
+            menu_key: item.menu_key,
+          });
+        }
+      }
+    });
+
+    // 정렬
+    roots.sort((a, b) => a.menu_order - b.menu_order);
+    roots.forEach((root) => {
+      root.children.sort((a: any, b: any) => a.menu_order - b.menu_order);
+    });
+
+    return roots;
+  };
+
+  // 메뉴 데이터 로드
+  const loadMenuData = async () => {
+    try {
+      const response = await callApi({
+        service: Service.HOST,
+        url: '/api/menu',
+        method: Method.GET,
+        params: {
+          queryParams: { groupType: 'HQ' },
+        },
+      });
+      if (response.successOrNot === 'Y') {
+        const transformedData = transformMenuData(response.data);
+        setMenuItems(transformedData);
+      }
+    } catch (error) {
+      console.error('메뉴 데이터 로드 실패:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadMenuData();
+  }, []);
 
   // 접힘으로 전환 시, 열림 상태는 모두 닫음 (요구5)
   useEffect(() => {
@@ -409,20 +446,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       <MenuList $collapsed={collapsed}>
         {menuItems.map((item) => {
           // 현재 활성화된 항목이 이 부모 메뉴의 자식인지 확인
-          const isChildActive = item.children?.some((child) => child.text === activeItem) ?? false;
+          const isChildActive =
+            item.children?.some((child: any) => child.text === activeItem) ?? false;
 
           return (
             <React.Fragment key={item.text}>
               <ListItemButton
                 onClick={() =>
-                  item.children ? handleParentClick(item.text) : handleItemClick(item.text)
+                  item.children
+                    ? handleParentClick(item.text)
+                    : handleItemClick(item.text, item.path)
                 }
                 onMouseEnter={(e) => {
                   if (collapsed && item.children) {
                     clearFlyoutTimer();
                     setFlyout({
                       anchorEl: e.currentTarget as HTMLElement,
-                      items: item.children,
+                      items: item.children.map((child: any) => ({
+                        text: child.text,
+                        icon: child.icon,
+                        path: child.path,
+                      })),
                       parentText: item.text,
                     });
                   }
@@ -454,11 +498,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
               {item.children && (
                 <Collapse in={isOpen && open[item.text]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {item.children.map((child) => (
+                    {item.children.map((child: any) => (
                       <ListItemButton
                         key={child.text}
                         sx={{ pl: 4 }}
-                        onClick={() => handleItemClick(child.text)}
+                        onClick={() => handleItemClick(child.text, child.path)}
                         // 현재 활성화된 항목일 때 회색('child-selected')으로 표시합니다.
                         className={activeItem === child.text ? 'child-selected' : ''}
                       >
@@ -489,6 +533,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                   key={child.text}
                   onClick={() => {
                     setActiveItem(child.text);
+                    if (child.path) navigate(child.path);
                     setFlyout(null);
                   }}
                   sx={{ py: 0.25, px: 1, minHeight: 26 }}
