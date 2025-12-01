@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import unionIcon from '@images/union.svg?inline';
 
 export interface EtsCheckBoxProps {
@@ -27,60 +27,94 @@ const StyledCheckBox = styled('div', {
   hasError?: boolean;
   customWidth?: string | number;
   customHeight?: string | number;
-}>(({ isChecked, isDisabled, isReadOnly, hasError, customWidth, customHeight }) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: customWidth || '24px',
-  height: customHeight || '24px',
-  borderRadius: '4px',
-  cursor: isDisabled || isReadOnly ? 'not-allowed' : 'pointer',
-  backgroundColor: (() => {
+}>(({ theme, isChecked, isDisabled, isReadOnly, hasError, customWidth, customHeight }) => {
+  const backgroundColor = (() => {
     if (isDisabled || isReadOnly) {
-      return '#D9D9D9';
+      return theme.palette.background.paper ?? '#ffffff';
     }
     if (hasError) {
-      return '#FFF5F5';
+      return theme.palette.error.light;
     }
-    return isChecked ? '#051766' : '#FFFFFF';
-  })(),
-  border: (() => {
-    if (hasError) {
-      return '1px solid #DA291C';
+    // 편집 + 체크된 상태
+    if (theme.palette.mode === 'dark') {
+      return isChecked ? theme.palette.primary.dark : theme.palette.background.paper;
+    } else {
+      return isChecked ? theme.palette.primary.main : theme.palette.background.paper;
     }
-    if (isDisabled) {
-      return '1px solid #A4A4A4';
-    }
-    if (isReadOnly) {
-      return '1px solid #051766';
-    }
-    return '1px solid #051766';
-  })(),
-  transition: 'all 0.2s ease-in-out',
-  position: 'relative',
+  })();
 
-  '&::after': isChecked
-    ? {
-        content: '""',
-        position: 'absolute',
-        width: '12px',
-        height: '10px',
-        backgroundImage: `url("${unionIcon}")`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        filter: (() => {
-          if (isDisabled) {
-            return 'brightness(0) saturate(100%) invert(64%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(96%) contrast(96%)'; // #A4A4A4
-          }
-          if (isReadOnly) {
-            return 'brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(7463%) hue-rotate(240deg) brightness(90%) contrast(130%)'; // #051766
-          }
-          return 'brightness(0) invert(1)'; // white for default and error checked state
-        })(),
-      }
-    : {},
-}));
+  const borderColor = (() => {
+    if (hasError) return theme.palette.error.main;
+    if (isDisabled) return theme.palette.action.disabled;
+    if (isReadOnly) return theme.palette.primary.main;
+    // 여기 보더 다크모드 흰색, 라이트모드 라이트색
+    if (theme.palette.mode === 'dark') {
+      return isChecked ? '#ffffff' : '#ffffff';
+    } else {
+      return isChecked ? theme.palette.primary.main : theme.palette.primary.main;
+    }
+  })();
+
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: customWidth || '24px',
+    height: customHeight || '24px',
+    borderRadius: '4px',
+    cursor: isDisabled || isReadOnly ? 'not-allowed' : 'pointer',
+    backgroundColor,
+    border: `1px solid ${borderColor}`,
+    transition: 'all 0.2s ease-in-out',
+    position: 'relative',
+    boxSizing: 'border-box',
+
+    '&:hover': {
+      ...(isDisabled || isReadOnly
+        ? {}
+        : {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
+          }),
+    },
+    '&:focus-visible': {
+      outline: 'none',
+      boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.25)}`,
+    },
+
+    '&::after': isChecked
+      ? {
+          content: '""',
+          position: 'absolute',
+          width: '12px',
+          height: '10px',
+          backgroundImage: `url("${unionIcon}")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'contain',
+          filter: (() => {
+            if (isDisabled) {
+              return 'invert(41%) sepia(88%) saturate(3761%) hue-rotate(127deg) brightness(94%) contrast(102%)';
+            }
+            if (isReadOnly) {
+              // 라이트모드 배경 체크 이미지 테마 색상에 맞춤
+              if (theme.palette.mode === 'light') {
+                if (theme.palette.primary.main === '#00AB55') {
+                  return 'invert(51%) sepia(98%) saturate(2214%) hue-rotate(131deg) brightness(94%) contrast(101%)';
+                } else if (theme.palette.primary.main === '#1976d2') {
+                  return 'invert(41%) sepia(94%) saturate(2360%) hue-rotate(190deg) brightness(93%) contrast(93%)';
+                } else if (theme.palette.primary.main === '#7C09CE') {
+                  return 'invert(22%) sepia(86%) saturate(7483%) hue-rotate(267deg) brightness(93%) contrast(103%)';
+                }
+              }
+            }
+            // 다크모드 배경 체크 이미지 흰색
+            return 'brightness(0) invert(1)';
+          })(),
+        }
+      : {},
+  };
+});
 
 const EtsCheckBox = React.forwardRef<HTMLDivElement, EtsCheckBoxProps>(
   (

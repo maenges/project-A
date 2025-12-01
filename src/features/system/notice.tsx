@@ -35,7 +35,6 @@ const Notice = () => {
       headerName: '',
       width: 60,
       headerCheckboxSelection: true,
-      hide: !isEditable,
     }),
     EtsColumnPreset.IdPreset({
       field: 'no',
@@ -77,8 +76,8 @@ const Notice = () => {
   const { toast } = useNotify();
   const [rowData, setRowData] = useState<Notices[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [_, setSaveOpen] = useState(false);
-  const [__, setDeleteOpen] = useState(false);
+  // const [_, setSaveOpen] = useState(false);
+  // const [__, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     onSearch();
@@ -105,32 +104,56 @@ const Notice = () => {
       setTotalCount(res.ItemCount ?? 0);
     });
   };
+  // 순차 페이드 대상 버튼 그룹 (편집 모드에서만 표시)
+  // const animatedButtons = (
+  //   <>
+  //     <EtsButton
+  //       type="grey"
+  //       onClick={() => {
+  //         if (gridRef.current) {
+  //           const selectedRows = gridRef.current?.api.getSelectedRows();
+  //           if (selectedRows && selectedRows.length > 0) {
+  //             setDeleteOpen(true);
+  //           }
+  //         }
+  //       }}
+  //     >
+  //       Delete
+  //     </EtsButton>
+  //     <EtsButton
+  //       type="grey"
+  //       onClick={() => {
+  //         if (gridRef.current) {
+  //           gridRef.current.api.stopEditing();
+  //         }
+  //         onSearch();
+  //         setIsEditable(false);
+  //       }}
+  //     >
+  //       Cancel
+  //     </EtsButton>
+  //     <EtsButton
+  //       type="blue"
+  //       onClick={async () => {
+  //         if (gridRef.current) {
+  //           gridRef.current.api.stopEditing();
+  //         }
+  //         setSaveOpen(true);
+  //       }}
+  //     >
+  //       Save
+  //     </EtsButton>
+  //   </>
+  // );
+
   const buttonComponent = (
     <buttonForm.Container>
       <buttonForm.Row>
         {isEditable ? (
           <>
-            <EtsButton
-              type="grey"
-              onClick={() => {
-                if (gridRef.current) {
-                  const selectedRows = gridRef.current?.api.getSelectedRows();
-                  if (selectedRows && selectedRows.length > 0) {
-                    setDeleteOpen(true);
-                  }
-                }
-              }}
-            >
-              Delete
+            <EtsButton type="grey" onClick={() => {}}>
+              삭제
             </EtsButton>
-            {/* <EtsButton
-                type="grey"
-                onClick={() => {
-                  handleAddRow();
-                }}
-              >
-                New
-              </EtsButton> */}
             <EtsButton
               type="grey"
               onClick={() => {
@@ -141,18 +164,10 @@ const Notice = () => {
                 setIsEditable(false);
               }}
             >
-              Cancel
+              취소
             </EtsButton>
-            <EtsButton
-              type="blue"
-              onClick={async () => {
-                if (gridRef.current) {
-                  gridRef.current.api.stopEditing();
-                }
-                setSaveOpen(true);
-              }}
-            >
-              Save
+            <EtsButton type="blue" onClick={async () => {}}>
+              저장
             </EtsButton>
           </>
         ) : (
@@ -163,7 +178,7 @@ const Notice = () => {
                 setIsEditable(true);
               }}
             >
-              Edit
+              편집
             </EtsButton>
           </>
         )}
@@ -177,6 +192,7 @@ const Notice = () => {
       gridRef={gridRef}
       columnDefs={columnDefs}
       buttonComponent={buttonComponent}
+      isRowSelectable={() => isEditable}
       rowData={rowData}
       totalCount={totalCount}
       rowSelection="multiple"

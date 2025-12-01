@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Stack } from '@mui/material';
-import { ColDef, IDatasource, GridReadyEvent } from 'ag-grid-community';
+import { ColDef, IDatasource, GridReadyEvent, IRowNode } from 'ag-grid-community';
 import SearchPanel from './SearchPanel';
-import ButtonPanel from './ButtonPanel';
+import ButtonPanel, { ButtonPanelProps } from './ButtonPanel';
 import { EtsGrid } from '../EtsGrid';
 import styled from 'styled-components';
 import EtsLeftTree from '@/components/EtsCommon/EtsLeftTree';
@@ -18,6 +18,8 @@ export interface PageTemplateProps {
   description?: string;
   searchComponent?: React.ReactNode;
   buttonComponent?: React.ReactNode;
+  /** ButtonPanel 추가 옵션 전달 */
+  buttonPanelProps?: Partial<ButtonPanelProps>;
   tabComponent?: React.ReactNode;
   tree?: boolean;
   columnDefs?: ColDef[];
@@ -43,6 +45,8 @@ export interface PageTemplateProps {
   size?: 'sm' | 'md' | 'lg' | 'sm-two-header' | 'no-search';
   loading?: boolean;
   onGridReady?: (params: GridReadyEvent) => void;
+  /** 행 선택 가능 여부 제어 (체크박스 비활성화에 사용) */
+  isRowSelectable?: (node: IRowNode) => boolean;
 }
 
 const PageTemplate: React.FC<PageTemplateProps> = ({
@@ -50,6 +54,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   // description,
   searchComponent,
   buttonComponent,
+  buttonPanelProps,
   tabComponent,
   columnDefs,
   rowData = [],
@@ -73,6 +78,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   size = 'sm',
   onGridReady,
   tree = false,
+  isRowSelectable,
 }) => {
   // --- size prop에 따라 그리드 높이를 결정하는 로직 ---
   const gridHeight = useMemo(() => {
@@ -253,7 +259,9 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
             }}
           >
             <Typography className="label">Total: {Number(totalCount).toLocaleString()}</Typography>
-            {buttonComponent && <ButtonPanel buttonComponent={buttonComponent} />}
+            {buttonComponent && (
+              <ButtonPanel buttonComponent={buttonComponent} {...buttonPanelProps} />
+            )}
           </Box>
 
           <Box
@@ -275,6 +283,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               onGridReady={onGridReady}
               suppressRowTransform={suppressRowTransform}
               suppressRowClickSelection={suppressRowClickSelection}
+              isRowSelectable={isRowSelectable}
               pinnedBottomRowData={pinnedBottomRowData}
               domLayout="normal" // pinnedBottom row가 항상 표시되도록 normal 사용
               datasource={dataSource}

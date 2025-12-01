@@ -34,16 +34,16 @@ export const agGridStyles = css`
     --ag-even-row-background-color: ${(props) => props.theme.colors.background.paper};
 
     /* 마우스 호버 시 행 색상 */
-    --ag-row-hover-color: #eff6ff; /* 행 호버 배경색 - 연한 파란색 */
+    /* --ag-row-hover-color: #eff6ff; 행 호버 배경색 - 연한 파란색 */
 
     /* 선택된 행 색상 */
 
     /* 셀(Cell) 기본 스타일 */
-    --ag-cell-horizontal-border: solid 1px #e5e7eb; /* 셀 수평 구분선 */
-    --ag-cell-text-color: #374151; /* 셀 텍스트 색상 */
+    /* --ag-cell-horizontal-border: solid 1px #e5e7eb; 셀 수평 구분선 */
+    /* --ag-cell-text-color: #374151; 셀 텍스트 색상 */
 
     /* 포커스된 셀 스타일 */
-    --ag-range-selection-border-style: solid; /* 셀 범위 선택 테두리 스타일 */
+    /* --ag-range-selection-border-style: solid; 셀 범위 선택 테두리 스타일 */
 
     /* 페이지네이션 스타일 */
     --ag-control-panel-background-color: #f8fafc; /* 페이지네이션 패널 배경색 */
@@ -61,6 +61,8 @@ export const agGridStyles = css`
     /* 정렬 아이콘 색상 */
     --ag-icon-color: #6b7280; /* 아이콘 기본 색상 */
   }
+
+  // 그리드 헤더 경계선 표기
   .ag-header-group-cell-with-group,
   .ag-header-cell {
     border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
@@ -81,9 +83,18 @@ export const agGridStyles = css`
     padding: 1.5px 0px !important;
   }
 
+  // 그리드 셀 경계선 표기
   .ag-cell {
-    border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: none !important;
+    border-right: none !important;
+    /* border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important; */
   }
+
+  /* .ag-cell {
+    border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
+  } */
 
   /* 모든 헤더 셀 중앙 정렬 */
   .ag-theme-material .ag-header-cell-label {
@@ -181,13 +192,15 @@ export const agGridStyles = css`
     line-height: 150% !important;
   }
 
-  .ag-column-first {
+  /* .ag-column-first {
+    border-top: 0px !important;
     border-left: 0px !important;
-  }
-  .ag-column-first .ag-header-group-cell-with-group,
+    border-bottom: 0px !important;
+  } */
+  /* .ag-column-first .ag-header-group-cell-with-group,
   .ag-column-last {
-    border-right: 0px !important;
-  }
+    border-right: none !important;
+  } */
 
   /**
    * @read 컬럼 헤더 색상 클래스들 - 즉시 적용
@@ -427,12 +440,12 @@ export const agGridStyles = css`
     box-shadow: none !important;
   } */
 
-  .ag-theme-material .ag-cell.ag-cell-focus:not(.ag-cell-range-selected) {
+  /* .ag-theme-material .ag-cell.ag-cell-focus:not(.ag-cell-range-selected) {
     border: 0 !important;
     border-right: 1px solid var(--color-border-divider-primary, #e5e7eb) !important;
     outline: none !important;
     box-shadow: none !important;
-  }
+  } */
 
   /* 라이트 모드: 행 호버 - primary.light 색상 기반 매우 옅은 배경 (선택 대비, hue 일치) */
   body[data-theme='light'] .ag-theme-material .ag-row-hover {

@@ -352,7 +352,6 @@ export const EtsColumnPreset = {
       headerName: params?.headerName ?? 'No',
       maxWidth: params?.maxWidth ?? 60,
       width: params?.width ?? 60,
-      pinned: params?.pinned ?? 'left',
       ...params,
     };
   },
