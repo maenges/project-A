@@ -27,9 +27,13 @@ import {
 import { Service } from '@/models/common/Service';
 import { callApi, Method } from '@/utils/ApiUtil';
 
+interface StyledButtonProps {
+  $isOpen: boolean;
+}
+
 const RAIL_WIDTH = 72; // 접힘 상태 고정 폭
-const SidebarContainer = styled.div<{ isOpen: boolean }>`
-  width: ${({ isOpen }) => (isOpen ? '280px' : `${RAIL_WIDTH}px`)};
+const SidebarContainer = styled.div<StyledButtonProps>`
+  width: ${({ $isOpen }) => ($isOpen ? '280px' : `${RAIL_WIDTH}px`)};
   height: 100vh;
   background-color: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.text.primary};
@@ -40,7 +44,7 @@ const SidebarContainer = styled.div<{ isOpen: boolean }>`
   left: 0;
   transition: width 0.3s ease-in-out;
   z-index: 1100;
-  padding: 20px 0 20px ${({ isOpen }) => (isOpen ? '12px' : '0')}; /* 접힘 시 좌측 패딩 제거로 아이콘 중앙 정렬 */
+  padding: 20px 0 20px ${({ $isOpen }) => ($isOpen ? '12px' : '0')}; /* 접힘 시 좌측 패딩 제거로 아이콘 중앙 정렬 */
   box-sizing: border-box;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral[30]};
 
@@ -434,7 +438,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   }, [collapsed]);
 
   return (
-    <SidebarContainer isOpen={isOpen}>
+    <SidebarContainer $isOpen={isOpen}>
       {/* 펼침 상태에서만 로고/텍스트 노출 */}
       {!collapsed && (
         <LogoContainer>

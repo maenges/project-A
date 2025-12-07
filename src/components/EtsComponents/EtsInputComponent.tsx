@@ -11,6 +11,7 @@ export interface EtsInputComponentProps {
   onlyNumber?: boolean;
   maxLength?: number;
   required?: boolean;
+  width?: number;
   [key: string]: any;
 }
 
@@ -19,10 +20,11 @@ const EtsInputComponent = ({
   name,
   label = '',
   placeholder = '',
-  sx = { width: 177 },
+  sx,
   onlyNumber = false,
   maxLength,
   required = false,
+  width,
   ...props
 }: EtsInputComponentProps) => (
   <searchForm.SelectField>
@@ -48,7 +50,8 @@ const EtsInputComponent = ({
           }}
           error={!!error}
           helperText={error?.message}
-          {...sx}
+          width={width}
+          sx={sx}
           {...props}
         />
       )}

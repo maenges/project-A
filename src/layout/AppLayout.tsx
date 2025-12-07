@@ -8,6 +8,14 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+interface StyledButtonProps {
+  $isOpen: boolean;
+}
+
+interface ContentWrapperProps {
+  $isSidebarOpen: boolean;
+}
+
 // Styled Components
 const LayoutContainer = styled.div`
   display: flex;
@@ -15,11 +23,11 @@ const LayoutContainer = styled.div`
   background-color: #e0e0e0;
 `;
 
-const ContentWrapper = styled.div<{ isSidebarOpen: boolean }>`
+const ContentWrapper = styled.div<ContentWrapperProps>`
   display: flex;
   flex-direction: column;
   flex: 1;
-  margin-left: ${({ isSidebarOpen }) => (isSidebarOpen ? '280px' : '72px')};
+  margin-left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '280px' : '72px')};
   transition: margin-left 0.3s ease-in-out;
 
   /* @media (max-width: 1200px) {
@@ -27,10 +35,10 @@ const ContentWrapper = styled.div<{ isSidebarOpen: boolean }>`
   } */
 `;
 
-const FloatingToggle = styled.button<{ isOpen: boolean }>`
+const FloatingToggle = styled.button<StyledButtonProps>`
   position: fixed;
   top: 72px; /* 헤더 아래쪽 위치 */
-  left: ${({ isOpen }) => (isOpen ? '268px' : '60px')}; /* 접힘(72px) 기준 위치 */
+  left: ${({ $isOpen }) => ($isOpen ? '268px' : '60px')}; /* 접힘(72px) 기준 위치 */
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -87,11 +95,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <LayoutContainer>
       <Sidebar isOpen={isSidebarOpen} />
-      <FloatingToggle isOpen={isSidebarOpen} onClick={toggleSidebar} aria-label="toggle sidebar">
+      <FloatingToggle $isOpen={isSidebarOpen} onClick={toggleSidebar} aria-label="toggle sidebar">
         {isSidebarOpen ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
       </FloatingToggle>
-      <ContentWrapper isSidebarOpen={isSidebarOpen}>
-        <MainHeader toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+      <ContentWrapper $isSidebarOpen={isSidebarOpen}>
+        <MainHeader toggleSidebar={toggleSidebar} $isSidebarOpen={isSidebarOpen} />
         <MainContent>{children}</MainContent>
       </ContentWrapper>
     </LayoutContainer>

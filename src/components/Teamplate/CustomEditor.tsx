@@ -6,9 +6,11 @@ type Props = {
   value?: string;
   onChange?: (html: string) => void;
   isDarkMode?: boolean;
+  width?: number | string;
+  height?: number;
 };
 
-const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange }) => {
+const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }) => {
   const editorRef = useRef<any>(null);
   const theme = useTheme();
 
@@ -29,7 +31,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange }) => {
       editorUrl="/ckeditor/ckeditor.js"
       initData={value}
       config={{
-        height: 400,
+        height: typeof height === 'number' ? height : 400,
         versionCheck: false,
         toolbar: [
           { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
@@ -53,6 +55,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange }) => {
         ],
         contentsCss: [],
       }}
+      style={{ width: width ?? '100%' }}
       onChange={(evt: any) => {
         const data = evt.editor.getData();
         onChange?.(data);

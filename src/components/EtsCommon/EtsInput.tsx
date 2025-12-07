@@ -1,7 +1,7 @@
 import React from 'react';
 import TextField from '@mui/material/TextField';
 import type { TextFieldProps } from '@mui/material/TextField';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 
 export interface EtsInputProps extends Omit<TextFieldProps, 'readOnly'> {
   width?: string | number;
@@ -16,13 +16,20 @@ const StyledTextField = styled(TextField, {
   theme,
 }) => {
   const bgBase = isReadOnly
-    ? theme.palette.action.disabledBackground
+    ? theme.palette.mode === 'light'
+      ? alpha(theme.palette.primary.main, 0.06)
+      : theme.palette.action.disabledBackground
     : theme.palette.mode === 'light'
       ? '#FFFFFF'
       : theme.palette.background.paper;
-  const textColor = theme.palette.text.primary;
+  const borderForReadonly = isReadOnly
+    ? theme.palette.mode === 'light'
+      ? alpha(theme.palette.primary.main, 0.35)
+      : theme.palette.divider
+    : theme.palette.divider;
+  const textColor = isReadOnly ? theme.palette.text.secondary : theme.palette.text.primary;
   const placeholder = theme.palette.text.secondary;
-  const borderColor = theme.palette.divider;
+  const borderColor = borderForReadonly;
   const focusColor = theme.palette.primary.main;
   return {
     width: customWidth || '200px',
@@ -42,10 +49,10 @@ const StyledTextField = styled(TextField, {
         border: `1px solid ${borderColor}`,
       },
       '&:hover fieldset': {
-        borderColor: focusColor,
+        borderColor: isReadOnly ? borderForReadonly : focusColor,
       },
       '&.Mui-focused fieldset': {
-        borderColor: focusColor,
+        borderColor: isReadOnly ? borderForReadonly : focusColor,
         borderWidth: '1px',
       },
       '&.Mui-error fieldset': {
@@ -103,7 +110,7 @@ const EtsInput = React.forwardRef<HTMLInputElement, EtsInputProps>(
           ...props.InputProps,
         }}
         sx={{
-          width: width || '200px',
+          width: width || '177px',
           position: 'relative',
           ...props.sx,
         }}

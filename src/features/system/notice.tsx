@@ -97,6 +97,10 @@ const Notice = () => {
       setRowData(res.data);
     });
   };
+
+  const handleDeleteRow = () => {
+    gridRef.current?.deleteBySelectedRows();
+  };
   // 순차 페이드 대상 버튼 그룹 (편집 모드에서만 표시)
   // const animatedButtons = (
   //   <>
@@ -153,7 +157,14 @@ const Notice = () => {
       <buttonForm.Row>
         {isEditable ? (
           <>
-            <EtsButton type="grey" onClick={() => {}}>
+            <EtsButton
+              type="grey"
+              onClick={() => {
+                if (gridRef.current) {
+                  handleDeleteRow();
+                }
+              }}
+            >
               삭제
             </EtsButton>
             <EtsButton

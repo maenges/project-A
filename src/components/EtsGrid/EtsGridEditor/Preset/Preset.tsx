@@ -10,6 +10,8 @@ import type {
 } from '../../../EtsCommon/EtsAutoComplete';
 import type { EtsCheckBoxProps } from '../../../EtsCommon/EtsCheckBox';
 import { EtsCheckButton, EtsCheckButtonProps } from '../../../EtsCommon/EtsCheckButton';
+import { EtsCheckButton2 } from '../../../EtsCommon/EtsCheckButton2';
+
 import { EtsFileButtonProps } from '../../../EtsCommon/EtsFileButton';
 import dayjs from 'dayjs';
 
@@ -380,7 +382,7 @@ export const EtsColumnPreset = {
   },
 
   /**
-   * @description 체크 버튼 컬럼 프리셋
+   * @description 체크 버튼 컬럼 프리셋 v1 switch
    * @param params.context.checkButtonProps EtsCheckButton 속성
    */
   CheckButtonPreset: (
@@ -420,6 +422,35 @@ export const EtsColumnPreset = {
         checkButtonProps: params?.context?.checkButtonProps,
       }),
       editable: params?.editable ?? false,
+      ...params,
+    };
+  },
+
+  /**
+   * @description 체크 버튼 컬럼 프리셋 v2 open popup
+   * @param params.context.checkButtonProps EtsCheckButton 속성
+   */
+  CheckButtonPreset2: (
+    params?: Arg<{
+      context?: {
+        label?: string;
+        onClick?: (rendererParams: any) => void;
+        disabled?: (rendererParams: any) => boolean;
+      };
+    }>
+  ): ColDef => {
+    return {
+      cellRenderer: (rendererParams: any) => {
+        const isDisabled = params?.context?.disabled?.(rendererParams) ?? false;
+        return (
+          <EtsCheckButton2
+            label={params?.context?.label}
+            disabled={isDisabled}
+            onClick={() => params?.context?.onClick?.(rendererParams)}
+          />
+        );
+      },
+      editable: false,
       ...params,
     };
   },
@@ -472,12 +503,6 @@ export const EtsColumnPreset = {
 
   SelectionBoxPreset: (params?: Arg): ColDef => {
     return {
-      // cellRenderer: (rendererParams: any) =>
-      //   EtsRenderer.SelectionBoxRenderer({
-      //     ...rendererParams,
-      //   }),
-      // cellEditor: EtsEditor.SelectionBoxEditor,
-      // cellEditorPopup: false,
       headerName: params?.headerName ?? '',
       width: 60,
       maxWidth: 60,

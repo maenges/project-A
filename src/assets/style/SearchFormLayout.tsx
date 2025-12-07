@@ -82,7 +82,8 @@ const FieldLabel = styled(Box)`
 
 const SelectField = styled(Box)`
   ${FieldAreaCss}
-  width: 265px;
+  width: auto;
+  min-width: 177px; /* 기본 폭 */
   height: 36px;
   gap: var(--spacing-16, 16px);
   flex-shrink: 0;

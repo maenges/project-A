@@ -4,7 +4,11 @@ import styled, { useTheme } from 'styled-components';
 import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from '@mui/material';
 
-const HeaderContainer = styled.header<{ isSidebarOpen: boolean }>`
+interface ContentWrapperProps {
+  $isSidebarOpen: boolean;
+}
+
+const HeaderContainer = styled.header<ContentWrapperProps>`
   height: 84px;
   display: flex;
   align-items: center;
@@ -15,7 +19,7 @@ const HeaderContainer = styled.header<{ isSidebarOpen: boolean }>`
   color: ${({ theme }) => theme.colors.text.primary};
   position: fixed;
   top: 0;
-  left: ${({ isSidebarOpen }) => (isSidebarOpen ? '280px' : '0')};
+  left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '280px' : '0')};
   right: 0;
   z-index: 1000;
   transition:
@@ -90,10 +94,10 @@ const CardValue = styled.div`
 
 interface MainHeaderProps {
   toggleSidebar: () => void;
-  isSidebarOpen: boolean;
+  $isSidebarOpen: boolean;
 }
 
-const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
+const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, $isSidebarOpen }) => {
   const [blink, setBlink] = useState(false);
   const theme = useTheme() as any;
 
@@ -108,7 +112,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, isSidebarOpen })
   const blinkingColor = blink ? '#e4c57a' : themedSoft;
 
   return (
-    <HeaderContainer isSidebarOpen={isSidebarOpen}>
+    <HeaderContainer $isSidebarOpen={$isSidebarOpen}>
       <HeaderLeft>
         <MenuButton onClick={toggleSidebar}>
           <MenuIcon />

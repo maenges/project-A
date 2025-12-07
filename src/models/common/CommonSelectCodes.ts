@@ -106,3 +106,9 @@ export const AccountKeyOptions = [
   { value: '045', label: '새마을금고' },
   { value: '071', label: '우체국' },
 ];
+
+export const processStatusOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'PENDING', label: '대기' },
+  { value: 'COMPLETED', label: '완료' },
+];

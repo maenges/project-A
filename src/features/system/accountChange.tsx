@@ -40,7 +40,7 @@ type FormValues = {
 const AccountChange: React.FC = () => {
   const gridRef = useRef<EtsGridRef<AccountRecord>>(null);
   const { toast } = useNotify();
-  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().startOf('month'));
+  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(7, 'day'));
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
   const [rowData, setRowData] = useState<AccountRecord[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
@@ -57,13 +57,13 @@ const AccountChange: React.FC = () => {
       hide: true,
     }),
     EtsColumnPreset.TextPreset({
-      field: '',
+      field: 'user_id',
       headerName: '회원 ID',
       width: 150,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
-      field: '',
+      field: 'user_type',
       headerName: '회원 유형',
       width: 150,
       flex: 1,
@@ -114,9 +114,9 @@ const AccountChange: React.FC = () => {
 
   useActivate(() => {
     // 데이터가 있으면 재조회 실행
-    if (rowData && rowData.length > 0) {
-      handleSubmit(onSearch)();
-    }
+    // if (rowData && rowData.length > 0) {
+    //   handleSubmit(onSearch)();
+    // }
   });
 
   const { control, handleSubmit } = useForm<FormValues>({

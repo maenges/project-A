@@ -53,6 +53,7 @@ const NoticeNewModal = ({ open, onClose }: NoticeNewModalProps) => {
             name="title"
             label="제목"
             placeholder="제목을 입력해주세요."
+            width={250}
           />
         </searchForm.Col>
         <searchForm.Col>
@@ -87,9 +88,6 @@ const NoticeNewModal = ({ open, onClose }: NoticeNewModalProps) => {
   );
   const component = (
     <Fragment>
-      {/* <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          내용
-        </Typography> */}
       <CustomEditor
         value={content}
         onChange={setContent}
