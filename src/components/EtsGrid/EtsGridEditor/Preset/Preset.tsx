@@ -472,12 +472,19 @@ export const EtsColumnPreset = {
 
   SelectionBoxPreset: (params?: Arg): ColDef => {
     return {
+      // cellRenderer: (rendererParams: any) =>
+      //   EtsRenderer.SelectionBoxRenderer({
+      //     ...rendererParams,
+      //   }),
+      // cellEditor: EtsEditor.SelectionBoxEditor,
+      // cellEditorPopup: false,
       headerName: params?.headerName ?? '',
       width: 60,
       maxWidth: 60,
       headerCheckboxSelection: params?.headerCheckboxSelection ?? false,
-      checkboxSelection: true,
-      showDisabledCheckboxes: true,
+      // checkboxSelection: false, // 커스텀 렌더러 사용
+      checkboxSelection: true, // 커스텀 렌더러 사용
+      showDisabledCheckboxes: true, // 행 selectable=false 시 표시 유지 의도면 유지
       editable: false,
       pinned: 'left',
       suppressMovable: false,

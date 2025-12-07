@@ -7,6 +7,46 @@ import { v4 as uuidv4 } from 'uuid';
 import { Service } from '@/models/common/Service';
 import { useLoadingStore } from '@/store/loading';
 
+const TIMESTAMP_FIELDS = ['created', 'updated', 'created_at', 'updated_at'];
+
+export function formatDate(dateString?: string | null): string {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    ' ' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes()) +
+    ':' +
+    pad(date.getSeconds())
+  );
+}
+
+function convertTimestampFields(obj: any) {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  for (const key in obj) {
+    if (TIMESTAMP_FIELDS.includes(key) && typeof obj[key] === 'string') {
+      obj[key] = formatDate(obj[key]);
+    }
+
+    if (typeof obj[key] === 'object') {
+      convertTimestampFields(obj[key]);
+    }
+  }
+  return obj;
+}
+
 export enum Method {
   GET = 'GET',
   POST = 'POST',
@@ -136,6 +176,7 @@ const getInstance = (
   // success / error 공통 처리
   instance.interceptors.response.use(
     (response: any): any => {
+      response.data = convertTimestampFields(response.data);
       const commonResponse: CommonResponse =
         response.status === 204
           ? {

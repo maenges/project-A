@@ -43,6 +43,7 @@
     "ag-grid-community": "^32.2.2",
     "ag-grid-react": "^32.2.2",
     "axios": "^1.6.7",
+    "ckeditor4-react": "^5.2.1",
     "dayjs": "^1.11.13",
     "env-cmd": "^10.1.0",
     "jwt-decode": "^4.0.0",

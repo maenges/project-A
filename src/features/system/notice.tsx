@@ -9,27 +9,25 @@ import { useNotify } from '@hooks/useNotify';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { buttonForm } from '@/assets/style';
+import NoticeNewModal from './noticeNewModal';
 
 type Notices = {
-  id: number;
-  seg: string;
-  sactyp: string;
-  fuelConsQ: string;
-  unit: string;
-  uncertainty: string;
-  fltCnt: number;
-  ltoCo2: number;
-  ltoCh4: number;
-  ltoN2o: number;
-  ltoFactor: number;
-  emissionCo2: number | null;
-  emissionCh4: number | null;
-  emissionN2o: number | null;
+  no: string;
+  notice_key: number;
+  notice_target_type: string;
+  notice_title: string;
+  created: string;
+  notice_active: boolean;
   [key: string]: any;
 };
 
 const Notice = () => {
   const [isEditable, setIsEditable] = useState(false);
+  const gridRef = useRef<EtsGridRef<Notices>>(null);
+  const { toast } = useNotify();
+  const [rowData, setRowData] = useState<Notices[]>([]);
+  const [newModalOpen, setNewModalOpen] = useState(false);
+
   const columnDefs: (ColDef | ColGroupDef)[] = [
     EtsColumnPreset.SelectionBoxPreset({
       headerName: '',
@@ -43,12 +41,12 @@ const Notice = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'notice_key',
-      headerName: 'id',
+      headerName: 'ID',
       hide: true,
     }),
     EtsColumnPreset.TextPreset({
       field: 'notice_target_type',
-      headerName: '공지구분',
+      headerName: '공지대상',
       width: 200,
       flex: 1,
     }),
@@ -72,10 +70,6 @@ const Notice = () => {
     }),
   ];
 
-  const gridRef = useRef<EtsGridRef<Notices>>(null);
-  const { toast } = useNotify();
-  const [rowData, setRowData] = useState<Notices[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   // const [_, setSaveOpen] = useState(false);
   // const [__, setDeleteOpen] = useState(false);
 
@@ -101,7 +95,6 @@ const Notice = () => {
         return toast.error(res.HeaderMsg);
       }
       setRowData(res.data);
-      setTotalCount(res.ItemCount ?? 0);
     });
   };
   // 순차 페이드 대상 버튼 그룹 (편집 모드에서만 표시)
@@ -146,6 +139,15 @@ const Notice = () => {
   //   </>
   // );
 
+  const newModal = newModalOpen && (
+    <NoticeNewModal
+      open={newModalOpen}
+      onClose={() => {
+        setNewModalOpen(false);
+      }}
+    />
+  );
+
   const buttonComponent = (
     <buttonForm.Container>
       <buttonForm.Row>
@@ -174,6 +176,14 @@ const Notice = () => {
           <>
             <EtsButton
               type="grey"
+              onClick={() => {
+                setNewModalOpen(true);
+              }}
+            >
+              공지 등록
+            </EtsButton>
+            <EtsButton
+              type="grey"
               onClick={async () => {
                 setIsEditable(true);
               }}
@@ -187,19 +197,21 @@ const Notice = () => {
   );
 
   return (
-    <PageTemplate
-      title="공지사항"
-      gridRef={gridRef}
-      columnDefs={columnDefs}
-      buttonComponent={buttonComponent}
-      isRowSelectable={() => isEditable}
-      rowData={rowData}
-      totalCount={totalCount}
-      rowSelection="multiple"
-      rowMultiSelectWithClick={true}
-      suppressRowClickSelection={true}
-      size="no-search"
-    />
+    <>
+      {newModal}
+      <PageTemplate
+        title="공지사항"
+        gridRef={gridRef}
+        columnDefs={columnDefs}
+        buttonComponent={buttonComponent}
+        isRowSelectable={() => isEditable}
+        rowData={rowData}
+        rowSelection="multiple"
+        rowMultiSelectWithClick={true}
+        suppressRowClickSelection={true}
+        size="no-search"
+      />
+    </>
   );
 };
 export default Notice;

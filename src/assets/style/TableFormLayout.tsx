@@ -19,7 +19,7 @@ const BodyDiv = styled(Box)`
   gap: 12px;
   align-self: stretch;
   width: 100%;
-  max-width: 1300px;
+  max-width: auto;
   height: 100px;
   flex: 1;
   box-sizing: border-box;

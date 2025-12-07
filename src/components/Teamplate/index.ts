@@ -9,3 +9,6 @@ export type { PageTemplateProps } from './PageTemplate';
 
 export { TableTemplate } from './TableTemplate';
 export type { TableTemplateProps } from './TableTemplate';
+
+export { PageModalTemplate } from './PageModalTemplate';
+export type { PageModalTemplateProps } from './PageModalTemplate';

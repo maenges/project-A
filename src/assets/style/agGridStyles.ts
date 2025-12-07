@@ -303,7 +303,7 @@ export const agGridStyles = css`
   }
 
   .ag-cell-inline-editing {
-    height: 40px !important;
+    height: 39px !important;
     border: none !important;
     box-shadow: none !important;
     background-color: ${(props) => props.theme.colors.background.paper} !important;

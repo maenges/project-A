@@ -217,7 +217,7 @@ const KEtsPage = () => {
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
   const actypeOptions = useCommonOptionsStore((s) => s.acTypeOptions);
   const [rowData, setRowData] = useState<Kets[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [_, setTotalCount] = useState(0);
 
   useActivate(() => {
     // 데이터가 있으면 재조회 실행
@@ -328,7 +328,6 @@ const KEtsPage = () => {
       searchComponent={searchComponent}
       buttonComponent={buttonComponent}
       rowData={rowData}
-      totalCount={totalCount}
     />
   );
 };

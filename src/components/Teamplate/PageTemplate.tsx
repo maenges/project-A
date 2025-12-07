@@ -18,7 +18,6 @@ export interface PageTemplateProps {
   description?: string;
   searchComponent?: React.ReactNode;
   buttonComponent?: React.ReactNode;
-  /** ButtonPanel 추가 옵션 전달 */
   buttonPanelProps?: Partial<ButtonPanelProps>;
   tabComponent?: React.ReactNode;
   tree?: boolean;
@@ -65,7 +64,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   suppressRowTransform = true,
   showPinnedBottom,
   // subSelect,
-  totalCount,
+  // totalCount,
   dataSource,
   cacheBlockSize,
   cacheOverflowSize,
@@ -258,7 +257,10 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               flexShrink: 0,
             }}
           >
-            <Typography className="label">Total: {Number(totalCount).toLocaleString()}</Typography>
+            <Typography className="label">
+              {/* 데이터 수 : {Number(totalCount).toLocaleString()} */}
+              {`데이터 수 : ${rowData.length}건`}
+            </Typography>
             {buttonComponent && (
               <ButtonPanel buttonComponent={buttonComponent} {...buttonPanelProps} />
             )}

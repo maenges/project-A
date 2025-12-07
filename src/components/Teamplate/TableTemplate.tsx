@@ -2,8 +2,9 @@ import React from 'react';
 import { Dialog, DialogTitle, IconButton, Typography, Container, Box, Stack } from '@mui/material';
 import { tableForm } from '@/assets/style';
 import closeIcon from '@/assets/images/ic-close.svg';
-import chevronRight from '@/assets/images/chevron-right.svg';
-import { useLocation } from 'react-router-dom';
+import { alpha, useTheme } from '@mui/material/styles';
+// import chevronRight from '@/assets/images/chevron-right.svg';
+// import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import SearchPanel from './SearchPanel';
 
@@ -13,12 +14,12 @@ const HeaderArea = styled(Stack)`
   align-items: end;
 `;
 
-const NavigationItem = styled(Typography)`
-  color: var(--color-brand-darkblue-100, #051766);
-  font-weight: 700;
-  font-size: 12px !important;
-  line-height: 24px;
-`;
+// const NavigationItem = styled(Typography)`
+//   color: var(--color-brand-darkblue-100, #051766);
+//   font-weight: 700;
+//   font-size: 12px !important;
+//   line-height: 24px;
+// `;
 
 export interface TableTemplateProps {
   open?: boolean;
@@ -36,61 +37,61 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
   open = true,
   onClose,
   title,
-  subTitle,
   component,
   bodySize,
   isModal = true,
   searchComponent,
   buttonComponent,
 }) => {
-  const { pathname } = useLocation();
+  // const { pathname } = useLocation();
+  const theme = useTheme();
 
   const handleClose = (_event: {}) => {
     onClose?.();
   };
 
   // 메뉴에서 현재 경로에 맞는 타이틀 찾기
-  const getMenuTitle = (currentPath: string) => {
-    try {
-      const userMenus = JSON.parse(sessionStorage.getItem('userMenus') || '[]');
-      const menu = userMenus.find((menu: any) => menu.menuPath === currentPath);
-      return menu?.menuName || null;
-    } catch {
-      return null;
-    }
-  };
+  // const getMenuTitle = (currentPath: string) => {
+  //   try {
+  //     const userMenus = JSON.parse(sessionStorage.getItem('userMenus') || '[]');
+  //     const menu = userMenus.find((menu: any) => menu.menuPath === currentPath);
+  //     return menu?.menuName || null;
+  //   } catch {
+  //     return null;
+  //   }
+  // };
 
   // pathname과 메뉴 정보를 기반으로 네비게이션 생성
-  const createNavigation = () => {
-    const pathSegments = pathname.split('/').filter((segment) => segment.length > 0);
-    const navigationItems = ['Home'];
+  // const createNavigation = () => {
+  //   const pathSegments = pathname.split('/').filter((segment) => segment.length > 0);
+  //   const navigationItems = ['Home'];
 
-    pathSegments.forEach((segment, index) => {
-      const currentPath = '/' + pathSegments.slice(0, index + 1).join('/');
+  //   pathSegments.forEach((segment, index) => {
+  //     const currentPath = '/' + pathSegments.slice(0, index + 1).join('/');
 
-      if (index === pathSegments.length - 1) {
-        const menuTitle = getMenuTitle(currentPath);
-        if (menuTitle) {
-          navigationItems.push(menuTitle);
-          return;
-        } else if (title && typeof title === 'string') {
-          navigationItems.push(title);
-          return;
-        }
-      }
+  //     if (index === pathSegments.length - 1) {
+  //       const menuTitle = getMenuTitle(currentPath);
+  //       if (menuTitle) {
+  //         navigationItems.push(menuTitle);
+  //         return;
+  //       } else if (title && typeof title === 'string') {
+  //         navigationItems.push(title);
+  //         return;
+  //       }
+  //     }
 
-      let formattedSegment = segment
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, (l) => l.toUpperCase())
-        .replace(/\B\w+/g, (l) => l.toLowerCase());
+  //     let formattedSegment = segment
+  //       .replace(/-/g, ' ')
+  //       .replace(/\b\w/g, (l) => l.toUpperCase())
+  //       .replace(/\B\w+/g, (l) => l.toLowerCase());
 
-      formattedSegment = formattedSegment.replace(/\b\w{1,2}\b/g, (word) => word.toUpperCase());
+  //     formattedSegment = formattedSegment.replace(/\b\w{1,2}\b/g, (word) => word.toUpperCase());
 
-      navigationItems.push(formattedSegment);
-    });
+  //     navigationItems.push(formattedSegment);
+  //   });
 
-    return navigationItems;
-  };
+  //   return navigationItems;
+  // };
 
   // 모달 모드
   if (isModal) {
@@ -105,9 +106,9 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
           },
-          '& .MuiDialog-paper': {
+          '& .MuiDialog-paper': (theme) => ({
             display: 'flex',
-            width: '1300px',
+            width: '860px',
             height: bodySize,
             maxWidth: 'calc(100vw - 32px)',
             maxHeight: '880px',
@@ -116,7 +117,7 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
             flexDirection: 'column',
             alignItems: 'flex-start',
             borderRadius: '16px',
-            background: 'var(--color-background-base-white, #FFF)',
+            background: theme.palette.background.paper,
             boxShadow: '0 0 20px 0 rgba(0, 0, 0, 0.15), 0 0 20px 0 rgba(0, 0, 0, 0.15)',
             overflow: 'hidden',
             '@media (max-width: 1340px)': {
@@ -129,11 +130,11 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
               height: 'auto',
               maxHeight: 'calc(100vh - 32px)',
             },
-          },
+          }),
         }}
       >
         <DialogTitle
-          sx={{
+          sx={(theme) => ({
             display: 'flex',
             padding: 'var(--spacing-16, 16px) 40px',
             height: '68px',
@@ -141,7 +142,10 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
             alignItems: 'center',
             alignSelf: 'stretch',
             borderRadius: '16px 16px 0 0',
-            background: 'var(--color-background-base-white, #FFF)',
+            background:
+              theme.palette.mode === 'dark'
+                ? alpha(theme.palette.primary.dark, 0.1)
+                : alpha(theme.palette.primary.main, 0.1),
             '@media (max-width: 1340px)': {
               padding: 'var(--spacing-16, 16px) 20px',
             },
@@ -150,14 +154,32 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
               height: 'auto',
               minHeight: '68px',
             },
-          }}
+          })}
         >
           <tableForm.HeaderContent>
-            <Typography className="label-modal-title-lg">{title}</Typography>
-            {subTitle && <Typography className="label-modal-title-sm">{subTitle}</Typography>}
+            <Typography
+              // className="label-modal-title-lg"
+              sx={(theme) => ({
+                color:
+                  theme.palette.mode === 'dark'
+                    ? theme.palette.common.white
+                    : theme.palette.common.black,
+              })}
+            >
+              {title}
+            </Typography>
+            {/* {subTitle && <Typography className="label-modal-title-sm">{subTitle}</Typography>} */}
           </tableForm.HeaderContent>
           <IconButton onClick={onClose} sx={{ padding: 0, width: 28, height: 28 }}>
-            <img src={closeIcon} alt="Close" style={{ width: 28, height: 28 }} />
+            <img
+              src={closeIcon}
+              alt="Close"
+              style={{
+                filter: theme.palette.mode === 'dark' ? 'brightness(0) invert(1)' : 'brightness(0)',
+                width: 28,
+                height: 28,
+              }}
+            />
           </IconButton>
         </DialogTitle>
         <tableForm.BodyDiv>{component}</tableForm.BodyDiv>
@@ -166,17 +188,13 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
   }
 
   // 페이지 모드
-  const navigationItems = createNavigation();
+  // const navigationItems = createNavigation();
 
   return (
     <Container maxWidth={false} disableGutters sx={{ width: '100%', mx: 0 }}>
       <HeaderArea direction={'row'}>
-        {title && (
-          <Typography className="label-lg" component="h1" sx={{ mt: 3 }}>
-            {title}
-          </Typography>
-        )}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {title && <Typography className="label-lg">{title}</Typography>}
+        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {navigationItems.map((item, index) => (
             <React.Fragment key={index}>
               <NavigationItem
@@ -191,7 +209,7 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
               )}
             </React.Fragment>
           ))}
-        </Box>
+        </Box> */}
       </HeaderArea>
 
       {searchComponent && (

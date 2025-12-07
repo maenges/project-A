@@ -63,3 +63,46 @@ export const UNIT = [
   { label: 'USG', value: 'USG' },
   { label: 'LT', value: 'LT' },
 ];
+
+export const PartnerOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'PARTNER', label: '파트너' },
+  { value: 'CUSTOMER', label: '고객' },
+];
+
+export const MemberTypeOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'SH', label: '부본사' },
+  { value: 'BR', label: '지사' },
+  { value: 'DM', label: '총판' },
+  { value: 'ST', label: '매장' },
+  { value: 'CU', label: '고객' },
+];
+
+export const AccountKeyOptions = [
+  { value: 'all', label: '전체' },
+  { value: '004', label: '국민은행' },
+  { value: '088', label: '신한은행' },
+  { value: '020', label: '우리은행' },
+  { value: '081', label: '하나은행' },
+  { value: '003', label: '기업은행(IBK)' },
+  { value: '011', label: '농협은행(NH)' },
+  { value: '023', label: 'SC제일은행' },
+  { value: '027', label: '한국씨티은행' },
+
+  { value: '031', label: '대구은행' },
+  { value: '032', label: '부산은행' },
+  { value: '034', label: '광주은행' },
+  { value: '035', label: '제주은행' },
+  { value: '037', label: '전북은행' },
+  { value: '039', label: '경남은행' },
+
+  { value: '089', label: '케이뱅크' },
+  { value: '090', label: '카카오뱅크' },
+  { value: '092', label: '토스뱅크' },
+
+  { value: '007', label: '수협은행' },
+  { value: '048', label: '신협' },
+  { value: '045', label: '새마을금고' },
+  { value: '071', label: '우체국' },
+];

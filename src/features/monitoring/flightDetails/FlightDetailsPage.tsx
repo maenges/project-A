@@ -187,39 +187,39 @@ const FlightDetailsPage = () => {
   /**
    * @description 모달 상세 데이터를 가져오는 함수
    */
-  const fetchDetailData = async (rowData: FlightDetailModalData) => {
-    try {
-      const res = await callApi({
-        service: Service.POSTMAN,
-        url: `/api/v1/flight/${rowData.fltId}`,
-        method: Method.GET,
-      });
+  // const fetchDetailData = async (rowData: FlightDetailModalData) => {
+  //   try {
+  //     const res = await callApi({
+  //       service: Service.POSTMAN,
+  //       url: `/api/v1/flight/${rowData.fltId}`,
+  //       method: Method.GET,
+  //     });
 
-      if (res.successOrNot === 'Y') {
-        return res.data;
-      }
-    } catch {
-      toast.error('상세 데이터 조회에 실패했습니다.');
-    }
-  };
+  //     if (res.successOrNot === 'Y') {
+  //       return res.data;
+  //     }
+  //   } catch {
+  //     toast.error('상세 데이터 조회에 실패했습니다.');
+  //   }
+  // };
 
   /**
    * @description 그리드 셀 클릭 핸들러
    */
-  const onCellClicked = async (params: any) => {
-    const rowData = params.data as FlightDetailData;
-    const rowModalData = params.data as FlightDetailModalData;
-    if (rowData) {
-      setSelectedRowData(rowData);
+  // const onCellClicked = async (params: any) => {
+  // const rowData = params.data as FlightDetailData;
+  // const rowModalData = params.data as FlightDetailModalData;
+  // if (rowData) {
+  //   setSelectedRowData(rowData);
 
-      // 상세 데이터 가져오기
-      const fetchedDetailData = await fetchDetailData(rowModalData);
-      setDetailData(fetchedDetailData); // 상세 데이터 상태 업데이트
+  //   // 상세 데이터 가져오기
+  //   const fetchedDetailData = await fetchDetailData(rowModalData);
+  //   setDetailData(fetchedDetailData); // 상세 데이터 상태 업데이트
 
-      // 모달 열기
-      setDetailOpen(true);
-    }
-  };
+  //   // 모달 열기
+  // setDetailOpen(true);
+  // }
+  // };
 
   const columnDefs: ColDef[] = [
     {
@@ -417,6 +417,7 @@ const FlightDetailsPage = () => {
           <EtsButton
             type="blue"
             onClick={() => {
+              setDetailOpen(true);
               handleSubmit(onSubmit, onInvalid)(); // 여기 () 추가
             }}
           >
@@ -441,7 +442,7 @@ const FlightDetailsPage = () => {
           filter: true,
           resizable: true,
         }}
-        onCellClicked={onCellClicked}
+        // onCellClicked={onCellClicked}
         size="md"
       />
       {detailModal}

@@ -19,6 +19,15 @@ const Row = styled(Box)`
   flex-wrap: wrap;
   gap: 16px 0;
 `;
+
+const Col = styled(Box)`
+  display: flex;
+  flex: 0 0 50%;
+  max-width: 50%;
+  box-sizing: border-box;
+  padding-right: 16px;
+`;
+
 const FieldAreaCss = css`
   display: flex;
   align-items: center;
@@ -116,6 +125,7 @@ const Label = styled(Typography)`
 export const searchForm = {
   Container,
   Row,
+  Col,
   DateField,
   DateRangeField,
   DatePickerWrapper,

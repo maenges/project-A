@@ -26,7 +26,7 @@ const EtsDatePickerComponent = ({
   setEndDate,
   startName = 'startDate',
   endName = 'endDate',
-  label = 'Period',
+  label = '조회 기간',
   type = 'default',
   format = 'YYYY.MM.DD',
   views = ['year', 'month', 'day'],
@@ -57,13 +57,13 @@ const EtsDatePickerComponent = ({
                         return '유효한 날짜를 입력하세요.';
                       }
 
-                      const date = dayjs(value, 'YYYYMMDD');
-                      const minDate = dayjs().subtract(1, 'year').startOf('day');
-                      const maxDate = dayjs().add(1, 'year').endOf('day');
+                      // const date = dayjs(value, 'YYYYMMDD');
+                      // const minDate = dayjs().subtract(1, 'year').startOf('day');
+                      // const maxDate = dayjs().add(1, 'year').endOf('day');
 
-                      if (date.isBefore(minDate) || date.isAfter(maxDate)) {
-                        return '유효한 날짜를 입력하세요.';
-                      }
+                      // if (date.isBefore(minDate) || date.isAfter(maxDate)) {
+                      //   return '유효한 날짜를 입력하세요.';
+                      // }
 
                       return true;
                     },
