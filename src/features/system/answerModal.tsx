@@ -31,15 +31,23 @@ type FormValues = {
 const AnswerModal = ({ open, onClose, data }: AnswerModalProps) => {
   const theme = useTheme();
   const [content, setContent] = useState('');
-  const macroOptions = useMemo(
-    () =>
-      (data?.macroList || []).map((m: any) => ({
-        label: m?.label ?? m?.macro_title ?? String(m),
-        value: m?.value ?? m?.macro_key ?? String(m),
-        content: m?.macro_content ?? '',
-      })),
-    [data]
-  );
+  // const macroOptions = useMemo(
+  //   () =>
+  //     (data?.macroList || []).map((m: any) => ({
+  //       label: m?.label ?? m?.macro_title ?? String(m),
+  //       value: m?.value ?? m?.macro_key ?? String(m),
+  //       content: m?.macro_content ?? '',
+  //     })),
+  //   [data]
+  // );
+  const macroOptions = useMemo(() => {
+    const base = (data?.macroList || []).map((m: any) => ({
+      label: m?.label ?? m?.macro_title ?? String(m),
+      value: m?.value ?? m?.macro_key ?? String(m),
+      content: m?.macro_content ?? '',
+    }));
+    return [{ value: 'CUSTOM', label: '직접 입력', content: '' }, ...base];
+  }, [data]);
   const { control, reset } = useForm<FormValues>({
     defaultValues: {
       user_id: '',
@@ -64,7 +72,7 @@ const AnswerModal = ({ open, onClose, data }: AnswerModalProps) => {
       macro_title: (macroOptions[0]?.value as string) ?? '',
     }));
     const initialMacroContent = macroOptions[0]?.content ?? '';
-    setContent(initialMacroContent || data.content || '');
+    setContent(initialMacroContent || '');
   }, [data]);
 
   useEffect(() => {

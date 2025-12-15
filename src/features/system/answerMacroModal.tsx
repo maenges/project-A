@@ -1,34 +1,38 @@
-import { useState, useRef, useEffect } from 'react';
-import { ColDef, ColGroupDef } from 'ag-grid-community';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
-import { PageTemplate } from '@/components/Teamplate';
+import { ColDef, IRowNode } from 'ag-grid-community';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
-// import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
-
-import { EtsButton } from '@/components/EtsCommon';
 import { buttonForm } from '@/assets/style';
-import MessageSendModal from './messageSendModal';
+import { EtsButton } from '@/components/EtsCommon';
+import { PageModalTemplate } from '@/components/Teamplate';
+import dayjs from 'dayjs';
 
-type Messages = {
+export type AnswerMacroModalProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+type Macro = {
   no: string;
-  notice_key: number;
-  notice_target_type: string;
-  notice_title: string;
+  macro_key: string;
+  macro_type: string;
+  macro_title: string;
+  macro_content: string;
+  macro_active: boolean;
   created: string;
-  notice_active: boolean;
   [key: string]: any;
 };
 
-const Message = () => {
+const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
   const [isEditable, setIsEditable] = useState(false);
-  const gridRef = useRef<EtsGridRef<Messages>>(null);
+  const gridRef = useRef<EtsGridRef<Macro>>(null);
+  const [_, setNewRowNodes] = useState<IRowNode<Macro>[]>([]);
+  const [rowData, setRowData] = useState<any[]>([]);
   const { toast } = useNotify();
-  const [rowData, setRowData] = useState<Messages[]>([]);
-  const [sendModalOpen, setSendModalOpen] = useState(false);
 
-  const columnDefs: (ColDef | ColGroupDef)[] = [
+  const columnDefs: ColDef[] = [
     EtsColumnPreset.SelectionBoxPreset({
       headerName: '',
       width: 60,
@@ -40,67 +44,46 @@ const Message = () => {
       width: 60,
     }),
     EtsColumnPreset.TextPreset({
-      field: 'notice_key',
-      headerName: 'ID',
+      field: 'macro_key',
+      headerName: 'id',
       hide: true,
     }),
-    // EtsColumnPreset.TextPreset({
-    //   field: 'notice_target_type',
-    //   headerName: '공지대상',
-    //   width: 200,
-    //   flex: 1,
-    // }),
     EtsColumnPreset.TextPreset({
-      field: 'notice_title',
+      field: 'macro_title',
       headerName: '제목',
       width: 200,
+      editable: isEditable,
       flex: 1,
     }),
-
     EtsColumnPreset.TextPreset({
-      field: 'notice_content',
+      field: 'macro_content',
       headerName: '내용',
       width: 200,
+      editable: isEditable,
       flex: 1,
     }),
-
-    EtsColumnPreset.TextPreset({
-      field: 'notice_taget_id',
-      headerName: '수신자',
-      width: 200,
-    }),
-
-    EtsColumnPreset.TextPreset({
-      field: 'notice_receive',
-      headerName: '수신여부',
-      width: 200,
-    }),
-
     EtsColumnPreset.TextPreset({
       field: 'created',
       headerName: '등록일시',
       width: 200,
+      flex: 1,
+    }),
+    EtsColumnPreset.CheckBoxPreset({
+      field: 'macro_active',
+      headerName: '보이기',
+      width: 100,
+      editable: isEditable,
     }),
   ];
-
-  // const [_, setSaveOpen] = useState(false);
-  // const [__, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     onSearch();
   }, []);
 
-  // useActivate(() => {
-  //   // 데이터가 있으면 재조회 실행
-  //   if (rowData && rowData.length > 0) {
-  //     onSearch();
-  //   }
-  // });
-
   const onSearch = () => {
     callApi({
       service: Service.POSTMAN,
-      url: '/api/message',
+      url: '/api/macro',
       method: Method.GET,
       params: {},
     }).then((res) => {
@@ -111,24 +94,40 @@ const Message = () => {
     });
   };
 
+  const handleAddRow = () => {
+    const lastRowIndex = gridRef.current?.api.getDisplayedRowCount() ?? 0;
+    gridRef.current?.addRow({
+      macro_type: 'MACRO',
+      macro_title: '',
+      macro_content: '',
+      macro_active: false,
+      created: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      isNew: true,
+    });
+
+    const newNode = gridRef.current?.api.getDisplayedRowAtIndex(lastRowIndex);
+    if (newNode) {
+      setNewRowNodes((prevNodes) => [...prevNodes, newNode]);
+    }
+  };
+
   const handleDeleteRow = () => {
     gridRef.current?.deleteBySelectedRows();
   };
-
-  const sendModal = sendModalOpen && (
-    <MessageSendModal
-      open={sendModalOpen}
-      onClose={() => {
-        setSendModalOpen(false);
-      }}
-    />
-  );
 
   const buttonComponent = (
     <buttonForm.Container>
       <buttonForm.Row>
         {isEditable ? (
           <>
+            <EtsButton
+              type="grey"
+              onClick={() => {
+                handleAddRow();
+              }}
+            >
+              추가
+            </EtsButton>
             <EtsButton
               type="grey"
               onClick={() => {
@@ -159,14 +158,6 @@ const Message = () => {
           <>
             <EtsButton
               type="grey"
-              onClick={() => {
-                setSendModalOpen(true);
-              }}
-            >
-              메세지 보내기
-            </EtsButton>
-            <EtsButton
-              type="grey"
               onClick={async () => {
                 setIsEditable(true);
               }}
@@ -178,23 +169,23 @@ const Message = () => {
       </buttonForm.Row>
     </buttonForm.Container>
   );
-
   return (
-    <>
-      {sendModal}
-      <PageTemplate
-        title="메세지"
+    <Fragment>
+      <PageModalTemplate
+        open={open}
+        onClose={onClose || (() => {})}
         gridRef={gridRef}
         columnDefs={columnDefs}
-        buttonComponent={buttonComponent}
-        isRowSelectable={() => isEditable}
         rowData={rowData}
+        isRowSelectable={() => isEditable}
         rowSelection="multiple"
-        rowMultiSelectWithClick={true}
-        suppressRowClickSelection={true}
-        size="no-search"
+        rowMultiSelectWithClick
+        suppressRowClickSelection
+        buttonComponent={buttonComponent}
+        title="답변 등록"
+        width={1000}
       />
-    </>
+    </Fragment>
   );
 };
-export default Message;
+export default AnswerMacroModal;

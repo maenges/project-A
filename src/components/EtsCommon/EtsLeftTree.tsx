@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, List, ListItemButton, ListItemText, Collapse, TextField } from '@mui/material';
+import {
+  Box,
+  List,
+  ListItemButton,
+  ListItemText,
+  Collapse,
+  TextField,
+  Checkbox,
+} from '@mui/material';
 // 조직 트리 API 및 서비스 상수, 알림 훅 임포트
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
@@ -24,6 +32,17 @@ export interface EtsLeftTreeProps {
   sx?: any;
   // 선택 이벤트 콜백(선택된 id)
   onSelect?: (id: string) => void;
+
+  // 체크박스 사용 여부
+  checkable?: boolean;
+  // 컨트롤드 체크 상태
+  checkedIds?: string[];
+  // 언컨트롤드 초기 체크 상태
+  defaultCheckedIds?: string[];
+  // 전체 체크 목록 변경
+  onCheckedIdsChange?: (checkedIds: string[]) => void;
+  // 단건 체크 변경
+  onCheckChange?: (id: string, checked: boolean) => void;
 }
 
 const TreeNode: React.FC<{
@@ -31,7 +50,10 @@ const TreeNode: React.FC<{
   level: number;
   selectedId?: string;
   onSelect?: (id: string) => void;
-}> = ({ node, level, selectedId, onSelect }) => {
+  checkable?: boolean;
+  isChecked?: (id: string) => boolean;
+  onToggleCheck?: (id: string) => void;
+}> = ({ node, level, selectedId, onSelect, checkable, isChecked, onToggleCheck }) => {
   const [open, setOpen] = React.useState<boolean>(true);
   const hasChildren = !!node.children?.length;
   const isSelected = selectedId === node.id;
@@ -114,6 +136,39 @@ const TreeNode: React.FC<{
             )
           ) : null}
         </Box>
+
+        {/* Checkbox (between expand icon and level icon) */}
+        {checkable ? (
+          <Box
+            component="span"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              flexShrink: 0,
+              color: 'inherit',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              size="small"
+              checked={isChecked?.(node.id) ?? false}
+              onChange={() => onToggleCheck?.(node.id)}
+              sx={(theme) => ({
+                padding: 0,
+                color: theme.palette.text.primary,
+                '&.Mui-checked': {
+                  color:
+                    theme.palette.mode === 'dark'
+                      ? `${theme.palette.primary.dark}`
+                      : `${theme.palette.primary.light}`,
+                },
+              })}
+            />
+          </Box>
+        ) : null}
+
         {/* Role icon per organization level */}
         <Box
           component="span"
@@ -151,6 +206,9 @@ const TreeNode: React.FC<{
                 level={level + 1}
                 selectedId={selectedId}
                 onSelect={onSelect}
+                checkable={checkable}
+                isChecked={isChecked}
+                onToggleCheck={onToggleCheck}
               />
             ))}
           </List>
@@ -187,11 +245,70 @@ function buildTree(flat: any[]): EtsTreeNode[] {
   return roots;
 }
 
-const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({ onSelect }) => {
+const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
+  width,
+  sx,
+  onSelect,
+  checkable = false,
+  checkedIds,
+  defaultCheckedIds,
+  onCheckedIdsChange,
+  onCheckChange,
+}) => {
   const { toast } = useNotify();
   const [treeItems, setTreeItems] = useState<EtsTreeNode[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [orgQuery, setOrgQuery] = useState<string>('');
+
+  const [internalCheckedIds, setInternalCheckedIds] = useState<Set<string>>(
+    () => new Set(defaultCheckedIds ?? [])
+  );
+
+  const nodeIndex = useMemo(() => {
+    const map = new Map<string, EtsTreeNode>();
+    const walk = (n: EtsTreeNode) => {
+      map.set(n.id, n);
+      n.children?.forEach(walk);
+    };
+    treeItems.forEach(walk);
+    return map;
+  }, [treeItems]);
+
+  const isChecked = (id: string) => {
+    return checkedIds ? checkedIds.includes(id) : internalCheckedIds.has(id);
+  };
+
+  const toggleCheck = (id: string) => {
+    const nextChecked = !isChecked(id);
+
+    const collectDescendantIds = (node: EtsTreeNode, acc: string[]) => {
+      acc.push(node.id);
+      node.children?.forEach((child) => collectDescendantIds(child, acc));
+    };
+
+    const idsToToggle: string[] = [];
+    const targetNode = nodeIndex.get(id);
+    if (targetNode) {
+      collectDescendantIds(targetNode, idsToToggle);
+    } else {
+      idsToToggle.push(id);
+    }
+
+    const base = checkedIds ? new Set(checkedIds) : new Set(internalCheckedIds);
+    if (nextChecked) {
+      idsToToggle.forEach((x) => base.add(x));
+    } else {
+      idsToToggle.forEach((x) => base.delete(x));
+    }
+    const nextIds = Array.from(base);
+
+    if (!checkedIds) {
+      setInternalCheckedIds(base);
+    }
+
+    onCheckChange?.(id, nextChecked);
+    onCheckedIdsChange?.(nextIds);
+  };
 
   // 트리 데이터 fetch
   useEffect(() => {
@@ -266,17 +383,20 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({ onSelect }) => {
 
   return (
     <Box
-      sx={{
-        mt: 3,
-        width: 240,
-        minWidth: 240,
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-        maxHeight: 'calc(100vh - 220px)',
-        overflow: 'hidden',
-      }}
+      sx={[
+        {
+          mt: 3,
+          width: width ?? 240,
+          minWidth: width ?? 240,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          maxHeight: 'calc(100vh - 220px)',
+          overflow: 'hidden',
+        },
+        sx,
+      ]}
     >
       <TextField
         size="small"
@@ -296,7 +416,12 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({ onSelect }) => {
             backgroundColor:
               theme.palette.mode === 'light' ? '#FFFFFF' : theme.palette.background.paper,
             '& fieldset': {
-              border: `1px solid ${theme.palette.divider}`,
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor:
+                theme.palette.mode === 'light'
+                  ? theme.palette.divider
+                  : alpha(theme.palette.common.white, 0.24),
             },
             '&:hover fieldset': {
               borderColor: theme.palette.primary.main,
@@ -321,6 +446,9 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({ onSelect }) => {
               level={0}
               selectedId={selectedOrgId}
               onSelect={handleTreeSelect}
+              checkable={checkable}
+              isChecked={isChecked}
+              onToggleCheck={toggleCheck}
             />
           ))}
         </List>

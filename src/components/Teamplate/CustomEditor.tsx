@@ -33,6 +33,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }
       config={{
         height: typeof height === 'number' ? height : 400,
         versionCheck: false,
+        removePlugins: 'exportpdf,cloudservices',
         toolbar: [
           { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
           { name: 'colors', items: ['TextColor', 'BGColor'] },

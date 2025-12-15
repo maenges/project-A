@@ -59,7 +59,6 @@ import PayloadCleansingPage from './../features/management/payloadCleansing/Payl
 
 import {
   SystemNoticePage,
-  SystemAccountPage,
   SystemAccountChangePage,
   SystemLoginRecordPage,
   SystemAnswerPage,
@@ -461,14 +460,6 @@ function App() {
                           element={
                             <PrivateRoute>
                               <SystemNoticePage />
-                            </PrivateRoute>
-                          }
-                        />
-                        <Route
-                          path="/system/account"
-                          element={
-                            <PrivateRoute>
-                              <SystemAccountPage />
                             </PrivateRoute>
                           }
                         />

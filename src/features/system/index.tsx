@@ -1,5 +1,4 @@
 export { default as SystemNoticePage } from './notice';
-export { default as SystemAccountPage } from './account';
 export { default as SystemAccountChangePage } from './accountChange';
 export { default as SystemLoginRecordPage } from './loginRecord';
 export { default as SystemAnswerPage } from './answer';

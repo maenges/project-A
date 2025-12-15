@@ -14,6 +14,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 import { useActivate } from 'react-activation';
 import AnswerModal from './answerModal';
+import AnswerMacroModal from './answerMacroModal';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { EtsSelectComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
@@ -45,6 +46,7 @@ const Answer: React.FC = () => {
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
   const [rowData, setRowData] = useState<AnswerProps[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [macroModalOpen, setMacroModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [modalData, setModalData] = useState<any | null>(null);
 
@@ -122,7 +124,7 @@ const Answer: React.FC = () => {
           const row = p?.data;
           if (!row) return;
           setSelectedRow(row);
-
+          console.log(row);
           callApi({
             service: Service.POSTMAN,
             url: '/api/macro/reply',
@@ -133,14 +135,11 @@ const Answer: React.FC = () => {
               toast.error(res.HeaderMsg);
               return;
             }
-            if (res.successOrNot !== 'Y') {
-              toast.error(res.HeaderMsg);
-              return;
-            }
             setModalData(res.data);
             setModalOpen(true);
           });
         },
+        // 처리 상태 완료시 disable 처리
         disabled: (p: any) =>
           p?.data?.notice_process ===
           processStatusOptions.find((opt) => opt.value === 'COMPLETED')?.label,
@@ -204,7 +203,15 @@ const Answer: React.FC = () => {
     });
   };
 
-  const newModal = modalOpen && (
+  const macroModal = macroModalOpen && (
+    <AnswerMacroModal
+      open={macroModalOpen}
+      onClose={() => {
+        setMacroModalOpen(false);
+      }}
+    />
+  );
+  const modal = modalOpen && (
     <AnswerModal
       open={modalOpen}
       onClose={() => {
@@ -289,7 +296,12 @@ const Answer: React.FC = () => {
           </>
         ) : (
           <>
-            <EtsButton type="grey" onClick={() => {}}>
+            <EtsButton
+              type="grey"
+              onClick={() => {
+                setMacroModalOpen(true);
+              }}
+            >
               매크로 관리
             </EtsButton>
             <EtsButton
@@ -308,7 +320,8 @@ const Answer: React.FC = () => {
 
   return (
     <>
-      {newModal}
+      {macroModal}
+      {modal}
       <PageTemplate
         title="1:1 문의"
         gridRef={gridRef}

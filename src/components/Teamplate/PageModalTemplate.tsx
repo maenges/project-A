@@ -1,19 +1,22 @@
-import React, { useEffect } from 'react';
-import { Dialog, DialogTitle, IconButton, Typography, Container, Box, Stack } from '@mui/material';
+import React, { useEffect, useMemo } from 'react';
+import { Dialog, DialogTitle, IconButton, Typography, Box } from '@mui/material';
 import { tableForm } from '@/assets/style';
 import closeIcon from '@/assets/images/ic-close.svg';
 import { alpha, useTheme } from '@mui/material/styles';
 // import chevronRight from '@/assets/images/chevron-right.svg';
 // import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+// import styled from 'styled-components';
 import SearchPanel from './SearchPanel';
 import ButtonPanel, { ButtonPanelProps } from './ButtonPanel';
+import { EtsGrid } from '../EtsGrid';
+import { ColDef, IDatasource } from 'ag-grid-community';
+import EtsLeftTree from '@/components/EtsCommon/EtsLeftTree';
 
-const HeaderArea = styled(Stack)`
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-`;
+// const HeaderArea = styled(Stack)`
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: end;
+// `;
 
 // const NavigationItem = styled(Typography)`
 //   color: var(--color-brand-darkblue-100, #051766);
@@ -34,6 +37,24 @@ export interface PageModalTemplateProps {
   buttonComponent?: React.ReactNode;
   buttonPanelProps?: Partial<ButtonPanelProps>;
   width?: number | string;
+  tree?: boolean;
+  // Grid props (optional)
+  columnDefs?: ColDef[];
+  rowData?: any[];
+  onCellValueChanged?: (_params: any) => void;
+  onCellClicked?: (_params: any) => void;
+  gridRef?: React.Ref<any>;
+  suppressRowTransform?: boolean;
+  suppressRowClickSelection?: boolean;
+  isRowSelectable?: (node: any) => boolean;
+  dataSource?: IDatasource;
+  cacheBlockSize?: number;
+  cacheOverflowSize?: number;
+  maxConcurrentDatasourceRequests?: number;
+  infiniteInitialRowCount?: number;
+  maxBlocksInCache?: number;
+  rowSelection?: 'single' | 'multiple';
+  rowMultiSelectWithClick?: boolean;
 }
 
 export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
@@ -47,9 +68,28 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
   buttonComponent,
   buttonPanelProps,
   width,
+  tree = false,
+  // Grid props
+  columnDefs,
+  rowData = [],
+  onCellValueChanged,
+  onCellClicked,
+  gridRef,
+  suppressRowTransform = true,
+  suppressRowClickSelection,
+  isRowSelectable,
+  dataSource,
+  cacheBlockSize,
+  cacheOverflowSize,
+  maxConcurrentDatasourceRequests,
+  infiniteInitialRowCount,
+  maxBlocksInCache,
+  rowSelection,
+  rowMultiSelectWithClick,
 }) => {
   // const { pathname } = useLocation();
   const theme = useTheme();
+  const gridHeight = useMemo(() => 'calc(100vh - 500px)', []);
 
   // Prevent body scroll flicker when opening/closing modal
   useEffect(() => {
@@ -193,7 +233,6 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
         >
           <tableForm.HeaderContent>
             <Typography
-              // className="label-modal-title-lg"
               sx={(theme) => ({
                 color:
                   theme.palette.mode === 'dark'
@@ -203,7 +242,6 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             >
               {title}
             </Typography>
-            {/* {subTitle && <Typography className="label-modal-title-sm">{subTitle}</Typography>} */}
           </tableForm.HeaderContent>
           <IconButton onClick={onClose} sx={{ padding: 0, width: 28, height: 28 }}>
             <img
@@ -217,88 +255,134 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             />
           </IconButton>
         </DialogTitle>
-        <tableForm.BodyDiv>
-          <>
+        <Box sx={{ display: 'flex', width: '100%', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
+          {tree && (
             <Box
               sx={{
-                flex: 1,
-                minWidth: 0,
+                ml: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                // 우측 전체 영역이 뷰 높이에 맞게 확장되고 내부 스크롤은 그리드/리스트가 담당
-                maxHeight: 'calc(100vh - 160px)',
+                flexShrink: 0,
+                minHeight: 0,
               }}
             >
-              {searchComponent && (
-                <Box sx={{ mt: 3, mb: 3, flexShrink: 0 }}>
-                  <SearchPanel searchComponent={searchComponent} />
-                </Box>
-              )}
-              {buttonComponent && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    marginTop: '24px',
-                    paddingBottom: '12px',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-end',
-                    alignSelf: 'stretch',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Typography className="label"></Typography>
-                  <ButtonPanel buttonComponent={buttonComponent} {...buttonPanelProps} />
-                </Box>
-              )}
-              <Box
+              <EtsLeftTree
+                checkable
                 sx={{
-                  width: '100%',
-                  flex: 1,
-                  minHeight: 0,
+                  mt: 3,
                 }}
-              >
-                {component}
-              </Box>
+              />
             </Box>
-          </>
-        </tableForm.BodyDiv>
+          )}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              // 우측 전체 영역이 뷰 높이에 맞게 확장되고 내부 스크롤은 그리드/리스트가 담당
+              maxHeight: 'calc(100vh - 140px)',
+            }}
+          >
+            <tableForm.BodyDiv>
+              <>
+                {searchComponent && (
+                  <Box sx={{ mt: 7, mb: 3, flexShrink: 0 }}>
+                    <SearchPanel searchComponent={searchComponent} />
+                  </Box>
+                )}
+                {buttonComponent && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      mt: '24px',
+                      paddingBottom: '12px',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-end',
+                      alignSelf: 'stretch',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Typography className="label"></Typography>
+                    <ButtonPanel buttonComponent={buttonComponent} {...buttonPanelProps} />
+                  </Box>
+                )}
+                {columnDefs ? (
+                  <>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        flex: 1,
+                        minHeight: 0,
+                      }}
+                    >
+                      <EtsGrid
+                        height={gridHeight}
+                        ref={gridRef}
+                        columnDefs={columnDefs}
+                        rowData={rowData}
+                        onCellValueChanged={onCellValueChanged}
+                        onCellClicked={onCellClicked}
+                        suppressRowTransform={suppressRowTransform}
+                        suppressRowClickSelection={suppressRowClickSelection}
+                        isRowSelectable={isRowSelectable}
+                        datasource={dataSource}
+                        cacheBlockSize={cacheBlockSize}
+                        cacheOverflowSize={cacheOverflowSize}
+                        maxConcurrentDatasourceRequests={maxConcurrentDatasourceRequests}
+                        infiniteInitialRowCount={infiniteInitialRowCount}
+                        maxBlocksInCache={maxBlocksInCache}
+                        rowSelection={rowSelection}
+                        rowMultiSelectWithClick={rowMultiSelectWithClick}
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>{component}</Box>
+                  </>
+                )}
+              </>
+            </tableForm.BodyDiv>
+          </Box>
+        </Box>
       </Dialog>
     );
   }
 
   // 페이지 모드
   // const navigationItems = createNavigation();
-  return (
-    <Container maxWidth={false} disableGutters sx={{ width: '100%', mx: 0 }}>
-      <HeaderArea direction={'row'}>
-        {title && <Typography className="label-lg">{title}</Typography>}
-        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {navigationItems.map((item, index) => (
-            <React.Fragment key={index}>
-              <NavigationItem
-                sx={{ fontWeight: index === navigationItems.length - 1 ? '700' : '500' }}
-              >
-                {item}
-              </NavigationItem>
-              {index < navigationItems.length - 1 && (
-                <NavigationItem sx={{ display: 'flex', alignItems: 'end' }}>
-                  <img src={chevronRight} alt="chevron-right" />
-                </NavigationItem>
-              )}
-            </React.Fragment>
-          ))}
-        </Box> */}
-      </HeaderArea>
+  // return (
+  //   <Container maxWidth={false} disableGutters sx={{ width: '100%', mx: 0 }}>
+  //     <HeaderArea direction={'row'}>
+  //       {title && <Typography className="label-lg">{title}</Typography>}
+  //       {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+  //         {navigationItems.map((item, index) => (
+  //           <React.Fragment key={index}>
+  //             <NavigationItem
+  //               sx={{ fontWeight: index === navigationItems.length - 1 ? '700' : '500' }}
+  //             >
+  //               {item}
+  //             </NavigationItem>
+  //             {index < navigationItems.length - 1 && (
+  //               <NavigationItem sx={{ display: 'flex', alignItems: 'end' }}>
+  //                 <img src={chevronRight} alt="chevron-right" />
+  //               </NavigationItem>
+  //             )}
+  //           </React.Fragment>
+  //         ))}
+  //       </Box> */}
+  //     </HeaderArea>
 
-      {/* {searchComponent && (
-        <Box sx={{ mt: 3, mb: 3 }}>
-          <SearchPanel searchComponent={searchComponent} />
-        </Box>
-      )}
-         */}
-      {/* {buttonComponent && <Box sx={{ mb: 2 }}>{buttonComponent}</Box>} */}
+  //     {/* {searchComponent && (
+  //       <Box sx={{ mt: 3, mb: 3 }}>
+  //         <SearchPanel searchComponent={searchComponent} />
+  //       </Box>
+  //     )}
+  //        */}
+  //     {/* {buttonComponent && <Box sx={{ mb: 2 }}>{buttonComponent}</Box>} */}
 
-      <Box sx={{ width: '100%', flex: 1 }}>{component}</Box>
-    </Container>
-  );
+  //     <Box sx={{ width: '100%', flex: 1 }}>{component}</Box>
+  //   </Container>
+  // );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useThemeMode } from '@/contexts/ThemeContext';
 import styled from 'styled-components';
 import {
@@ -304,6 +304,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // '활성화'된 항목을 추적하는 단일 상태 (부모 또는 자식 메뉴의 텍스트)
   const [activeItem, setActiveItem] = useState<string>('');
@@ -431,6 +432,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   useEffect(() => {
     loadMenuData();
   }, []);
+
+  // 새로고침/직접 진입 시: 현재 URL 기준으로 부모 메뉴를 자동으로 펼치고 활성 항목을 세팅
+  useEffect(() => {
+    if (!pathname || menuItems.length === 0) return;
+
+    let foundParentText: string | null = null;
+    let foundActiveText: string | null = null;
+
+    for (const parent of menuItems) {
+      if (parent?.path && parent.path === pathname) {
+        foundActiveText = parent.text;
+        foundParentText = parent.children?.length ? parent.text : null;
+        break;
+      }
+      const child = parent?.children?.find((c: any) => c?.path === pathname);
+      if (child) {
+        foundActiveText = child.text;
+        foundParentText = parent.text;
+        break;
+      }
+    }
+
+    if (foundActiveText) {
+      setActiveItem(foundActiveText);
+    }
+    // 접힘 상태에서는 펼침 상태를 유지하지 않음
+    if (!collapsed && foundParentText) {
+      setOpen((prev) => ({ ...prev, [foundParentText as string]: true }));
+    }
+  }, [pathname, menuItems, collapsed]);
 
   // 접힘으로 전환 시, 열림 상태는 모두 닫음 (요구5)
   useEffect(() => {

@@ -9,7 +9,7 @@ import { PageModalTemplate } from '@/components/Teamplate';
 import { EtsInputComponent, EtsSelectComponent } from '@/components/EtsComponents';
 import { PartnerOptions } from '@/models/common/CommonSelectCodes';
 
-export type NoticeNewModalProps = {
+export type MessageSendModalProps = {
   open: boolean;
   onClose: () => void;
 };
@@ -21,23 +21,12 @@ type FormValues = {
   title: string;
 };
 
-// const PartnerOptions = [
-//   { value: 'all', label: '전체' },
-//   { value: 'PARTNER', label: '파트너' },
-//   { value: 'CUSTOMER', label: '고객' },
-// ];
-
-const NoticeNewModal = ({ open, onClose }: NoticeNewModalProps) => {
+const MessageSendModal = ({ open, onClose }: MessageSendModalProps) => {
   const theme = useTheme();
   const [content, setContent] = useState('<p>내용입력</p>');
-  // const [isEditable, setIsEditable] = useState(false);
-  // const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().startOf('month'));
-  // const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
 
   const { control } = useForm<FormValues>({
     defaultValues: {
-      // startDate: dayjs().startOf('month').format('YYYYMMDD'),
-      // endDate: endRangeDate?.format('YYYYMMDD'),
       partner: 'all',
       title: '',
     },
@@ -101,9 +90,12 @@ const NoticeNewModal = ({ open, onClose }: NoticeNewModalProps) => {
         searchComponent={searchComponent}
         buttonComponent={buttonComponent}
         component={component}
-        title="공지사항 등록"
+        tree={true}
+        width={1200}
+        bodySize={900}
+        title="메세지 보내기"
       />
     </Fragment>
   );
 };
-export default NoticeNewModal;
+export default MessageSendModal;
