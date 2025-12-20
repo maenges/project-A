@@ -2264,11 +2264,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.9.0":
-  version: 2.9.9
-  resolution: "baseline-browser-mapping@npm:2.9.9"
+  version: 2.9.11
+  resolution: "baseline-browser-mapping@npm:2.9.11"
   bin:
     baseline-browser-mapping: dist/cli.js
-  checksum: 0671f176b69672a25ac7036b9fa4cf9968125c8daa8eda916f2db6c602e17f755cb6cc6c4546a70924301630f6a95f1d12ee80c92432c1a232b4f4419510b467
+  checksum: eba49fcc1b33ab994aeeb73a4848f2670e06a0886dd5b903689ae6f60d47e7f1bea9262dbb2548c48179e858f7eda2b82ddf941ae783b862f4dcc51085a246f2
   languageName: node
   linkType: hard
 
@@ -2395,9 +2395,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001759":
-  version: 1.0.30001760
-  resolution: "caniuse-lite@npm:1.0.30001760"
-  checksum: cee26dff5c5b15ba073ab230200e43c0d4e88dc3bac0afe0c9ab963df70aaa876c3e513dde42a027f317136bf6e274818d77b073708b74c5807dfad33c029d3c
+  version: 1.0.30001761
+  resolution: "caniuse-lite@npm:1.0.30001761"
+  checksum: 8ea4158ccd507b9c73c03b9b3b1b897e75d095c5753a131d0f36ef9b64c19a049174467842dd9e8bebe886ac27ed7a5b1d5adcaae5fe887716b07fc1103e100b
   languageName: node
   linkType: hard
 
@@ -3501,7 +3501,6 @@ __metadata:
     react-leaflet: "npm:^5.0.0"
     react-router-dom: "npm:^7.7.1"
     react-toastify: "npm:^11.0.5"
-    react19-google-recaptcha-v3: "npm:^1.0.0"
     recharts: "npm:^3.1.2"
     styled-components: "npm:^6.1.13"
     styled-reset: "npm:^4.5.2"
@@ -5435,23 +5434,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.0.0":
-  version: 19.2.3
-  resolution: "react-dom@npm:19.2.3"
-  dependencies:
-    scheduler: "npm:^0.27.0"
-  peerDependencies:
-    react: ^19.2.3
-  checksum: dc43f7ede06f46f3acc16ee83107c925530de9b91d1d0b3824583814746ff4c498ea64fd65cd83aba363205268adff52e2827c582634ae7b15069deaeabc4892
-  languageName: node
-  linkType: hard
-
 "react-hook-form@npm:^7.62.0":
-  version: 7.68.0
-  resolution: "react-hook-form@npm:7.68.0"
+  version: 7.69.0
+  resolution: "react-hook-form@npm:7.69.0"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18 || ^19
-  checksum: 5fb500fe60077185ab6de32a2371d05bf75ae335ef62993f0359dbb42bb0c95e0c28d4f7d70c4382995486c82715295c87fc44f2ced5de1ae353aa1f23398f47
+  checksum: 99440aac1edbbda1f1704e31bea72dd75130d09593f5fce037596d381fb3dbf5a9864b28f49ecd52bd6dfabceb437905578fe2efc20c69411500fbdbc8647df6
   languageName: node
   linkType: hard
 
@@ -5582,29 +5570,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react19-google-recaptcha-v3@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "react19-google-recaptcha-v3@npm:1.0.0"
-  dependencies:
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
-    rollup: "npm:^4.29.1"
-    tslib: "npm:^2.8.1"
-  checksum: 95eebf4112f9c7bf6b62f55e7d955daf7d9af24a687819b87e0dbc8aa1c09cd12080e74d766fb6527cc36bd1eb60b67d85168b97356fb0d775357fe639fd197d
-  languageName: node
-  linkType: hard
-
 "react@npm:19.0.0":
   version: 19.0.0
   resolution: "react@npm:19.0.0"
   checksum: 9cad8f103e8e3a16d15cb18a0d8115d8bd9f9e1ce3420310aea381eb42aa0a4f812cf047bb5441349257a05fba8a291515691e3cb51267279b2d2c3253f38471
-  languageName: node
-  linkType: hard
-
-"react@npm:^19.0.0":
-  version: 19.2.3
-  resolution: "react@npm:19.2.3"
-  checksum: 094220b3ba3a76c1b668f972ace1dd15509b157aead1b40391d1c8e657e720c201d9719537375eff08f5e0514748c0319063392a6f000e31303aafc4471f1436
   languageName: node
   linkType: hard
 
@@ -5808,7 +5777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^4.20.0, rollup@npm:^4.29.1":
+"rollup@npm:^4.20.0":
   version: 4.53.5
   resolution: "rollup@npm:4.53.5"
   dependencies:
@@ -5941,13 +5910,6 @@ __metadata:
   version: 0.25.0
   resolution: "scheduler@npm:0.25.0"
   checksum: a4bb1da406b613ce72c1299db43759526058fdcc413999c3c3e0db8956df7633acf395cb20eb2303b6a65d658d66b6585d344460abaee8080b4aa931f10eaafe
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.27.0":
-  version: 0.27.0
-  resolution: "scheduler@npm:0.27.0"
-  checksum: 4f03048cb05a3c8fddc45813052251eca00688f413a3cee236d984a161da28db28ba71bd11e7a3dd02f7af84ab28d39fb311431d3b3772fed557945beb00c452
   languageName: node
   linkType: hard
 
@@ -6536,13 +6498,6 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: e03a8a4271152c8b26604ed45535954c0a45296e32445b4b87f8a5abdb2421f40b59b4ca437c4346af0f28179780d604094eb64546bee2019d903d01c6c19bdb
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.8.1":
-  version: 2.8.1
-  resolution: "tslib@npm:2.8.1"
-  checksum: 9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
   languageName: node
   linkType: hard
 
