@@ -111,6 +111,8 @@ const getInstance = (
   if (isLoading) {
     showLoading();
   }
+  // CSRF 방지 헤더 추가
+  axios.defaults.headers.common['X-ADMIN-REQUEST'] = 'true';
 
   axios.defaults.headers.get['Content-Type'] = 'application/json';
   axios.defaults.headers.post['Content-Type'] = 'application/json';

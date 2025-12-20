@@ -75,6 +75,8 @@ import {
 import { BetBetListPage, BetLosePage } from '@features/bet';
 import { GameRecordStatisticsPage } from '@/features/gameRecord';
 import { SettlementLoosingPage } from '@/features/settlement';
+// import DashboardLoginPage from '@/features/DashboardLoginPage';
+import LoginPage from '@/features/LoginPage';
 
 function App() {
   const { isLoading } = useLoadingStore();
@@ -148,6 +150,7 @@ function App() {
             <EtsLoading open={isLoading} />
             {/* {sessionLoaded ? ( */}
             <Routes>
+              <Route path="/login" element={<LoginPage />} />
               <Route
                 path="*"
                 element={
