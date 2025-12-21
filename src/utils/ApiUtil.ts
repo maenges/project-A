@@ -148,7 +148,6 @@ const getInstance = (
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
-    withCredentials: import.meta.env.VITE_API_WITH_CREDENTIALS === 'true',
   });
 
   // 공통 요청 처리
