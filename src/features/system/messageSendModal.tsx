@@ -92,7 +92,6 @@ const MessageSendModal = ({ open, onClose }: MessageSendModalProps) => {
         component={component}
         tree={true}
         width={1200}
-        bodySize={900}
         title="메세지 보내기"
       />
     </Fragment>

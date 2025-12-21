@@ -437,7 +437,7 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
           },
         })}
       />
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', flexShrink: 0 }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         <List component="nav" sx={{ py: 0 }}>
           {filteredTreeItems.map((item) => (
             <TreeNode

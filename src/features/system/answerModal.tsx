@@ -137,7 +137,7 @@ const AnswerModal = ({ open, onClose, data }: AnswerModalProps) => {
         value={content}
         onChange={setContent}
         isDarkMode={theme.palette.mode === 'dark'}
-        height={200}
+        height={350}
       />
     </Fragment>
   );
@@ -150,6 +150,7 @@ const AnswerModal = ({ open, onClose, data }: AnswerModalProps) => {
         component={component}
         title="답변 등록"
         width={800}
+        bodySize={900}
       />
     </Fragment>
   );

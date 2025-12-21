@@ -184,7 +184,7 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             width: width || '1000px',
             height: bodySize,
             maxWidth: 'calc(100vw - 32px)',
-            maxHeight: '1000px',
+            maxHeight: 'calc(100vh - 40px)',
             margin: 0,
             padding: 'var(--spacing-0, 0) 0',
             flexDirection: 'column',
@@ -263,13 +263,13 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 flexShrink: 0,
-                minHeight: 0,
               }}
             >
               <EtsLeftTree
                 checkable
                 sx={{
                   mt: 3,
+                  height: '95%',
                 }}
               />
             </Box>
