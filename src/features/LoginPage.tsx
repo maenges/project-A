@@ -1,16 +1,23 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
+import { useUserStore } from '@/store/cookieStore';
 // import { getRecaptchaToken } from '@/utils/recaptcha';
 
 const LoginPage = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+
+  const setUser = useUserStore((s) => s.setUser);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    await handleLocalLogin();
   };
 
   // login page mounted 시
@@ -43,7 +50,21 @@ const LoginPage = () => {
       },
     });
 
-    console.log('login response:', res);
+    if (res?.successOrNot === 'Y') {
+      const payload = (res?.data ?? res?.resultData ?? res?.result ?? {}) as any;
+
+      const userId = payload?.userId ?? payload?.memberId ?? payload?.id ?? null;
+      const role = payload?.role ?? payload?.roleType ?? null;
+      const groupKey = payload?.groupKey ?? payload?.deptCode ?? payload?.group ?? null;
+
+      if (userId) {
+        setUser({ userId: String(userId), role, groupKey: groupKey ? String(groupKey) : '' });
+      }
+
+      navigate('/', { replace: true });
+    } else {
+      console.warn('Login failed:', res);
+    }
   };
 
   return (
@@ -73,13 +94,7 @@ const LoginPage = () => {
             autoComplete="current-password"
             fullWidth
           />
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            fullWidth
-            onClick={handleLocalLogin}
-          >
+          <Button type="submit" variant="contained" size="large" fullWidth>
             로그인
           </Button>
         </Stack>

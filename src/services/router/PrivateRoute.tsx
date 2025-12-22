@@ -1,5 +1,6 @@
 import React from 'react';
-// import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useUserStore } from '@/store/cookieStore';
 
 // interface UserMenu {
 //   menuPath: string;
@@ -8,7 +9,13 @@ import React from 'react';
 // }
 
 const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
-  // const location = useLocation();
+  const location = useLocation();
+  const userId = useUserStore((s) => s.userId);
+
+  if (!userId) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
   // const rawMenus = sessionStorage.getItem('userMenus');
   // const userMenus: UserMenu[] = rawMenus ? JSON.parse(rawMenus) : [];
 

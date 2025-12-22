@@ -1,13 +1,20 @@
 import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import SessionUtil from '@utils/SessionUtil';
-import { refreshAccessToken } from '@/services/auth/auth.api';
 import CommonResponse, { StatusCode } from '@/models/common/CommonResponse';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Service } from '@/models/common/Service';
 import { useLoadingStore } from '@/store/loading';
+import { useUserStore } from '@/store/cookieStore';
 
 const TIMESTAMP_FIELDS = ['created', 'updated', 'created_at', 'updated_at'];
+
+let refreshInFlight: Promise<void> | null = null;
+
+const isRefreshRequest = (url?: string): boolean => {
+  if (!url) return false;
+  return url.includes('/api/auth/refresh');
+};
 
 export function formatDate(dateString?: string | null): string {
   if (!dateString) return '';
@@ -118,7 +125,8 @@ const getInstance = (
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.put['Content-Type'] = 'application/json';
   axios.defaults.headers.patch['Content-Type'] = 'application/json';
-  axios.defaults.withCredentials = true;
+  console.log(process.env.NODE_ENV);
+  axios.defaults.withCredentials = process.env.NODE_ENV === 'local' ? false : true;
 
   let baseURL = '';
   const sessionUtil = new SessionUtil();
@@ -199,6 +207,11 @@ const getInstance = (
         hideLoading();
       }
 
+      const status = error.response?.status?.toString();
+      const originalRequest = error.config as
+        | (AxiosRequestConfig & { _retry?: boolean })
+        | undefined;
+
       const unknownError: CommonResponse = {
         successOrNot: 'N',
         statusCode: StatusCode.UNKNOWN_ERROR,
@@ -259,6 +272,46 @@ const getInstance = (
         }
       }
 
+      // 기준: 401 발생 시 /api/auth/refresh 호출 후 원요청 재시도
+      // - refresh 요청 자체(무한루프 방지) / 이미 재시도한 요청은 제외
+      if (
+        status === '401' &&
+        originalRequest &&
+        !originalRequest._retry &&
+        !isRefreshRequest(originalRequest.url)
+      ) {
+        originalRequest._retry = true;
+
+        try {
+          if (!refreshInFlight) {
+            const refreshClient = axios.create({
+              baseURL: instance.defaults.baseURL,
+              withCredentials: true,
+            });
+            refreshInFlight = refreshClient
+              .post('/api/auth/refresh')
+              .then(() => undefined)
+              .finally(() => {
+                refreshInFlight = null;
+              });
+          }
+
+          await refreshInFlight;
+
+          // refresh 성공 후, 실패했던 요청을 그대로 재시도
+          return await instance.request(originalRequest);
+        } catch (e) {
+          useUserStore.getState().clear();
+          sessionUtil.deleteSessionInfo();
+          window.location.href = '/login';
+          return {
+            successOrNot: 'N',
+            statusCode: StatusCode.SESSION_EXPIRED,
+            data: {},
+          } as CommonResponse;
+        }
+      }
+
       if (error.response && error.response.status.toString().indexOf('40') === 0) {
         if (error.response.data instanceof Blob) {
           const text = await error.response.data.text();
@@ -267,25 +320,9 @@ const getInstance = (
             errorCode: json.errorCode,
           };
         }
-
-        if (
-          error.response.status.toString() === '403' &&
-          error.response.data.errorCode.toString() === '301'
-        ) {
-          try {
-            await refreshAccessToken();
-            const originalRequest = error.config;
-            const retryResponse = await axios.request(originalRequest as AxiosRequestConfig);
-            return retryResponse.data as CommonResponse;
-          } catch (refreshError) {
-            return Promise.reject(refreshError);
-          }
-        } else {
-          sessionUtil.deleteSessionInfo();
-        }
       }
 
-      if (error.response?.status?.toString() === '401') {
+      if (status === '401') {
         return expiredError;
       }
 
