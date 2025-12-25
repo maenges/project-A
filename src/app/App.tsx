@@ -46,7 +46,6 @@ import NotifyProvider from '@/components/Provider/NotifyProvider';
 import EtsLoading from '@/components/EtsCommon/EtsLoading';
 import { useLoadingStore } from '@/store/loading';
 import PrivateRoute from '@/services/router/PrivateRoute';
-import { useUserStore } from '@/store/cookieStore';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -79,8 +78,6 @@ import LoginPage from '@/features/LoginPage';
 
 function App() {
   const { isLoading } = useLoadingStore();
-  const userId = useUserStore((s) => s.userId);
-  const isAuthenticated = Boolean(userId);
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -149,10 +146,7 @@ function App() {
             <EtsLoading open={isLoading} />
             {/* {sessionLoaded ? ( */}
             <Routes>
-              <Route
-                path="/login"
-                element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
-              />
+              <Route path="/login" element={<LoginPage />} />
               <Route
                 path="*"
                 element={

@@ -5,7 +5,6 @@ import CommonResponse, { StatusCode } from '@/models/common/CommonResponse';
 import { v4 as uuidv4 } from 'uuid';
 import { Service } from '@/models/common/Service';
 import { useLoadingStore } from '@/store/loading';
-import { useUserStore } from '@/store/cookieStore';
 
 const TIMESTAMP_FIELDS = ['created', 'updated', 'created_at', 'updated_at'];
 
@@ -125,8 +124,10 @@ const getInstance = (
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.put['Content-Type'] = 'application/json';
   axios.defaults.headers.patch['Content-Type'] = 'application/json';
-  console.log(process.env.NODE_ENV);
-  axios.defaults.withCredentials = process.env.NODE_ENV === 'local' ? false : true;
+
+  // 쿠키 기반 인증(HTTPOnly access_token) 사용 시, 로컬 포함 항상 쿠키를 주고받아야 합니다.
+  // (특히 프론트/백엔드가 다른 Origin이면 withCredentials=false일 때 Set-Cookie가 저장되지 않음)
+  axios.defaults.withCredentials = true;
 
   let baseURL = '';
   const sessionUtil = new SessionUtil();
@@ -156,6 +157,7 @@ const getInstance = (
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
+    withCredentials: true,
   });
 
   // 공통 요청 처리
@@ -301,8 +303,6 @@ const getInstance = (
           // refresh 성공 후, 실패했던 요청을 그대로 재시도
           return await instance.request(originalRequest);
         } catch (e) {
-          useUserStore.getState().clear();
-          sessionUtil.deleteSessionInfo();
           window.location.href = '/login';
           return {
             successOrNot: 'N',

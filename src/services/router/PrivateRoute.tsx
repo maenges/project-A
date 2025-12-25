@@ -1,6 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useUserStore } from '@/store/cookieStore';
+import { useLocation } from 'react-router-dom';
 
 // interface UserMenu {
 //   menuPath: string;
@@ -9,12 +8,10 @@ import { useUserStore } from '@/store/cookieStore';
 // }
 
 const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
-  const location = useLocation();
-  const userId = useUserStore((s) => s.userId);
-
-  if (!userId) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
+  // 쿠키(access_token)가 HttpOnly면 프론트에서 로그인 여부를 판단할 수 없습니다.
+  // 실제 접근 제어는 서버(401) + API 인터셉터(/login 리다이렉트)에 위임합니다.
+  // 이 컴포넌트는 라우트 구조를 유지하기 위한 패스스루로 둡니다.
+  useLocation();
 
   // const rawMenus = sessionStorage.getItem('userMenus');
   // const userMenus: UserMenu[] = rawMenus ? JSON.parse(rawMenus) : [];
