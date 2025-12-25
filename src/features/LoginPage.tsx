@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { callApi, Method } from '@utils/ApiUtil';
@@ -20,20 +20,20 @@ const LoginPage = () => {
   };
 
   // login page mounted 시
-  useEffect(() => {
-    if (document.getElementById('awswaf-js')) return;
+  // useEffect(() => {
+  //   if (document.getElementById('awswaf-js')) return;
 
-    const s = document.createElement('script');
-    s.id = 'awswaf-js';
-    s.src = 'https://797593cbf480.edge.captcha-sdk.awswaf.com/797593cbf480/jsapi.js';
-    s.async = true;
-    document.head.appendChild(s);
+  //   const s = document.createElement('script');
+  //   s.id = 'awswaf-js';
+  //   s.src = 'https://797593cbf480.edge.captcha-sdk.awswaf.com/797593cbf480/jsapi.js';
+  //   s.async = true;
+  //   document.head.appendChild(s);
 
-    return () => {
-      // 필요하면 제거
-      // document.getElementById('awswaf-js')?.remove();
-    };
-  }, []);
+  //   return () => {
+  //     // 필요하면 제거
+  //     // document.getElementById('awswaf-js')?.remove();
+  //   };
+  // }, []);
 
   const handleLocalLogin = async () => {
     if (isSubmitting) return;
