@@ -37,7 +37,7 @@ const EtsTabs: React.FC<EtsTabsProps> = ({ tabs, value, onChange, sx, className,
             label={tab.label}
             value={tab.value}
             disabled={tab.disabled}
-            sx={{ minWidth: 120, fontWeight: 700, fontFamily: 'Hanjin Group Sans', fontSize: 16 }}
+            sx={{ minWidth: 120, fontWeight: 700, fontFamily: 'Sans', fontSize: 16 }}
           />
         ))}
       </Tabs>

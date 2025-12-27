@@ -328,7 +328,7 @@ export const muiTheme = createTheme({
       styleOverrides: {
         root: {
           fontSize: '10px',
-          fontFamily: '"Hanjin Group Sans"',
+          fontFamily: '"Sans"',
           marginLeft: '0px',
           marginTop: '0px',
           position: 'absolute',

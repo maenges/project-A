@@ -66,7 +66,7 @@ const BodyContent = styled.div`
 
   .modal-body-tooltip {
     color: var(--color-text-base, #252525) !important;
-    font-family: 'Hanjin Group Sans' !important;
+    font-family: 'Sans' !important;
     font-size: var(--font-size-body-ms, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;

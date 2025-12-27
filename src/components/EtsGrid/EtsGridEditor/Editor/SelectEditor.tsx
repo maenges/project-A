@@ -82,7 +82,7 @@ export default function SelectEditor(props: ICellEditorParams & EtsSelectEditorP
                 sx={{
                   height: '24px',
                   margin: '2px',
-                  fontFamily: '"Hanjin Group Sans"',
+                  fontFamily: '"Sans"',
                   fontSize: '12px',
                   fontWeight: 'var(--font-weight-regular, 400)',
                   padding: '0 8px',

@@ -96,7 +96,7 @@ const MenuOption = styled(Box)`
   /* Typography 스타일을 MenuOption에서 직접 제어 */
   .export-button-menu-text {
     color: var(--color-text-base, #252525);
-    font-family: 'Hanjin Group Sans';
+    font-family: 'Sans';
     font-size: var(--font-size-label-md, 14px);
     font-style: normal;
     font-weight: var(--font-weight-regular, 400);
@@ -109,7 +109,7 @@ const MenuOption = styled(Box)`
 
     .export-button-menu-text {
       color: var(--color-text-base, #252525);
-      font-family: 'Hanjin Group Sans';
+      font-family: 'Sans';
       font-size: var(--font-size-label-md, 14px);
       font-style: normal;
       font-weight: var(--font-weight-bold, 700);

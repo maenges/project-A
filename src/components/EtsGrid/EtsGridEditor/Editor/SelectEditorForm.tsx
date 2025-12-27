@@ -82,7 +82,7 @@ const StyledSelect = styled(Select, {
     },
 
     '& .MuiSelect-select': {
-      fontFamily: '"Hanjin Group Sans"',
+      fontFamily: '"Sans"',
       fontSize: 'var(--font-size-label-md, 14px)',
       fontWeight: 'var(--font-weight-regular, 400)',
       lineHeight: '130%',
@@ -120,7 +120,7 @@ const StyledSelect = styled(Select, {
     '& .MuiInputLabel-root': {
       fontSize: 'var(--font-size-label-md, 14px)',
       fontWeight: 'var(--font-weight-regular, 400)',
-      fontFamily: '"Hanjin Group Sans"',
+      fontFamily: '"Sans"',
       color: 'var(--color-text-placeholder, #A4A4A4)',
       '&.Mui-focused': {
         color: 'var(--color-text-placeholder, #A4A4A4)',
@@ -189,7 +189,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => {
       ? `${theme.palette.text.primary} !important`
       : 'var(--color-text-base, #252525) !important';
   return {
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
     lineHeight: '130%',
@@ -225,7 +225,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => {
 const StyledChip = styled(Chip)(() => ({
   height: '24px',
   margin: '2px',
-  fontFamily: '"Hanjin Group Sans"',
+  fontFamily: '"Sans"',
   fontSize: '12px',
   fontWeight: 'var(--font-weight-regular, 400)',
   '& .MuiChip-label': {

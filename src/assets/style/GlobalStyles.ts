@@ -133,7 +133,7 @@ export const GlobalStyles = createGlobalStyle`
     --size-9999: 624.9375rem;
 
     /* string */
-    --font-family-hanjingroup-sans: "Hanjin Group Sans", sans-serif;
+    --font-family-hanjingroup-sans: "Sans", sans-serif;
     --font-family-helvetica-neue: "Helvetica Neue", sans-serif;
     --font-family-microsoft-jhenghei: "Microsoft JhengHei", sans-serif;
     --font-family-microsoft-yahei: "Microsoft YaHei", sans-serif;
@@ -328,7 +328,7 @@ export const GlobalStyles = createGlobalStyle`
   .button-label {
     color: var(--color-text-base, #252525);
     text-align: center;
-    font-family: "Hanjin Group Sans";
+    font-family: "Sans";
     font-size: var(--font-size-label-sm, 13px);
     font-style: normal;
     font-weight: var(--font-weight-bold, 700);
@@ -373,7 +373,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .label-modal-sm {
     color: var(--color-text-title, #051766) !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-title-sm, 21px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-bold, 700) !important;
@@ -383,7 +383,7 @@ export const GlobalStyles = createGlobalStyle`
   .label-grid {
     color: var(--color-text-accent, #DA291C);
     text-align: center;
-    font-family: "Hanjin Group Sans";
+    font-family: "Sans";
     font-size: 11px;
     font-style: normal;
     font-weight: var(--font-weight-regular, 400);
@@ -392,7 +392,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .sub-title {
     color: var(--color-text-body-secondary, #5E5E5E)!important;
-    font-family: "Hanjin Group Sans"!important;
+    font-family: "Sans"!important;
     font-size: var(--font-body-md-bold, 16px)!important;
     font-style: normal!important;
     font-weight: 700!important;
@@ -401,7 +401,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .modal-body-text { 
     color: var(--color-text-base, #252525) !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-body-ms, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;
@@ -410,7 +410,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .modal-body-text-sub {
     color: var(--color-text-warning, #B33C00) !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-body-ms, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;
@@ -421,7 +421,7 @@ export const GlobalStyles = createGlobalStyle`
     overflow: hidden !important;
     color: var(--color-text-primary-darkblue, #051766) !important;
     text-overflow: ellipsis !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-body-lg, 18px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-bold, 700) !important;
@@ -432,7 +432,7 @@ export const GlobalStyles = createGlobalStyle`
     overflow: hidden !important;
     color: var(--color-text-primary-darkblue, #051766) !important;
     text-overflow: ellipsis !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: 14px !important;
     font-style: normal !important;
     font-weight: 400 !important;
@@ -441,7 +441,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .tab-button-on {
     color: var(--color-text-title, #051766) !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-title-sm, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-bold, 700) !important;
@@ -451,7 +451,7 @@ export const GlobalStyles = createGlobalStyle`
   .tab-button-off {
     color: var(--color-text-primary-darkblue, #051766) !important;
     text-align: center !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-label-md, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;
@@ -460,7 +460,7 @@ export const GlobalStyles = createGlobalStyle`
 
   .export-button-text {
     text-align: center !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: 13px !important;
     font-style: normal !important;
     font-weight: var(--font-weight-bold, 700) !important;
@@ -470,7 +470,7 @@ export const GlobalStyles = createGlobalStyle`
   .label-modal-grid-header {
     color: var(--color-text-base, #252525) !important;
     text-align: center !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-body-ms, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-bold, 700) !important;
@@ -480,7 +480,7 @@ export const GlobalStyles = createGlobalStyle`
   .label-modal-grid-column {
     color: var(--color-text-base, #252525) !important;
     text-align: right !important;
-    font-family: "Hanjin Group Sans" !important;
+    font-family: "Sans" !important;
     font-size: var(--font-size-body-ms, 14px) !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;

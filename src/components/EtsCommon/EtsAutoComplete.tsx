@@ -9,11 +9,10 @@ export interface EtsAutoCompleteOption {
   value: string;
 }
 
-export interface EtsAutoCompleteProps
-  extends Omit<
-    AutocompleteProps<EtsAutoCompleteOption, false, false, false>,
-    'renderInput' | 'options' | 'onChange' | 'value'
-  > {
+export interface EtsAutoCompleteProps extends Omit<
+  AutocompleteProps<EtsAutoCompleteOption, false, false, false>,
+  'renderInput' | 'options' | 'onChange' | 'value'
+> {
   label?: string;
   value?: string;
   options: EtsAutoCompleteOption[];
@@ -47,7 +46,7 @@ const StyledAutocomplete = styled(Autocomplete, {
       } !important`,
       fontSize: 'var(--font-size-label-md, 14px)',
       fontWeight: 'var(--font-weight-regular, 400)',
-      fontFamily: '"Hanjin Group Sans"',
+      fontFamily: '"Sans"',
       lineHeight: '130%',
       padding: '0 !important',
 
@@ -100,7 +99,7 @@ const StyledAutocomplete = styled(Autocomplete, {
     },
 
     '& .MuiAutocomplete-input': {
-      fontFamily: '"Hanjin Group Sans"',
+      fontFamily: '"Sans"',
       fontSize: 'var(--font-size-label-md, 14px)',
       fontWeight: 'var(--font-weight-regular, 400)',
       lineHeight: '20px', // 고정 라인높이로 선택(블루 하이라이트) 잘림 방지
@@ -163,7 +162,7 @@ const StyledAutocomplete = styled(Autocomplete, {
     '& .MuiFormLabel-root': {
       fontSize: 'var(--font-size-label-md, 14px)',
       fontWeight: 'var(--font-weight-regular, 400)',
-      fontFamily: '"Hanjin Group Sans"',
+      fontFamily: '"Sans"',
       color: theme.palette.text.secondary,
       '&.Mui-focused': { color: theme.palette.text.secondary },
       '&.Mui-error': { color: '#ef4444' },
@@ -204,7 +203,7 @@ const StyledOptionListItem = styled('li', {
       : 'var(--color-text-base, #252525) !important';
 
   return {
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: isSelected ? 'var(--font-weight-bold, 700)' : 'var(--font-weight-regular, 400)',
     lineHeight: '20px', // 텍스트 상하 여백 균형
@@ -316,7 +315,7 @@ const EtsAutoComplete = React.forwardRef<HTMLInputElement, EtsAutoCompleteProps>
         // ListboxProps로 키보드 포커스 문제 해결
         ListboxProps={{
           sx: {
-            fontFamily: '"Hanjin Group Sans"',
+            fontFamily: '"Sans"',
             fontSize: 'var(--font-size-label-md, 14px)',
             fontWeight: 'var(--font-weight-regular, 400)',
             lineHeight: '130%',
@@ -374,7 +373,7 @@ const EtsAutoComplete = React.forwardRef<HTMLInputElement, EtsAutoCompleteProps>
         sx={{
           // No options 메시지 스타일 (ListboxProps와 StyledOptionListItem이 나머지 처리)
           '& .MuiAutocomplete-noOptions': {
-            fontFamily: '"Hanjin Group Sans"',
+            fontFamily: '"Sans"',
             fontSize: 'var(--font-size-label-md, 14px)',
             fontStyle: 'italic',
             textAlign: 'center',

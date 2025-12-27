@@ -66,7 +66,7 @@ const StyledTextField = styled(TextField, {
         : theme.palette.background.paper,
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     lineHeight: '130%',
     '& fieldset': {
       border: `1px solid ${theme.palette.divider}`,
@@ -90,7 +90,7 @@ const StyledTextField = styled(TextField, {
     },
   },
   '& .MuiOutlinedInput-input': {
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
     lineHeight: '130%',
@@ -109,7 +109,7 @@ const StyledTextField = styled(TextField, {
   '& .MuiInputLabel-root': {
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.mode === 'dark' ? '#FFFFFF' : theme.palette.text.secondary,
     '&.Mui-focused': {
       color: theme.palette.mode === 'dark' ? '#FFFFFF' : theme.palette.text.secondary,
@@ -180,7 +180,7 @@ const StyledModalPaper = styled(Paper)(({ theme }) => ({
   '& .MuiDayCalendar-weekDayLabel': {
     fontSize: '12px',
     fontWeight: '600',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
     '&:first-of-type': {
       color: '#FF0000 !important', // 일요일(S)를 빨간색으로
@@ -198,7 +198,7 @@ const StyledModalPaper = styled(Paper)(({ theme }) => ({
   // 달력 날짜 스타일링 - 일요일 컬럼 빨간색
   '& .MuiPickersDay-root': {
     fontSize: '14px',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.text.primary,
     width: '36px',
     height: '36px',
@@ -243,7 +243,7 @@ const StyledModalPaper = styled(Paper)(({ theme }) => ({
   // 년도/월 선택 스타일링
   '& .MuiPickersYear-yearButton, & .MuiPickersMonth-monthButton': {
     fontSize: '14px',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.text.primary,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -283,7 +283,7 @@ const StyledPopperPaper = styled(Paper)(({ theme }) => ({
   '& .MuiDayCalendar-weekDayLabel': {
     fontSize: '12px',
     fontWeight: '600',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
     '&:first-of-type': {
       color: '#FF0000 !important', // 일요일(S)를 빨간색으로
@@ -293,7 +293,7 @@ const StyledPopperPaper = styled(Paper)(({ theme }) => ({
   // 달력 날짜 스타일링 - 일요일 컬럼 빨간색
   '& .MuiPickersDay-root': {
     fontSize: '14px',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.text.primary,
     width: '36px',
     height: '36px',
@@ -337,7 +337,7 @@ const StyledPopperPaper = styled(Paper)(({ theme }) => ({
 
   '& .MuiPickersYear-yearButton, & .MuiPickersMonth-monthButton': {
     fontSize: '14px',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     color: theme.palette.text.primary,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -367,7 +367,7 @@ const StyledActionBar = styled(Box, {
   alignItems: 'center',
 
   '& .MuiButton-root': {
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     fontSize: '14px',
     fontWeight: '500',
     borderRadius: '6px',
@@ -488,7 +488,7 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
 
           fontSize: '16px',
           fontWeight: '600',
-          fontFamily: '"Hanjin Group Sans"',
+          fontFamily: '"Sans"',
           color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
         }}
       >
@@ -501,7 +501,7 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
             cursor: 'pointer',
             fontSize: '16px',
             fontWeight: '600',
-            fontFamily: '"Hanjin Group Sans"',
+            fontFamily: '"Sans"',
             color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
             // padding: '4px 8px',
             borderRadius: '4px',
@@ -526,7 +526,7 @@ const CustomCalendarHeader = React.forwardRef<any, any>((props, ref) => {
             cursor: 'pointer',
             fontSize: '16px',
             fontWeight: '600',
-            fontFamily: '"Hanjin Group Sans"',
+            fontFamily: '"Sans"',
             color: theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-base, #252525)',
             // padding: '4px 8px',
             borderRadius: '4px',
@@ -667,7 +667,7 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
             '& .MuiDayCalendar-weekDayLabel': {
               fontSize: '12px',
               fontWeight: '600',
-              fontFamily: '"Hanjin Group Sans"',
+              fontFamily: '"Sans"',
               color:
                 theme.palette.mode === 'dark' ? '#FFFFFF' : 'var(--color-text-secondary, #666666)',
               '&:first-of-type': {
@@ -678,7 +678,7 @@ const EtsDatePicker = React.forwardRef<HTMLInputElement, EtsDatePickerProps>(
             // 달력 날짜 스타일링
             '& .MuiPickersDay-root': {
               fontSize: '14px',
-              fontFamily: '"Hanjin Group Sans"',
+              fontFamily: '"Sans"',
               color: theme.palette.text.primary,
               '&.MuiPickersDay-today': {
                 border: `1px solid ${theme.palette.primary.main} !important`,

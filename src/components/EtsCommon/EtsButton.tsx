@@ -46,7 +46,7 @@ const EtsButton = ({
     border: isDark ? 'none' : '1px solid #000000',
     color: '#000000',
     textAlign: 'center',
-    fontFamily: 'Hanjin Group Sans, sans-serif',
+    fontFamily: 'Sans, sans-serif',
     fontStyle: 'normal',
     lineHeight: '150%',
     boxShadow: 'none',

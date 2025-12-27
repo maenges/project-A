@@ -63,7 +63,7 @@ const StyledSelect = styled(Select, {
       : 'var(--color-background-base-white, #FFF) !important',
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     lineHeight: '130%',
     '& fieldset': {
       border: isReadOnly
@@ -110,7 +110,7 @@ const StyledSelect = styled(Select, {
     backgroundColor: 'var(--color-background-disabled, #EDEDED) !important',
   },
   '& .MuiSelect-select': {
-    fontFamily: '"Hanjin Group Sans"',
+    fontFamily: '"Sans"',
     fontSize: 'var(--font-size-label-md, 14px)',
     fontWeight: 'var(--font-weight-regular, 400)',
     lineHeight: '130%',
@@ -168,7 +168,7 @@ const StyledMenuItem = styled(MenuItem, {
 })<{
   isSelected?: boolean;
 }>(({ isSelected }) => ({
-  fontFamily: '"Hanjin Group Sans"',
+  fontFamily: '"Sans"',
   fontSize: 'var(--font-size-label-md, 14px)',
   fontWeight: 'var(--font-weight-regular, 400)',
   lineHeight: '130%',

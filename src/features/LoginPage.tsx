@@ -4,6 +4,7 @@ import { Box, Button, Stack, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
+import { StatusCode } from '@models/common/CommonResponse';
 import { useNotify } from '../hooks/useNotify';
 
 const LoginPage = () => {
@@ -52,16 +53,20 @@ const LoginPage = () => {
           },
         },
       });
-      console.log(res);
+
       if (res.successOrNot !== 'Y') {
+        if (res.statusCode === StatusCode.UNKNOWN_ERROR) {
+          return toast.error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        if (res.statusCode === StatusCode.BLOCKED_USER) {
+          return toast.error(res.data?.message);
+        }
+
         return toast.error('아이디 또는 비밀번호가 올바르지 않습니다.');
       }
 
       navigate('/', { replace: true });
       return;
-    } catch (e) {
-      toast.error('로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-      console.error(e);
     } finally {
       setIsSubmitting(false);
     }

@@ -185,7 +185,7 @@ export const agGridStyles = css`
   .ag-theme-material .ag-cell.statistics-grid-font {
     color: var(--color-text-base, #252525) !important;
     text-align: center !important;
-    font-family: 'Hanjin Group Sans', Arial, sans-serif !important;
+    font-family: 'Sans', Arial, sans-serif !important;
     font-size: 11px !important;
     font-style: normal !important;
     font-weight: var(--font-weight-regular, 400) !important;
@@ -671,7 +671,7 @@ export const agGridStyles = css`
     padding: 7px 12px !important;
     border: 1px solid var(--color-border-base, #d9d9d9) !important;
     border-radius: var(--radius-sm, 8px) !important;
-    font-family: 'Hanjin Group Sans', Arial, sans-serif !important;
+    font-family: 'Sans', Arial, sans-serif !important;
     font-size: var(--font-size-label-md, 14px) !important;
     font-weight: var(--font-weight-regular, 400) !important;
     line-height: 130% !important;

@@ -15,6 +15,12 @@ const isRefreshRequest = (url?: string): boolean => {
   return url.includes('/api/auth/refresh');
 };
 
+// 로그인 페이지 예외 처리
+const isLoginRequest = (url?: string): boolean => {
+  if (!url) return false;
+  return url.includes('/api/auth/login');
+};
+
 export function formatDate(dateString?: string | null): string {
   if (!dateString) return '';
 
@@ -127,7 +133,7 @@ const getInstance = (
 
   // 쿠키 기반 인증(HTTPOnly access_token) 사용 시, 로컬 포함 항상 쿠키를 주고받아야 합니다.
   // (특히 프론트/백엔드가 다른 Origin이면 withCredentials=false일 때 Set-Cookie가 저장되지 않음)
-  axios.defaults.withCredentials = true;
+  axios.defaults.withCredentials = false;
 
   let baseURL = '';
   const sessionUtil = new SessionUtil();
@@ -157,7 +163,7 @@ const getInstance = (
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
-    withCredentials: true,
+    // withCredentials: true,
   });
 
   // 공통 요청 처리
@@ -226,6 +232,12 @@ const getInstance = (
         data: {},
       };
 
+      const blockedError: CommonResponse = {
+        successOrNot: 'N',
+        statusCode: StatusCode.BLOCKED_USER,
+        data: { message: '차단된 사용자입니다. 관리자에게 문의해주세요.' },
+      };
+
       const downloadError: CommonResponse = {
         successOrNot: 'N',
         statusCode: StatusCode.DOWNLOAD_SIZE_EXCEEDS,
@@ -280,7 +292,8 @@ const getInstance = (
         status === '401' &&
         originalRequest &&
         !originalRequest._retry &&
-        !isRefreshRequest(originalRequest.url)
+        !isRefreshRequest(originalRequest.url) &&
+        !isLoginRequest(originalRequest.url)
       ) {
         originalRequest._retry = true;
 
@@ -320,6 +333,10 @@ const getInstance = (
             errorCode: json.errorCode,
           };
         }
+      }
+
+      if (status === '403') {
+        return blockedError;
       }
 
       if (status === '401') {

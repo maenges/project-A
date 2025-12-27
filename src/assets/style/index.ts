@@ -130,7 +130,7 @@ export const theme: ThemeInterface = {
   },
   fonts: {
     family: {
-      primary: '"Hanjin Group Sans", sans-serif',
+      primary: '"Sans", sans-serif',
     },
     size: {
       xs: '12px',

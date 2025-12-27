@@ -26,6 +26,7 @@ export class StatusCode {
 
   public static readonly SUCCESS = 'SUCCESS';
   public static readonly FAIL = 'FAIL';
+  public static readonly BLOCKED_USER = 'BLOCKED_USER';
 
   public static readonly NO_CONTENT = 'NO_CONTENT';
   public static readonly NOT_FOUND = 'NOT_FOUND';

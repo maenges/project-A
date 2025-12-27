@@ -98,7 +98,7 @@ export const HeaderFrontContent = styled(Stack)`
   font-weight: 400;
   line-height: 130%;
   color: #051766;
-  font-family: 'Hanjin Group Sans';
+  font-family: 'Sans';
   justify-content: end;
   align-items: end;
 
@@ -124,7 +124,7 @@ export const HeaderBackText = styled.div`
   font-weight: 400;
   line-height: 130%;
   color: #051766;
-  font-family: 'Hanjin Group Sans';
+  font-family: 'Sans';
   justify-content: end;
   align-items: end;
 

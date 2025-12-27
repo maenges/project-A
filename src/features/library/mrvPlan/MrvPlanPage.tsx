@@ -60,7 +60,7 @@ const ViewerWrapper = styled(Box)`
     /* 줌 비율 텍스트와 유사한 크기로 조정합니다. */
     color: #fff;
     text-align: center;
-    font-family: 'Hanjin Group Sans';
+    font-family: 'Sans';
     font-size: 12px;
     font-style: normal;
     font-weight: 400;
@@ -70,7 +70,7 @@ const ViewerWrapper = styled(Box)`
   .rpv-toolbar__label {
     color: #fff;
     text-align: center;
-    font-family: 'Hanjin Group Sans';
+    font-family: 'Sans';
     font-size: 13px;
     font-style: normal;
     font-weight: 400;
@@ -705,7 +705,7 @@ const MrvPlan = () => {
                     <Typography
                       sx={{
                         color: 'var(--color-text-label, #051766)',
-                        fontFamily: 'var(--font-family-hanjingroup-sans, "Hanjin Group Sans")',
+                        fontFamily: 'var(--font-family-hanjingroup-sans, "Sans")',
                         fontSize: 'var(--font-body-sm, 14px)',
                         fontStyle: 'normal',
                         fontWeight: 400,

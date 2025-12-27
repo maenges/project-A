@@ -42,7 +42,7 @@ const StyledTextField = styled(TextField, {
       backgroundColor: bgBase,
       fontSize: 14,
       fontWeight: 400,
-      fontFamily: 'Hanjin Group Sans',
+      fontFamily: 'Sans',
       lineHeight: '130%',
       transition: 'background-color .2s, border-color .2s',
       '& fieldset': {
@@ -67,7 +67,7 @@ const StyledTextField = styled(TextField, {
         },
       },
       '& input': {
-        fontFamily: 'Hanjin Group Sans',
+        fontFamily: 'Sans',
         fontSize: 14,
         fontWeight: 400,
         lineHeight: '130%',
@@ -78,7 +78,7 @@ const StyledTextField = styled(TextField, {
           overflow: 'hidden',
           color: placeholder,
           textOverflow: 'ellipsis',
-          fontFamily: 'Hanjin Group Sans',
+          fontFamily: 'Sans',
           fontSize: 14,
           fontWeight: 400,
           lineHeight: '130%',
@@ -89,7 +89,7 @@ const StyledTextField = styled(TextField, {
     '& .MuiInputLabel-root': {
       fontSize: 14,
       fontWeight: 400,
-      fontFamily: 'Hanjin Group Sans',
+      fontFamily: 'Sans',
       color: placeholder,
       '&.Mui-focused': { color: placeholder },
       '&.Mui-error': { color: '#ef4444' },

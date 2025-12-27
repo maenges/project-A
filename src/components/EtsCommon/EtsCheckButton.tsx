@@ -29,7 +29,7 @@ const StyledCheckButton = styled('button', {
   borderRadius: 'var(--radius-button-sm, 20px)',
   cursor: 'pointer',
   transition: 'all 0.2s ease-in-out',
-  fontFamily: 'var(--font-family-hanjingroup-sans, "Hanjin Group Sans")',
+  fontFamily: 'var(--font-family-hanjingroup-sans, "Sans")',
   whiteSpace: 'nowrap',
   outline: 'none',
 
