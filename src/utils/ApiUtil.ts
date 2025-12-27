@@ -133,7 +133,7 @@ const getInstance = (
 
   // 쿠키 기반 인증(HTTPOnly access_token) 사용 시, 로컬 포함 항상 쿠키를 주고받아야 합니다.
   // (특히 프론트/백엔드가 다른 Origin이면 withCredentials=false일 때 Set-Cookie가 저장되지 않음)
-  axios.defaults.withCredentials = false;
+  axios.defaults.withCredentials = import.meta.env.VITE_API_WITH_CREDENTIALS === 'true';
 
   let baseURL = '';
   const sessionUtil = new SessionUtil();
@@ -163,7 +163,7 @@ const getInstance = (
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     params: params || {},
-    // withCredentials: true,
+    withCredentials: import.meta.env.VITE_API_WITH_CREDENTIALS === 'true',
   });
 
   // 공통 요청 처리
