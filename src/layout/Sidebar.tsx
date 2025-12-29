@@ -23,6 +23,7 @@ import {
   ExpandMore,
   FiberManualRecord,
   Star,
+  Logout,
 } from '@mui/icons-material';
 import { Service } from '@/models/common/Service';
 import { callApi, Method } from '@/utils/ApiUtil';
@@ -198,6 +199,10 @@ function BrandSwitcher({ collapsed }: BrandSwitcherProps) {
     </BrandRow>
   );
 }
+
+const LogoutButtonContainer = styled(ToggleButtonContainer)<{ $collapsed: boolean }>`
+  margin-top: ${({ $collapsed }) => ($collapsed ? '6px' : '10px')};
+`;
 
 const MenuList = styled(List)<{ $collapsed: boolean }>`
   /* 컨테이너 높이 변동을 막아 Collapse 전개 시 상단 '위로 밀림' 현상 제거 */
@@ -468,6 +473,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     if (collapsed) setOpen({});
   }, [collapsed]);
 
+  const handleLogout = async () => {
+    try {
+      await callApi({
+        service: Service.POSTMAN,
+        url: '/api/auth/logout',
+        method: Method.POST,
+      });
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    } finally {
+      navigate('/login', { replace: true });
+    }
+  };
+
   return (
     <SidebarContainer $isOpen={isOpen}>
       {/* 펼침 상태에서만 로고/텍스트 노출 */}
@@ -584,6 +603,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         <DarkModeToggle collapsed={collapsed} />
         {/* Brand color switcher */}
         <BrandSwitcher collapsed={collapsed} />
+        {/* Logout button */}
+        <LogoutButtonContainer
+          $collapsed={collapsed}
+          onClick={handleLogout}
+          role="button"
+          aria-label="logout"
+        >
+          <Logout fontSize="small" />
+          {!collapsed && <span style={{ fontWeight: 700 }}>로그아웃</span>}
+        </LogoutButtonContainer>
       </MenuList>
     </SidebarContainer>
   );
