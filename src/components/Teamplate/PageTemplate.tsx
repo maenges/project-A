@@ -5,7 +5,7 @@ import SearchPanel from './SearchPanel';
 import ButtonPanel, { ButtonPanelProps } from './ButtonPanel';
 import { EtsGrid } from '../EtsGrid';
 import styled from 'styled-components';
-import EtsLeftTree from '@/components/EtsCommon/EtsLeftTree';
+import EtsLeftTree, { type EtsLeftTreeProps } from '@/components/EtsCommon/EtsLeftTree';
 
 const HeaderArea = styled(Stack)`
   display: flex;
@@ -21,6 +21,8 @@ export interface PageTemplateProps {
   buttonPanelProps?: Partial<ButtonPanelProps>;
   tabComponent?: React.ReactNode;
   tree?: boolean;
+  /** tree=true 일 때 좌측 트리(EtsLeftTree) props 전달용 */
+  leftTreeProps?: Partial<EtsLeftTreeProps>;
   columnDefs?: ColDef[];
   rowData?: any[];
   onCellValueChanged?: (_params: any) => void;
@@ -77,6 +79,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   size = 'sm',
   onGridReady,
   tree = false,
+  leftTreeProps,
   isRowSelectable,
 }) => {
   // --- size prop에 따라 그리드 높이를 결정하는 로직 ---
@@ -223,7 +226,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
       {/* Left Tree Sidebar with Search (tree=true 일 때만 표시) */}
       <Box sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'stretch' }}>
-        {tree && <EtsLeftTree />}
+        {tree && <EtsLeftTree {...leftTreeProps} />}
 
         {/* Right Content Area */}
         <Box

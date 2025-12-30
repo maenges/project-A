@@ -101,47 +101,6 @@ const Notice = () => {
   const handleDeleteRow = () => {
     gridRef.current?.deleteBySelectedRows();
   };
-  // 순차 페이드 대상 버튼 그룹 (편집 모드에서만 표시)
-  // const animatedButtons = (
-  //   <>
-  //     <EtsButton
-  //       type="grey"
-  //       onClick={() => {
-  //         if (gridRef.current) {
-  //           const selectedRows = gridRef.current?.api.getSelectedRows();
-  //           if (selectedRows && selectedRows.length > 0) {
-  //             setDeleteOpen(true);
-  //           }
-  //         }
-  //       }}
-  //     >
-  //       Delete
-  //     </EtsButton>
-  //     <EtsButton
-  //       type="grey"
-  //       onClick={() => {
-  //         if (gridRef.current) {
-  //           gridRef.current.api.stopEditing();
-  //         }
-  //         onSearch();
-  //         setIsEditable(false);
-  //       }}
-  //     >
-  //       Cancel
-  //     </EtsButton>
-  //     <EtsButton
-  //       type="blue"
-  //       onClick={async () => {
-  //         if (gridRef.current) {
-  //           gridRef.current.api.stopEditing();
-  //         }
-  //         setSaveOpen(true);
-  //       }}
-  //     >
-  //       Save
-  //     </EtsButton>
-  //   </>
-  // );
 
   const newModal = newModalOpen && (
     <NoticeNewModal

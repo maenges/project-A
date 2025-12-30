@@ -27,7 +27,7 @@ const ContentWrapper = styled.div<ContentWrapperProps>`
   display: flex;
   flex-direction: column;
   flex: 1;
-  margin-left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '280px' : '72px')};
+  margin-left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '260px' : '72px')};
   transition: margin-left 0.3s ease-in-out;
 
   /* @media (max-width: 1200px) {
@@ -38,7 +38,8 @@ const ContentWrapper = styled.div<ContentWrapperProps>`
 const FloatingToggle = styled.button<StyledButtonProps>`
   position: fixed;
   top: 72px; /* 헤더 아래쪽 위치 */
-  left: ${({ $isOpen }) => ($isOpen ? '268px' : '60px')}; /* 접힘(72px) 기준 위치 */
+  /* 사이드바 경계(OPEN: 260px, COLLAPSED: 72px)에 버튼(28px)이 살짝 걸치도록 배치 */
+  left: ${({ $isOpen }) => ($isOpen ? '246px' : '58px')};
   width: 28px;
   height: 28px;
   border-radius: 50%;

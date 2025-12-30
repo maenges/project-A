@@ -1,3 +1,5 @@
+// import { EtsSelectOption } from '@/components/EtsCommon';
+
 export const DOM_INT = [
   { value: 'all', label: 'ALL' },
   { value: 'DOM', label: 'Dom' },
@@ -64,6 +66,8 @@ export const UNIT = [
   { label: 'LT', value: 'LT' },
 ];
 
+// 신규
+
 export const PartnerOptions = [
   { value: 'all', label: '전체' },
   { value: 'PARTNER', label: '파트너' },
@@ -112,3 +116,18 @@ export const processStatusOptions = [
   { value: 'PENDING', label: '대기' },
   { value: 'COMPLETED', label: '완료' },
 ];
+
+export const rollingCasinoOptions = [
+  { value: '0', label: '0%' },
+  { value: '1', label: '1%' },
+  { value: '2', label: '2%' },
+  { value: '3', label: '3%' },
+  { value: '4', label: '4%' },
+  { value: '5', label: '5%' },
+];
+
+// export const storeOptions: EtsSelectOption[] = [
+//   { label: 'S-OIL', value: 'S-OIL' },
+//   { label: 'Airport Fuel Supply LLC.', value: 'AIRPORT' },
+//   { label: 'Air bp', value: 'AIR-BP' },
+// ];

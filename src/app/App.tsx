@@ -65,11 +65,7 @@ import {
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
 import { PartnerPartnerListPage } from '@/features/partner';
-import {
-  CustomerWaitPage,
-  CustomerAccessorPage,
-  CustomerCustomerListPage,
-} from '@features/customer';
+import { CustomerWaitPage, CustomerAccessorPage, CustomerPage } from '@features/customer';
 import { BetBetListPage, BetLosePage } from '@features/bet';
 import { GameRecordStatisticsPage } from '@/features/gameRecord';
 import { SettlementLoosingPage } from '@/features/settlement';
@@ -496,6 +492,14 @@ function App() {
                             }
                           />
                           <Route
+                            path="/system/ipBlock"
+                            element={
+                              <PrivateRoute>
+                                <SystemIpBlockPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
                             path="/trans/transfer"
                             element={
                               <PrivateRoute>
@@ -524,6 +528,14 @@ function App() {
                             element={
                               <PrivateRoute>
                                 <PartnerPartnerListPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
+                            path="/customer/customerList"
+                            element={
+                              <PrivateRoute>
+                                <CustomerPage />
                               </PrivateRoute>
                             }
                           />
@@ -564,22 +576,6 @@ function App() {
                             element={
                               <PrivateRoute>
                                 <GameRecordStatisticsPage />
-                              </PrivateRoute>
-                            }
-                          />
-                          <Route
-                            path="/system/ipBlock"
-                            element={
-                              <PrivateRoute>
-                                <SystemIpBlockPage />
-                              </PrivateRoute>
-                            }
-                          />
-                          <Route
-                            path="/customer/cutomerList"
-                            element={
-                              <PrivateRoute>
-                                <CustomerCustomerListPage />
                               </PrivateRoute>
                             }
                           />

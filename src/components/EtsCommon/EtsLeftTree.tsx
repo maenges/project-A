@@ -314,13 +314,12 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
   useEffect(() => {
     callApi({
       service: Service.POSTMAN,
-      url: '/api/group/',
+      url: '/api/group',
       method: Method.GET,
       params: {},
       config: { isLoading: false },
     })
       .then((res) => {
-        console.log('Fetched organization tree:', res);
         if (res.successOrNot !== 'Y') {
           toast.error(res.HeaderMsg);
           return Promise.reject(res.HeaderMsg);

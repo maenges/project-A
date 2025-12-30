@@ -33,8 +33,9 @@ interface StyledButtonProps {
 }
 
 const RAIL_WIDTH = 72; // 접힘 상태 고정 폭
+const OPEN_WIDTH = 260; // 펼침 상태 폭(요청: 가로 공백 축소)
 const SidebarContainer = styled.div<StyledButtonProps>`
-  width: ${({ $isOpen }) => ($isOpen ? '280px' : `${RAIL_WIDTH}px`)};
+  width: ${({ $isOpen }) => ($isOpen ? `${OPEN_WIDTH}px` : `${RAIL_WIDTH}px`)};
   height: 100vh;
   background-color: ${({ theme }) => theme.colors.background.default};
   color: ${({ theme }) => theme.colors.text.primary};

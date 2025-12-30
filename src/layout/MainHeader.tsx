@@ -19,7 +19,7 @@ const HeaderContainer = styled.header<ContentWrapperProps>`
   color: ${({ theme }) => theme.colors.text.primary};
   position: fixed;
   top: 0;
-  left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '280px' : '0')};
+  left: ${({ $isSidebarOpen }) => ($isSidebarOpen ? '260px' : '0')};
   right: 0;
   z-index: 1000;
   transition:
