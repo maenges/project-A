@@ -66,6 +66,41 @@ const StyledTextField = styled(TextField, {
           WebkitTextFillColor: theme.palette.text.disabled,
         },
       },
+      '& input:-webkit-autofill, & textarea:-webkit-autofill': {
+        WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        WebkitTextFillColor: `${textColor} !important`,
+        caretColor: textColor,
+        borderRadius: 'inherit',
+        transition: 'background-color 600000s 0s, color 600000s 0s',
+      },
+      '& input:-webkit-autofill:hover, & textarea:-webkit-autofill:hover': {
+        WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+      },
+      '& input:-webkit-autofill:focus, & textarea:-webkit-autofill:focus': {
+        WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+      },
+      '& input:-internal-autofill-selected, & textarea:-internal-autofill-selected': {
+        WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        WebkitTextFillColor: `${textColor} !important`,
+        caretColor: textColor,
+        transition: 'background-color 600000s 0s, color 600000s 0s',
+      },
+      '& input:-internal-autofill-previewed, & textarea:-internal-autofill-previewed': {
+        WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        WebkitTextFillColor: `${textColor} !important`,
+        caretColor: textColor,
+        transition: 'background-color 600000s 0s, color 600000s 0s',
+      },
+      '& input:-moz-autofill, & textarea:-moz-autofill': {
+        boxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        MozTextFillColor: textColor,
+        caretColor: textColor,
+      },
       '& input': {
         fontFamily: 'Sans',
         fontSize: 14,
@@ -83,6 +118,18 @@ const StyledTextField = styled(TextField, {
           fontWeight: 400,
           lineHeight: '130%',
           opacity: 1,
+        },
+        '&:-webkit-autofill': {
+          WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+          WebkitTextFillColor: `${textColor} !important`,
+          caretColor: textColor,
+          borderRadius: 'inherit',
+        },
+        '&:-webkit-autofill:hover': {
+          WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
+        },
+        '&:-webkit-autofill:focus': {
+          WebkitBoxShadow: `0 0 0 100px ${bgBase} inset !important`,
         },
       },
     },

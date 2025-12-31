@@ -204,6 +204,11 @@ const getInstance = (
           : (response.data as CommonResponse);
       if (response.status !== 204) commonResponse.header = response?.headers;
 
+      // 백엔드가 message로 내려주는 에러/메시지를 기존 프론트 규격(HeaderMsg)으로 매핑
+      if (!commonResponse.HeaderMsg && commonResponse.message) {
+        commonResponse.HeaderMsg = commonResponse.message;
+      }
+
       if (isLoading) {
         hideLoading();
       }
@@ -235,8 +240,16 @@ const getInstance = (
       const blockedError: CommonResponse = {
         successOrNot: 'N',
         statusCode: StatusCode.BLOCKED_USER,
-        data: { message: '차단된 사용자입니다. 관리자에게 문의해주세요.' },
+        message: '차단된 사용자입니다. 관리자에게 문의해주세요.',
+        data: {},
       };
+
+      // const alreadyExists: CommonResponse = {
+      //   successOrNot: 'N',
+      //   statusCode: StatusCode.,
+      //   message: '이미 존재하는 데이터입니다.',
+      //   data: {},
+      // };
 
       const downloadError: CommonResponse = {
         successOrNot: 'N',
@@ -341,6 +354,23 @@ const getInstance = (
 
       if (status === '401') {
         return expiredError;
+      }
+
+      // 4xx 등 비-2xx 응답이 JSON(CommonResponse 형태)로 내려오는 경우 message -> HeaderMsg 매핑
+      if (error.response?.data && typeof error.response.data === 'object') {
+        const serverData = error.response.data as CommonResponse;
+        const normalized: CommonResponse = {
+          ...unknownError,
+          ...serverData,
+          successOrNot: serverData.successOrNot ?? 'N',
+          statusCode:
+            typeof (serverData as any).statusCode === 'number'
+              ? String((serverData as any).statusCode)
+              : ((serverData as any).statusCode ?? StatusCode.UNKNOWN_ERROR),
+          data: serverData.data ?? {},
+          HeaderMsg: serverData.HeaderMsg ?? serverData.message ?? (serverData as any).headerMsg,
+        };
+        return normalized;
       }
 
       return unknownError;

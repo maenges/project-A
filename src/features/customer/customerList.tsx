@@ -361,6 +361,7 @@ const CustomerPage = () => {
       onClose={() => {
         setNewModalOpen(false);
       }}
+      groupKey={selectedTreeId || ''}
     />
   );
 
