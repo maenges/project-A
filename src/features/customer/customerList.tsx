@@ -8,21 +8,13 @@ import { PageTemplate } from '@/components/Teamplate';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
-
 import { EtsButton } from '@/components/EtsCommon';
-import { EtsInputComponent } from '@/components/EtsComponents';
+import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
 import CustomerListModal from './customerListModal';
 
 type Customer = {
-  no: string;
-  user_key: number;
-  user_id: number;
-  store_name: string;
-  notice_title: string;
-  created: string;
-  notice_active: boolean;
   [key: string]: any;
 };
 
@@ -38,13 +30,46 @@ const CustomerPage = () => {
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [showCasinoSlot, setShowCasinoSlot] = useState(false);
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(7, 'day'));
+  const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
+
+  const getGroupNameOptionsByRow = (row: any) => {
+    const raw = row?.group_name;
+    if (!Array.isArray(raw)) return [];
+
+    // level: 1(하위) ~ 4(상위) => 역순(상위 -> 하위)
+    const sorted = [...raw].sort((a: any, b: any) => (b?.level ?? 0) - (a?.level ?? 0));
+    return sorted
+      .map((x: any) => ({
+        name: x?.group_name ?? x?.groupName,
+        level: x?.level,
+      }))
+      .filter((x: any) => Boolean(x?.name))
+      .map((x: any) => {
+        const name = String(x.name);
+        const level = typeof x.level === 'number' ? x.level : undefined;
+        const prefix = level ? `[L${level}]` : '';
+        return {
+          value: name,
+          label: prefix ? `${prefix} ${name}` : name,
+        };
+      });
+  };
+
+  const getStoreNameByRow = (row: any) => {
+    const raw = row?.group_name;
+    if (!Array.isArray(raw)) return '';
+    const match = raw.find((x: any) => String(x?.group_key) === String(row?.group_key));
+    const store = match ?? raw.find((x: any) => x?.level === 1) ?? raw[0];
+    return store?.group_name ?? store?.groupName ?? '';
+  };
 
   const defaultViewVisibleColKeys = [
     'charge_pay',
     'charge_recover',
     'user_money',
     'user_rolling_money',
-    'store_name',
+    'group_name',
     'withdrawal',
     'deposit',
     'created',
@@ -60,7 +85,7 @@ const CustomerPage = () => {
   ] as const;
 
   useEffect(() => {
-    const api = gridRef.current?.api;
+    const api = (gridRef.current as any)?.api;
     if (!api) return;
 
     if (showCasinoSlot) {
@@ -72,7 +97,7 @@ const CustomerPage = () => {
       api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
       api.setColumnsVisible([...casinoSlotFields], false);
     }
-  }, [showCasinoSlot, rowData.length]);
+  }, [showCasinoSlot]);
 
   const columnDefs: (ColDef | ColGroupDef)[] = [
     // EtsColumnPreset.SelectionBoxPreset({
@@ -172,14 +197,25 @@ const CustomerPage = () => {
       width: 100,
       flex: 1,
     }),
-    EtsColumnPreset.TextPreset({
-      field: 'store_name',
-      headerName: '매장명',
+    EtsColumnPreset.SelectPreset({
+      field: 'group_name',
+      headerName: '소속',
       width: 100,
       flex: 1,
-      // context: {
-      //   options: storeOptions,
-      // },
+      editable: true,
+      valueGetter: (p: any) => getStoreNameByRow(p?.data),
+      valueSetter: () => {
+        // 보기용 콤보: 선택해도 rowData(group_name 배열)는 변경하지 않음
+        return false;
+      },
+      cellEditorParams: (p: any) => ({
+        ...p,
+        options: getGroupNameOptionsByRow(p?.data),
+      }),
+      context: {
+        // renderer는 value만 보여주면 되므로 빈 options
+        options: [],
+      },
     }),
     {
       headerName: '입출금',
@@ -255,7 +291,7 @@ const CustomerPage = () => {
     }),
   ];
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
@@ -275,6 +311,33 @@ const CustomerPage = () => {
       }
       setRowData(res.data);
     });
+  };
+
+  const fetchCustomerListByGroupKey = (groupKey: string) => {
+    const { startDate, endDate } = getValues();
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/user/cuInfo',
+      method: Method.GET,
+      params: {
+        queryParams: { groupKey, startDate, endDate },
+      },
+      config: { isLoading: true },
+    }).then((res) => {
+      if (res.successOrNot !== 'Y') {
+        toast.error(res.HeaderMsg);
+        setRowData([]);
+        return;
+      }
+
+      // rowData는 API 응답 그대로 사용 (group_name 배열 포함)
+      setRowData(res.data ?? []);
+    });
+  };
+
+  const handleTreeSelect = (id: string) => {
+    setSelectedTreeId(id);
+    fetchCustomerListByGroupKey(id);
   };
 
   const storeConfirm = async (): Promise<boolean> => {
@@ -305,6 +368,13 @@ const CustomerPage = () => {
     <form onSubmit={handleSubmit(onSearch)}>
       <searchForm.Container>
         <searchForm.Row>
+          <EtsDatePickerComponent
+            control={control}
+            startDate={startRangeDate}
+            endDate={endRangeDate}
+            setStartDate={setStartRangeDate}
+            setEndDate={setEndRangeDate}
+          />
           <EtsInputComponent
             control={control}
             name="acReg"
@@ -379,9 +449,7 @@ const CustomerPage = () => {
         // size="sm-two-header"
         tree={true}
         leftTreeProps={{
-          onSelect: (id) => {
-            setSelectedTreeId(id);
-          },
+          onSelect: handleTreeSelect,
         }}
         rowSelection="single"
       />
