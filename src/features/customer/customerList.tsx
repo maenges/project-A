@@ -300,17 +300,18 @@ const CustomerPage = () => {
   });
 
   const onSearch = () => {
-    callApi({
-      service: Service.POSTMAN,
-      url: '/api/notice',
-      method: Method.GET,
-      params: {},
-    }).then((res) => {
-      if (res.successOrNot !== 'Y') {
-        return toast.error(res.HeaderMsg);
-      }
-      setRowData(res.data);
-    });
+    // 충환전 끝나면 작성
+    // callApi({
+    //   service: Service.POSTMAN,
+    //   url: '/api/notice',
+    //   method: Method.GET,
+    //   params: {},
+    // }).then((res) => {
+    //   if (res.successOrNot !== 'Y') {
+    //     return toast.error(res.HeaderMsg);
+    //   }
+    //   setRowData(res.data);
+    // });
   };
 
   const fetchCustomerListByGroupKey = (groupKey: string) => {

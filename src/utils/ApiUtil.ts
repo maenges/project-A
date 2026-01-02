@@ -231,18 +231,18 @@ const getInstance = (
         data: {},
       };
 
-      const expiredError: CommonResponse = {
-        successOrNot: 'N',
-        statusCode: StatusCode.SESSION_EXPIRED,
-        data: {},
-      };
+      // const expiredError: CommonResponse = {
+      //   successOrNot: 'N',
+      //   statusCode: StatusCode.SESSION_EXPIRED,
+      //   data: {},
+      // };
 
-      const blockedError: CommonResponse = {
-        successOrNot: 'N',
-        statusCode: StatusCode.BLOCKED_USER,
-        message: '차단된 사용자입니다. 관리자에게 문의해주세요.',
-        data: {},
-      };
+      // const blockedError: CommonResponse = {
+      //   successOrNot: 'N',
+      //   statusCode: StatusCode.BLOCKED_USER,
+      //   message: '차단된 사용자입니다. 관리자에게 문의해주세요.',
+      //   data: {},
+      // };
 
       // const alreadyExists: CommonResponse = {
       //   successOrNot: 'N',
@@ -348,13 +348,13 @@ const getInstance = (
         }
       }
 
-      if (status === '403') {
-        return blockedError;
-      }
+      // if (status === '403') {
+      //   return blockedError;
+      // }
 
-      if (status === '401') {
-        return expiredError;
-      }
+      // if (status === '401') {
+      //   return expiredError;
+      // }
 
       // 4xx 등 비-2xx 응답이 JSON(CommonResponse 형태)로 내려오는 경우 message -> HeaderMsg 매핑
       if (error.response?.data && typeof error.response.data === 'object') {
