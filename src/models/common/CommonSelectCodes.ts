@@ -69,7 +69,7 @@ export const UNIT = [
 // 신규
 
 export const PartnerOptions = [
-  { value: 'all', label: '전체' },
+  { value: 'ALL', label: '전체' },
   { value: 'PARTNER', label: '파트너' },
   { value: 'CUSTOMER', label: '고객' },
 ];

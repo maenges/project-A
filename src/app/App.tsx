@@ -61,7 +61,7 @@ import {
   SystemLoginRecordPage,
   SystemAnswerPage,
   SystemMessagePage,
-  SystemIpBlockPage,
+  SystemBlockPage,
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
 import { PartnerPartnerListPage } from '@/features/partner';
@@ -492,10 +492,10 @@ function App() {
                             }
                           />
                           <Route
-                            path="/system/ipBlock"
+                            path="/system/block"
                             element={
                               <PrivateRoute>
-                                <SystemIpBlockPage />
+                                <SystemBlockPage />
                               </PrivateRoute>
                             }
                           />

@@ -300,7 +300,7 @@ const CustomerPage = () => {
   });
 
   const onSearch = () => {
-    // 충환전 끝나면 작성
+    // 충환전 끝나면 작성, 신규등록후 재조회도 해야함
     // callApi({
     //   service: Service.POSTMAN,
     //   url: '/api/notice',
@@ -404,7 +404,6 @@ const CustomerPage = () => {
         <EtsButton
           type="grey"
           onClick={async () => {
-            console.log('selectedTreeId:', selectedTreeId);
             const canProceed = await storeConfirm();
             if (canProceed) {
               setNewModalOpen(true);

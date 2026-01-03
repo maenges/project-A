@@ -16,6 +16,7 @@ type Notices = {
   notice_key: number;
   notice_target_type: string;
   notice_title: string;
+  notice_content?: string;
   created: string;
   notice_active: boolean;
   [key: string]: any;
@@ -27,6 +28,8 @@ const Notice = () => {
   const { toast } = useNotify();
   const [rowData, setRowData] = useState<Notices[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<Notices | null>(null);
 
   const columnDefs: (ColDef | ColGroupDef)[] = [
     EtsColumnPreset.SelectionBoxPreset({
@@ -90,6 +93,7 @@ const Notice = () => {
       url: '/api/notice',
       method: Method.GET,
       params: {},
+      config: { isLoading: true },
     }).then((res) => {
       if (res.successOrNot !== 'Y') {
         return toast.error(res.HeaderMsg);
@@ -98,8 +102,89 @@ const Notice = () => {
     });
   };
 
+  const updateRowNotice = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    // stopEditing 이후 rowStatus(U) 반영 타이밍 보장
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const modifiedNodes: any[] = [];
+    gridRef.current?.api.forEachNode((node) => {
+      const status = node?.data?.rowStatus;
+      if (String(status).toUpperCase() === 'U') {
+        modifiedNodes.push(node);
+      }
+    });
+
+    if (modifiedNodes.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    const payload = modifiedNodes
+      .map((node) => {
+        if (!node.data) return null;
+
+        const { originData, rowStatus, ...currentData } = node.data as any;
+        const changedData: Record<string, any> = {
+          notice_key: currentData.notice_key,
+        };
+
+        Object.keys(currentData).forEach((key) => {
+          if (key === 'no' || key === 'created') return;
+          const currentValue = currentData[key];
+          const originalValue = originData ? originData[key] : undefined;
+          if (currentValue !== originalValue) {
+            changedData[key] = currentValue;
+          }
+        });
+
+        return Object.keys(changedData).length > 1 ? changedData : null;
+      })
+      .filter(Boolean) as Array<Record<string, any>>;
+
+    if (payload.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/notice',
+      method: Method.PATCH,
+      params: {
+        bodyParams: {
+          notice_key: payload[0]?.notice_key,
+          notice_active: payload[0]?.notice_active,
+        },
+      },
+      config: { isLoading: true },
+    }).then((res) => {
+      if (res.successOrNot !== 'Y') {
+        return toast.error(res.HeaderMsg);
+      }
+
+      toast.success('저장되었습니다.');
+      onSearch();
+      setIsEditable(false);
+    });
+  };
+
   const handleDeleteRow = () => {
     gridRef.current?.deleteBySelectedRows();
+  };
+
+  const handleUpdatedRow = async () => {
+    const selected = (gridRef.current?.getSelectedData() ?? []) as Notices[];
+    const row = selected[0];
+    if (!row) {
+      toast.error('수정할 항목을 선택하세요.');
+      return;
+    }
+    setSelectedRow(row);
+    setUpdateModalOpen(true);
   };
 
   const newModal = newModalOpen && (
@@ -108,6 +193,7 @@ const Notice = () => {
       onClose={() => {
         setNewModalOpen(false);
       }}
+      onSaved={onSearch}
     />
   );
 
@@ -128,6 +214,16 @@ const Notice = () => {
             </EtsButton>
             <EtsButton
               type="grey"
+              onClick={async () => {
+                if (gridRef.current) {
+                  await handleUpdatedRow();
+                }
+              }}
+            >
+              수정
+            </EtsButton>
+            <EtsButton
+              type="grey"
               onClick={() => {
                 if (gridRef.current) {
                   gridRef.current.api.stopEditing();
@@ -138,7 +234,12 @@ const Notice = () => {
             >
               취소
             </EtsButton>
-            <EtsButton type="blue" onClick={async () => {}}>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                updateRowNotice();
+              }}
+            >
               저장
             </EtsButton>
           </>
@@ -169,14 +270,37 @@ const Notice = () => {
   return (
     <>
       {newModal}
+      {updateModalOpen && selectedRow && (
+        <NoticeNewModal
+          open={updateModalOpen}
+          onClose={() => {
+            setUpdateModalOpen(false);
+            setSelectedRow(null);
+            setIsEditable(false);
+          }}
+          onSaved={() => {
+            setUpdateModalOpen(false);
+            setSelectedRow(null);
+            onSearch();
+            setIsEditable(false);
+          }}
+          mode="edit"
+          noticeKey={selectedRow.notice_key}
+          initialValues={{
+            notice_target_type: selectedRow.notice_target_type,
+            notice_title: selectedRow.notice_title,
+          }}
+          initialContent={selectedRow.notice_content ?? ''}
+        />
+      )}
       <PageTemplate
         title="공지사항"
         gridRef={gridRef}
         columnDefs={columnDefs}
         buttonComponent={buttonComponent}
-        isRowSelectable={() => isEditable}
         rowData={rowData}
-        rowSelection="multiple"
+        isRowSelectable={() => isEditable}
+        rowSelection="single"
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
         size="no-search"

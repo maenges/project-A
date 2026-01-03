@@ -91,7 +91,6 @@ const NoticeNewModal = ({ open, onClose, groupKey }: NoticeNewModalProps) => {
     }
 
     const { user_password_confirm: _user_password_confirm, ...payload } = values;
-    console.log(payload);
     const res = await callApi({
       service: Service.POSTMAN,
       url: '/api/user',
