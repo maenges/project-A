@@ -343,7 +343,7 @@ const CustomerPage = () => {
 
   const storeConfirm = async (): Promise<boolean> => {
     if (!selectedTreeId) {
-      toast.error('매장을 선택해 주세요.');
+      toast.info('매장을 선택해 주세요.');
       return false;
     }
     const res = await callApi({
@@ -359,7 +359,7 @@ const CustomerPage = () => {
       return false;
     }
     if (res.data?.group_type !== 'ST') {
-      toast.error('회원 신규 등록은 매장 선택 후에만 가능합니다.');
+      toast.info('회원 신규 등록은 매장 선택 후에만 가능합니다.');
       return false;
     }
     return true;

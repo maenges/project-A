@@ -8,15 +8,21 @@ type Props = {
   isDarkMode?: boolean;
   width?: number | string;
   height?: number;
+  readOnly?: boolean;
 };
 
-const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }) => {
+const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height, readOnly }) => {
   const editorRef = useRef<any>(null);
   const theme = useTheme();
 
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
+
+    if (typeof readOnly === 'boolean') {
+      editor.setReadOnly(readOnly);
+    }
+
     const current = editor.getData();
     if (current !== value) {
       editor.setData(value || '');
@@ -24,7 +30,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }
     const body = editor.document.getBody();
     body.setStyle('background', isDarkMode ? theme.palette.background.paper : '#ffffff');
     body.setStyle('color', isDarkMode ? '#ffffff' : '#111827');
-  }, [isDarkMode, value]);
+  }, [isDarkMode, value, readOnly]);
 
   return (
     <CKEditor
@@ -32,6 +38,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }
       initData={value}
       config={{
         height: typeof height === 'number' ? height : 400,
+        readOnly: !!readOnly,
         versionCheck: false,
         removePlugins: 'exportpdf,cloudservices',
         toolbar: [
@@ -58,11 +65,16 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height }
       }}
       style={{ width: width ?? '100%' }}
       onChange={(evt: any) => {
+        if (readOnly) return;
         const data = evt.editor.getData();
         onChange?.(data);
       }}
       onInstanceReady={(evt: any) => {
         editorRef.current = evt.editor;
+
+        if (typeof readOnly === 'boolean') {
+          evt.editor.setReadOnly(readOnly);
+        }
 
         const body = evt.editor.document.getBody();
         body.setStyle('background', isDarkMode ? theme.palette.background.paper : '#ffffff');

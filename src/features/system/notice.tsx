@@ -13,7 +13,7 @@ import NoticeNewModal from './noticeNewModal';
 
 type Notices = {
   no: string;
-  notice_key: number;
+  notice_key: string;
   notice_target_type: string;
   notice_title: string;
   notice_content?: string;
@@ -102,28 +102,36 @@ const Notice = () => {
     });
   };
 
-  const updateRowNotice = async () => {
+  // GridRow 저장 버튼
+  const handleSave = async () => {
     if (gridRef.current) {
       gridRef.current.api.stopEditing();
     }
 
-    // stopEditing 이후 rowStatus(U) 반영 타이밍 보장
+    // stopEditing 이후 rowStatus 반영 타이밍 보장
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-    const modifiedNodes: any[] = [];
+    const deleteNodes: any[] = [];
+    const updateNodes: any[] = [];
+
     gridRef.current?.api.forEachNode((node) => {
-      const status = node?.data?.rowStatus;
-      if (String(status).toUpperCase() === 'U') {
-        modifiedNodes.push(node);
-      }
+      const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status === 'D') deleteNodes.push(node);
+      if (status === 'U') updateNodes.push(node);
     });
 
-    if (modifiedNodes.length === 0) {
+    const deletePayload = deleteNodes
+      .map((node) => node?.data?.notice_key)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      .map((notice_key) => ({ notice_key }));
+
+    if (updateNodes.length === 0 && deletePayload.length === 0) {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
 
-    const payload = modifiedNodes
+    // 전값 비교 후 변경된 컬럼 값만 추출 (U)
+    const updatePayload = updateNodes
       .map((node) => {
         if (!node.data) return null;
 
@@ -133,6 +141,7 @@ const Notice = () => {
         };
 
         Object.keys(currentData).forEach((key) => {
+          // no, created 필드는 제외
           if (key === 'no' || key === 'created') return;
           const currentValue = currentData[key];
           const originalValue = originData ? originData[key] : undefined;
@@ -145,34 +154,59 @@ const Notice = () => {
       })
       .filter(Boolean) as Array<Record<string, any>>;
 
-    if (payload.length === 0) {
+    if (updatePayload.length === 0 && deletePayload.length === 0) {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
 
-    callApi({
-      service: Service.POSTMAN,
-      url: '/api/notice',
-      method: Method.PATCH,
-      params: {
-        bodyParams: {
-          notice_key: payload[0]?.notice_key,
-          notice_active: payload[0]?.notice_active,
-        },
-      },
-      config: { isLoading: true },
-    }).then((res) => {
-      if (res.successOrNot !== 'Y') {
-        return toast.error(res.HeaderMsg);
-      }
+    // 삭제(D) + 수정(U) 한번에 처리
+    const requests: Array<Promise<any>> = [];
+    if (deletePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/notice',
+          method: Method.DELETE,
+          params: {
+            bodyParams: deletePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+    if (updatePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/notice',
+          method: Method.PATCH,
+          params: {
+            bodyParams: updatePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
 
-      toast.success('저장되었습니다.');
-      onSearch();
-      setIsEditable(false);
-    });
+    const results = await Promise.all(requests);
+    const failed = results.find((r) => r?.successOrNot !== 'Y');
+    if (failed) {
+      toast.error(failed.HeaderMsg);
+      return;
+    }
+
+    toast.success('저장되었습니다.');
+    onSearch();
+    setIsEditable(false);
   };
 
   const handleDeleteRow = () => {
+    const selected = (gridRef.current?.getSelectedData() ?? []) as Notices[];
+    const row = selected[0];
+    if (!row) {
+      toast.info('삭제할 항목을 선택하세요.');
+      return;
+    }
     gridRef.current?.deleteBySelectedRows();
   };
 
@@ -180,7 +214,7 @@ const Notice = () => {
     const selected = (gridRef.current?.getSelectedData() ?? []) as Notices[];
     const row = selected[0];
     if (!row) {
-      toast.error('수정할 항목을 선택하세요.');
+      toast.info('수정할 항목을 선택하세요.');
       return;
     }
     setSelectedRow(row);
@@ -237,7 +271,7 @@ const Notice = () => {
             <EtsButton
               type="blue"
               onClick={() => {
-                updateRowNotice();
+                handleSave();
               }}
             >
               저장
@@ -277,6 +311,11 @@ const Notice = () => {
             setUpdateModalOpen(false);
             setSelectedRow(null);
             setIsEditable(false);
+            // 모달에서 저장하지 않고 닫은 경우에도, 그리드가 수정 중이던 값으로 남지 않도록 재조회
+            if (gridRef.current) {
+              gridRef.current.api.stopEditing();
+            }
+            onSearch();
           }}
           onSaved={() => {
             setUpdateModalOpen(false);

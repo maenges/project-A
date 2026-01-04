@@ -20,22 +20,13 @@ import { EtsButton } from '@/components/EtsCommon';
 import { EtsSelectComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
 
 type AnswerProps = {
-  no: number;
-  account_key: string;
-  before_key: string;
-  before_account: string;
-  before_won: string;
-  new_key: string;
-  new_account: string;
-  new_won: string;
-  updated: string;
   [key: string]: any;
 };
 
 type FormValues = {
   startDate: string;
   endDate: string;
-  process: string;
+  noticeProcess: string;
 };
 
 const Answer: React.FC = () => {
@@ -62,7 +53,7 @@ const Answer: React.FC = () => {
       width: 60,
     }),
     EtsColumnPreset.TextPreset({
-      field: 'account_key',
+      field: 'notice_key',
       headerName: 'id',
       hide: true,
     }),
@@ -124,10 +115,9 @@ const Answer: React.FC = () => {
           const row = p?.data;
           if (!row) return;
           setSelectedRow(row);
-          console.log(row);
           callApi({
             service: Service.POSTMAN,
-            url: '/api/macro/reply',
+            url: '/api/answer/reply',
             method: Method.GET,
             params: {},
           }).then((res) => {
@@ -136,6 +126,8 @@ const Answer: React.FC = () => {
               return;
             }
             setModalData(res.data);
+            console.log(selectedRow);
+
             setModalOpen(true);
           });
         },
@@ -155,36 +147,43 @@ const Answer: React.FC = () => {
     // }
   });
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
-      process: 'all',
+      noticeProcess: 'ALL',
     },
     mode: 'onChange',
   });
 
-  const getQueryParams = () => {
-    const sendParams = {
-      startDate: startRangeDate ? startRangeDate.format('YYYYMMDD') : '',
-      endDate: endRangeDate ? endRangeDate.format('YYYYMMDD') : '',
-      // sactyp: watch('acType') === 'ALL' ? '' : watch('acType'),
-      // seg: watch('seg') === 'all' ? '' : watch('seg'),
-    };
+  // const getQueryParams = () => {
+  //   const sendParams = {
+  //     startDate: startRangeDate ? startRangeDate.format('YYYYMMDD') : '',
+  //     endDate: endRangeDate ? endRangeDate.format('YYYYMMDD') : '',
+  //     // sactyp: watch('acType') === 'ALL' ? '' : watch('acType'),
+  //     // seg: watch('seg') === 'all' ? '' : watch('seg'),
+  //   };
 
-    return sendParams;
-  };
+  //   return sendParams;
+  // };
 
   const onSearch: SubmitHandler<FormValues> = () => {
-    const sendParams = getQueryParams();
+    // const sendParams = getQueryParams();
+
+    const { startDate, endDate, noticeProcess } = getValues();
 
     callApi({
       service: Service.POSTMAN,
       url: '/api/answer',
       method: Method.GET,
       params: {
-        queryParams: sendParams,
+        queryParams: {
+          startDate: startDate,
+          endDate: endDate,
+          noticeProcess: noticeProcess === 'ALL' ? '' : noticeProcess,
+        },
       },
+      config: { isLoading: true },
     }).then((res) => {
       if (res.successOrNot !== 'Y') {
         return toast.error(res.HeaderMsg);
@@ -217,7 +216,12 @@ const Answer: React.FC = () => {
       onClose={() => {
         setModalOpen(false);
       }}
+      onSaved={() => {
+        handleSubmit(onSearch)();
+      }}
+      // 넘긴값 + 조회 값
       data={{
+        noticeKey: selectedRow?.notice_key,
         userId: selectedRow?.user_id,
         nickName: selectedRow?.user_nick,
         title: selectedRow?.notice_title,
@@ -228,7 +232,58 @@ const Answer: React.FC = () => {
   );
 
   const handleDeleteRow = () => {
+    const selected = (gridRef.current?.getSelectedData() ?? []) as AnswerProps[];
+    const row = selected[0];
+    if (!row) {
+      toast.info('삭제할 항목을 선택하세요.');
+      return;
+    }
     gridRef.current?.deleteBySelectedRows();
+  };
+
+  // GridRow 저장 버튼
+  const handleSave = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    // stopEditing 이후 rowStatus 반영 타이밍 보장
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const deleteNodes: any[] = [];
+
+    gridRef.current?.api.forEachNode((node) => {
+      const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status === 'D') deleteNodes.push(node);
+    });
+
+    const deletePayload = deleteNodes
+      .map((node) => node?.data?.notice_key)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      .map((notice_key) => ({ notice_key }));
+
+    if (deletePayload.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    await callApi({
+      service: Service.POSTMAN,
+      url: '/api/answer',
+      method: Method.DELETE,
+      params: {
+        bodyParams: deletePayload,
+      },
+      config: { isLoading: true },
+    }).then((res) => {
+      if (res.successOrNot !== 'Y') {
+        toast.error(res.HeaderMsg);
+        return;
+      }
+      toast.success('저장되었습니다.');
+      handleSubmit(onSearch)();
+      setIsEditable(false);
+    });
   };
 
   const searchComponent = (
@@ -244,7 +299,7 @@ const Answer: React.FC = () => {
           />
           <EtsSelectComponent
             control={control}
-            name="process"
+            name="noticeProcess"
             label="처리 상태"
             options={processStatusOptions}
           />
@@ -290,7 +345,12 @@ const Answer: React.FC = () => {
             >
               취소
             </EtsButton>
-            <EtsButton type="blue" onClick={async () => {}}>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                handleSave();
+              }}
+            >
               저장
             </EtsButton>
           </>

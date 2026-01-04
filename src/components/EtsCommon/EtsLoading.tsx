@@ -1,4 +1,5 @@
 import { Backdrop, CircularProgress } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import { styled } from 'styled-components';
 
 export interface EtsLoadingProps {
@@ -14,7 +15,6 @@ const LoadingContainer = styled.div`
 `;
 
 const LoadingText = styled.div`
-  color: #333;
   font-size: 16px;
   font-weight: 500;
 `;
@@ -25,17 +25,27 @@ const LoadingText = styled.div`
  * @param hasBackdrop - 배경 오버레이 표시 여부 (기본값: true)
  */
 const EtsLoading = ({ open, hasBackdrop = true }: EtsLoadingProps) => {
+  const theme = useTheme();
+
   return (
     <Backdrop
       open={open}
       sx={{
         zIndex: 9999,
-        backgroundColor: hasBackdrop ? 'rgba(255, 255, 255, 0.5)' : 'transparent',
+        backgroundColor: hasBackdrop
+          ? alpha(theme.palette.background.default, theme.palette.mode === 'dark' ? 0.6 : 0.5)
+          : 'transparent',
       }}
     >
       <LoadingContainer>
-        <CircularProgress size={60} thickness={4} sx={{ color: '#051766' }} />
-        <LoadingText>Loading...</LoadingText>
+        <CircularProgress
+          size={60}
+          thickness={4}
+          sx={{
+            color: theme.palette.primary.main,
+          }}
+        />
+        <LoadingText style={{ color: theme.palette.text.primary }}>Loading...</LoadingText>
       </LoadingContainer>
     </Backdrop>
   );

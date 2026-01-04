@@ -112,7 +112,7 @@ export const AccountKeyOptions = [
 ];
 
 export const processStatusOptions = [
-  { value: 'all', label: '전체' },
+  { value: 'ALL', label: '전체' },
   { value: 'PENDING', label: '대기' },
   { value: 'COMPLETED', label: '완료' },
 ];

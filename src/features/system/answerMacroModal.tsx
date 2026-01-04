@@ -94,6 +94,111 @@ const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
     });
   };
 
+  const handdleSave = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const createNodes: any[] = [];
+    const updateNodes: any[] = [];
+    const deleteNodes: any[] = [];
+
+    gridRef.current?.api.forEachNode((node) => {
+      const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status === 'I') createNodes.push(node);
+      if (status === 'U') updateNodes.push(node);
+      if (status === 'D') deleteNodes.push(node);
+    });
+
+    const insertPayload = createNodes
+      .map((node) => node?.data)
+      .filter(Boolean)
+      .map((row: any) => ({
+        macro_type: row?.macro_type ?? 'MACRO',
+        macro_title: row?.macro_title ?? '',
+        macro_content: row?.macro_content ?? '',
+        macro_active: !!row?.macro_active,
+      }));
+
+    // 업데이트는 키비교(diff) 없이, 변경된 로우 전체를 insert처럼 전송
+    const updatePayload = updateNodes
+      .map((node) => node?.data)
+      .filter(Boolean)
+      .map((row: any) => ({
+        macro_key: row?.macro_key ?? '',
+        macro_type: row?.macro_type ?? 'MACRO',
+        macro_title: row?.macro_title ?? '',
+        macro_content: row?.macro_content ?? '',
+        macro_active: !!row?.macro_active,
+      }))
+      .filter((row: any) => typeof row.macro_key === 'string' && row.macro_key.length > 0);
+
+    const deletePayload = deleteNodes
+      .map((node) => node?.data?.macro_key)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      .map((macro_key) => ({ macro_key }));
+
+    console.log({ insertPayload, updatePayload, deletePayload });
+    if (insertPayload.length === 0 && updatePayload.length === 0 && deletePayload.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    const requests: Array<Promise<any>> = [];
+    if (insertPayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/macro',
+          method: Method.POST,
+          params: {
+            bodyParams: insertPayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+    if (updatePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/macro',
+          method: Method.PATCH,
+          params: {
+            bodyParams: updatePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+    if (deletePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/macro',
+          method: Method.DELETE,
+          params: {
+            bodyParams: deletePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+
+    const results = await Promise.all(requests);
+    const failed = results.find((r) => r?.successOrNot !== 'Y');
+    if (failed) {
+      toast.error(failed.HeaderMsg);
+      return;
+    }
+
+    toast.success('저장되었습니다.');
+    onSearch();
+    setIsEditable(false);
+  };
+
   const handleAddRow = () => {
     const lastRowIndex = gridRef.current?.api.getDisplayedRowCount() ?? 0;
     gridRef.current?.addRow({
@@ -150,7 +255,12 @@ const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
             >
               취소
             </EtsButton>
-            <EtsButton type="blue" onClick={async () => {}}>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                handdleSave();
+              }}
+            >
               저장
             </EtsButton>
           </>

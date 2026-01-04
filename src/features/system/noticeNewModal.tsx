@@ -15,6 +15,7 @@ import { PartnerOptions } from '@/models/common/CommonSelectCodes';
 type FormValues = {
   notice_target_type: string;
   notice_title: string;
+  notice_type: string;
 };
 
 export type NoticeNewModalProps = {
@@ -22,7 +23,7 @@ export type NoticeNewModalProps = {
   onClose: () => void;
   onSaved?: () => void;
   mode?: 'create' | 'edit';
-  noticeKey?: number;
+  noticeKey?: string;
   initialValues?: Partial<FormValues>;
   initialContent?: string;
 };
@@ -44,6 +45,7 @@ const NoticeNewModal = ({
     defaultValues: {
       notice_target_type: initialValues?.notice_target_type ?? 'ALL',
       notice_title: initialValues?.notice_title ?? '',
+      notice_type: 'NOTICE',
     },
     mode: 'onChange',
   });
@@ -53,6 +55,7 @@ const NoticeNewModal = ({
     reset({
       notice_target_type: initialValues?.notice_target_type ?? 'ALL',
       notice_title: initialValues?.notice_title ?? '',
+      notice_type: 'NOTICE',
     });
     setContent(initialContent ?? '<p>내용입력</p>');
   }, [open, reset, initialValues?.notice_target_type, initialValues?.notice_title, initialContent]);
@@ -81,6 +84,7 @@ const NoticeNewModal = ({
         bodyParams: {
           ...(isEditMode ? { notice_key: noticeKey } : {}),
           ...values,
+          notice_type: 'NOTICE',
           notice_content: content,
         },
       },

@@ -13,7 +13,7 @@ import MessageSendModal from './messageSendModal';
 
 type Messages = {
   no: string;
-  notice_key: number;
+  notice_key: string;
   notice_target_type: string;
   notice_title: string;
   created: string;

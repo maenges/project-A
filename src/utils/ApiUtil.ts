@@ -430,7 +430,9 @@ export const callApi = async (apiRequest: ApiRequest): Promise<CommonResponse> =
       );
       break;
     case Method.DELETE:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url);
+      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url, {
+        data: apiRequest.params?.bodyParams,
+      });
       break;
     default:
       break;
@@ -473,7 +475,9 @@ export const callApiForFile = async (apiRequest: ApiRequest): Promise<any> => {
       );
       break;
     case Method.DELETE:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url);
+      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url, {
+        data: apiRequest.params?.bodyParams,
+      });
       break;
     default:
       throw Error('Not Supported Method');
