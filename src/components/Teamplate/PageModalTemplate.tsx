@@ -10,7 +10,7 @@ import SearchPanel from './SearchPanel';
 import ButtonPanel, { ButtonPanelProps } from './ButtonPanel';
 import { EtsGrid } from '../EtsGrid';
 import { ColDef, IDatasource } from 'ag-grid-community';
-import EtsLeftTree from '@/components/EtsCommon/EtsLeftTree';
+import EtsLeftTree, { type EtsLeftTreeProps } from '@/components/EtsCommon/EtsLeftTree';
 
 // const HeaderArea = styled(Stack)`
 //   display: flex;
@@ -38,6 +38,8 @@ export interface PageModalTemplateProps {
   buttonPanelProps?: Partial<ButtonPanelProps>;
   width?: number | string;
   tree?: boolean;
+  /** tree=true 일 때 좌측 트리(EtsLeftTree) props 전달용 */
+  leftTreeProps?: Partial<EtsLeftTreeProps>;
   // Grid props (optional)
   columnDefs?: ColDef[];
   rowData?: any[];
@@ -69,6 +71,7 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
   buttonPanelProps,
   width,
   tree = false,
+  leftTreeProps,
   // Grid props
   columnDefs,
   rowData = [],
@@ -90,6 +93,8 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
   // const { pathname } = useLocation();
   const theme = useTheme();
   const gridHeight = useMemo(() => 'calc(100vh - 500px)', []);
+
+  const { sx: leftTreeSx, ...restLeftTreeProps } = leftTreeProps ?? {};
 
   // Prevent body scroll flicker when opening/closing modal
   useEffect(() => {
@@ -267,10 +272,14 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             >
               <EtsLeftTree
                 checkable
-                sx={{
-                  mt: 3,
-                  height: '95%',
-                }}
+                {...restLeftTreeProps}
+                sx={[
+                  {
+                    mt: 3,
+                    height: '95%',
+                  },
+                  leftTreeSx,
+                ]}
               />
             </Box>
           )}

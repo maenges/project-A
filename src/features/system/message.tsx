@@ -12,13 +12,33 @@ import { buttonForm } from '@/assets/style';
 import MessageSendModal from './messageSendModal';
 
 type Messages = {
-  no: string;
-  notice_key: string;
-  notice_target_type: string;
-  notice_title: string;
-  created: string;
-  notice_active: boolean;
   [key: string]: any;
+};
+
+const toYesNo = (value: unknown) => {
+  if (value === true || value === 'true') return '예';
+  if (value === false || value === 'false') return '아니오';
+  return value;
+};
+
+const stripHtmlToText = (value: unknown) => {
+  if (value === null || value === undefined) return '';
+  if (typeof value !== 'string') return String(value);
+
+  const html = value
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\s*\/\s*p\s*>/gi, '\n')
+    .replace(/<\s*\/\s*div\s*>/gi, '\n');
+
+  if (typeof document !== 'undefined') {
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    const text = (el.textContent ?? el.innerText ?? '').trim();
+    return text.replace(/\n{3,}/g, '\n\n');
+  }
+
+  // SSR/비브라우저 환경 fallback
+  return html.replace(/<[^>]*>/g, '').trim();
 };
 
 const Message = () => {
@@ -39,17 +59,13 @@ const Message = () => {
       headerName: 'No',
       width: 60,
     }),
+
     EtsColumnPreset.TextPreset({
       field: 'notice_key',
       headerName: 'ID',
       hide: true,
     }),
-    // EtsColumnPreset.TextPreset({
-    //   field: 'notice_target_type',
-    //   headerName: '공지대상',
-    //   width: 200,
-    //   flex: 1,
-    // }),
+
     EtsColumnPreset.TextPreset({
       field: 'notice_title',
       headerName: '제목',
@@ -58,14 +74,14 @@ const Message = () => {
     }),
 
     EtsColumnPreset.TextPreset({
-      field: 'notice_content',
+      field: 'notice_content_text',
       headerName: '내용',
       width: 200,
       flex: 1,
     }),
 
     EtsColumnPreset.TextPreset({
-      field: 'notice_taget_id',
+      field: 'notice_target_id',
       headerName: '수신자',
       width: 200,
     }),
@@ -107,12 +123,71 @@ const Message = () => {
       if (res.successOrNot !== 'Y') {
         return toast.error(res.HeaderMsg);
       }
-      setRowData(res.data);
+
+      const normalized = (Array.isArray(res.data) ? res.data : []).map((row: any) => {
+        const rawReceive = row?.notice_receive ?? row?.notice_recive;
+        return {
+          ...row,
+          notice_receive: toYesNo(rawReceive),
+          notice_content_text: stripHtmlToText(row?.notice_content),
+        };
+      });
+
+      setRowData(normalized);
     });
   };
 
   const handleDeleteRow = () => {
+    const selected = (gridRef.current?.getSelectedData() ?? []) as Messages[];
+    const row = selected[0];
+    if (!row) {
+      toast.info('삭제할 항목을 선택하세요.');
+      return;
+    }
     gridRef.current?.deleteBySelectedRows();
+  };
+
+  const handleSave = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const deleteNodes: any[] = [];
+    gridRef.current?.api.forEachNode((node) => {
+      const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status === 'D') deleteNodes.push(node);
+    });
+
+    const deletePayload = deleteNodes
+      .map((node) => node?.data?.notice_key)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      .map((notice_key) => ({ notice_key }));
+
+    if (deletePayload.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/message',
+      method: Method.DELETE,
+      params: {
+        bodyParams: deletePayload,
+      },
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      toast.error(res.HeaderMsg);
+      return;
+    }
+
+    toast.success('삭제되었습니다.');
+    onSearch();
+    setIsEditable(false);
   };
 
   const sendModal = sendModalOpen && (
@@ -121,6 +196,7 @@ const Message = () => {
       onClose={() => {
         setSendModalOpen(false);
       }}
+      onSaved={onSearch}
     />
   );
 
@@ -151,7 +227,7 @@ const Message = () => {
             >
               취소
             </EtsButton>
-            <EtsButton type="blue" onClick={async () => {}}>
+            <EtsButton type="blue" onClick={handleSave}>
               저장
             </EtsButton>
           </>

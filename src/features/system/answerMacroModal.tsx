@@ -217,6 +217,12 @@ const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
   };
 
   const handleDeleteRow = () => {
+    const selected = (gridRef.current?.getSelectedData() ?? []) as Macro[];
+    const row = selected[0];
+    if (!row) {
+      toast.info('삭제할 항목을 선택하세요.');
+      return;
+    }
     gridRef.current?.deleteBySelectedRows();
   };
 
