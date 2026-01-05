@@ -75,7 +75,7 @@ export const PartnerOptions = [
 ];
 
 export const MemberTypeOptions = [
-  { value: 'all', label: '전체' },
+  { value: 'ALL', label: '전체' },
   { value: 'SH', label: '부본사' },
   { value: 'BR', label: '지사' },
   { value: 'DM', label: '총판' },
@@ -84,7 +84,7 @@ export const MemberTypeOptions = [
 ];
 
 export const AccountKeyOptions = [
-  { value: 'all', label: '전체' },
+  { value: 'ALL', label: '전체' },
   { value: '004', label: '국민은행' },
   { value: '088', label: '신한은행' },
   { value: '020', label: '우리은행' },

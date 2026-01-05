@@ -34,7 +34,7 @@ type AccountRecord = {
 type FormValues = {
   startDate: string;
   endDate: string;
-  type: string;
+  userType: string;
 };
 
 const AccountChange: React.FC = () => {
@@ -119,35 +119,28 @@ const AccountChange: React.FC = () => {
     // }
   });
 
-  const { control, handleSubmit } = useForm<FormValues>({
+  const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {
-      startDate: dayjs().startOf('month').format('YYYYMMDD'),
-      endDate: endRangeDate?.format('YYYYMMDD'),
-      type: 'all',
+      startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
+      endDate: dayjs().format('YYYYMMDD'),
+      userType: 'ALL',
     },
     mode: 'onChange',
   });
 
-  const getQueryParams = () => {
-    const sendParams = {
-      startDate: startRangeDate ? startRangeDate.format('YYYYMMDD') : '',
-      endDate: endRangeDate ? endRangeDate.format('YYYYMMDD') : '',
-      // sactyp: watch('acType') === 'ALL' ? '' : watch('acType'),
-      // seg: watch('seg') === 'all' ? '' : watch('seg'),
-    };
-
-    return sendParams;
-  };
-
   const onSearch: SubmitHandler<FormValues> = () => {
-    const sendParams = getQueryParams();
+    const { startDate, endDate, userType } = getValues();
 
     callApi({
       service: Service.POSTMAN,
       url: '/api/account-record',
       method: Method.GET,
       params: {
-        queryParams: sendParams,
+        queryParams: {
+          startDate: startDate,
+          endDate: endDate,
+          type: userType === 'ALL' ? '' : userType,
+        },
       },
     }).then((res) => {
       if (res.successOrNot !== 'Y') {
@@ -155,8 +148,10 @@ const AccountChange: React.FC = () => {
       }
 
       const keyLabelMap = new Map(AccountKeyOptions.map((opt) => [opt.value, opt.label]));
+      const memberTypeLabelMap = new Map(MemberTypeOptions.map((opt) => [opt.value, opt.label]));
       const mapped = (res.data || []).map((row: any) => ({
         ...row,
+        user_type: memberTypeLabelMap.get(row?.user_type) ?? row?.user_type ?? '',
         before_key: keyLabelMap.get(row?.before_key) ?? row?.before_key ?? '',
         new_key: keyLabelMap.get(row?.new_key) ?? row?.new_key ?? '',
       }));
@@ -170,6 +165,9 @@ const AccountChange: React.FC = () => {
       open={newModalOpen}
       onClose={() => {
         setNewModalOpen(false);
+      }}
+      onSaved={() => {
+        handleSubmit(onSearch)();
       }}
     />
   );
@@ -187,7 +185,7 @@ const AccountChange: React.FC = () => {
           />
           <EtsSelectComponent
             control={control}
-            name="type"
+            name="userType"
             label="회원 유형"
             options={MemberTypeOptions}
           />

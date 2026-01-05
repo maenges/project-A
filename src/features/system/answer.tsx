@@ -156,20 +156,7 @@ const Answer: React.FC = () => {
     mode: 'onChange',
   });
 
-  // const getQueryParams = () => {
-  //   const sendParams = {
-  //     startDate: startRangeDate ? startRangeDate.format('YYYYMMDD') : '',
-  //     endDate: endRangeDate ? endRangeDate.format('YYYYMMDD') : '',
-  //     // sactyp: watch('acType') === 'ALL' ? '' : watch('acType'),
-  //     // seg: watch('seg') === 'all' ? '' : watch('seg'),
-  //   };
-
-  //   return sendParams;
-  // };
-
   const onSearch: SubmitHandler<FormValues> = () => {
-    // const sendParams = getQueryParams();
-
     const { startDate, endDate, noticeProcess } = getValues();
 
     callApi({
