@@ -299,7 +299,7 @@ export const agGridStyles = css`
   }
 
   .ag-theme-material .ag-ltr .ag-header-select-all {
-    margin-left: 20px !important;
+    margin-left: 0 !important;
   }
 
   .ag-cell-inline-editing {
@@ -509,6 +509,19 @@ export const agGridStyles = css`
   .ag-theme-material .ag-checkbox-input-wrapper input[type='checkbox'] {
     width: 18px !important;
     height: 18px !important;
+  }
+
+  /* Selection 컬럼(행 체크박스 + 헤더 전체선택)은 더 크게 표시 */
+  .ag-theme-material .ag-selection-checkbox .ag-checkbox-input-wrapper,
+  .ag-theme-material .ag-header-select-all .ag-checkbox-input-wrapper {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .ag-theme-material .ag-selection-checkbox .ag-checkbox-input-wrapper input[type='checkbox'],
+  .ag-theme-material .ag-header-select-all .ag-checkbox-input-wrapper input[type='checkbox'] {
+    width: 24px !important;
+    height: 24px !important;
   }
 
   .ag-theme-material .ag-checkbox-input-wrapper.ag-checked {

@@ -35,7 +35,7 @@ const Notice = () => {
     EtsColumnPreset.SelectionBoxPreset({
       headerName: '',
       width: 60,
-      headerCheckboxSelection: true,
+      headerCheckboxSelection: false,
     }),
     EtsColumnPreset.IdPreset({
       field: 'no',

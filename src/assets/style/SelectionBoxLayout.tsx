@@ -13,11 +13,57 @@ const StyledAgGridSelectionBox = styled(Box)(() => ({
     outline: 'none !important',
   },
 
-  // 3. 선택용 컬럼의 헤더와 데이터 셀 내부의 체크박스를 중앙 정렬
-  '.ag-selection-cell, .ag-header-select-all': {
+  // 3. 선택용 컬럼(프리셋) 셀 중앙 정렬
+  '.ets-selection-cell': {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // 헤더: select-all 체크박스를 헤더 셀 중앙에 고정 (AG Grid 헤더 DOM 차이를 타지 않게 absolute 사용)
+  '.ets-selection-header': {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: '0 !important',
+    paddingRight: '0 !important',
+  },
+
+  // selection 헤더는 텍스트/정렬 아이콘 영역이 필요 없어서 숨김 (레이아웃 영향 제거)
+  '.ets-selection-header .ag-header-cell-comp-wrapper': {
+    display: 'none !important',
+  },
+
+  // 헤더 체크박스 자체도 margin 없이 중앙
+  '.ets-selection-header .ag-header-select-all': {
+    margin: '0 !important',
+    position: 'static !important',
+    inset: 'unset !important',
+    width: 'auto !important',
+    height: 'auto !important',
+    display: 'flex !important',
+    alignItems: 'center !important',
+    justifyContent: 'center !important',
+  },
+
+  // notice처럼 헤더 전체선택을 끈 경우: 헤더 체크박스 DOM 자체를 숨김
+  '.ets-selection-header--no-selectall .ag-header-select-all': {
+    display: 'none !important',
+  },
+
+  // AG Grid가 넣는 label(align-right용)이 공간을 차지하는 경우를 방지
+  '.ets-selection-header .ag-header-select-all .ag-label': {
+    display: 'none !important',
+  },
+
+  // 실제 체크박스(사각형)를 헤더 셀 정중앙에 고정
+  '.ets-selection-header .ag-header-select-all .ag-checkbox-input-wrapper': {
+    position: 'static !important',
+    top: 'auto !important',
+    left: 'auto !important',
+    margin: '0 !important',
+    transform: 'none !important',
   },
 
   // 4. 커스텀 체크박스 스타일 (데이터 행 + 헤더)
@@ -33,7 +79,13 @@ const StyledAgGridSelectionBox = styled(Box)(() => ({
       borderRadius: '4px',
       transition: 'all 0.2s ease-in-out',
       position: 'relative',
+      cursor: 'pointer',
     },
+
+  // 실제 input에도 손모양 커서 적용 (브라우저/테마별 hit-area 차이 보완)
+  '.ag-selection-checkbox input[type="checkbox"], .ag-header-select-all input[type="checkbox"]': {
+    cursor: 'pointer',
+  },
 
   // 5. AG-Grid 기본 체크 아이콘 숨기기 (데이터 행 + 헤더)
   '.ag-selection-checkbox .ag-checkbox-input-wrapper::after, .ag-header-select-all .ag-checkbox-input-wrapper::after':

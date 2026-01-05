@@ -17,6 +17,8 @@ import dayjs from 'dayjs';
 
 type Arg<T = void> = T extends void ? Partial<ColDef> : Partial<ColDef> & T;
 
+const EmptySelectionHeader = () => null;
+
 export const EtsColumnPreset = {
   /**
    * @description 텍스트 컬럼 프리셋
@@ -301,8 +303,8 @@ export const EtsColumnPreset = {
         }
 
         const defaultCheckBoxProps = {
-          width: '20px',
-          height: '20px',
+          width: '24px',
+          height: '24px',
           ...params?.context?.checkBoxProps,
         };
 
@@ -325,8 +327,8 @@ export const EtsColumnPreset = {
       cellEditorParams: (cellEditorParams: ICellEditorParams) => ({
         ...cellEditorParams,
         checkBoxProps: {
-          width: '20px',
-          height: '20px',
+          width: '24px',
+          height: '24px',
           ...params?.context?.checkBoxProps,
         },
       }),
@@ -502,11 +504,30 @@ export const EtsColumnPreset = {
   },
 
   SelectionBoxPreset: (params?: Arg): ColDef => {
+    const { headerCheckboxSelection, headerClass, cellClass, ...rest } = (params ??
+      {}) as Partial<ColDef> & {
+      headerClass?: any;
+      cellClass?: any;
+    };
+
+    const useHeaderSelectAll = headerCheckboxSelection ?? false;
+
+    const mergedHeaderClass = [
+      'ets-selection-header',
+      useHeaderSelectAll ? '' : 'ets-selection-header--no-selectall',
+      typeof headerClass === 'string' ? headerClass : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    const mergedCellClass = ['ets-selection-cell', typeof cellClass === 'string' ? cellClass : '']
+      .filter(Boolean)
+      .join(' ');
+
     return {
       headerName: params?.headerName ?? '',
       width: 60,
       maxWidth: 60,
-      headerCheckboxSelection: params?.headerCheckboxSelection ?? false,
       // checkboxSelection: false, // 커스텀 렌더러 사용
       checkboxSelection: true, // 커스텀 렌더러 사용
       showDisabledCheckboxes: true, // 행 selectable=false 시 표시 유지 의도면 유지
@@ -514,7 +535,13 @@ export const EtsColumnPreset = {
       pinned: 'left',
       suppressMovable: false,
       lockPosition: 'left',
-      ...params,
+      ...rest,
+      headerCheckboxSelection: useHeaderSelectAll,
+      // headerCheckboxSelection이 false여도 헤더에 checkbox DOM이 남는 케이스가 있어
+      // (CSS로도 제거 가능하도록 class를 부여하고) header 자체도 비워준다.
+      ...(useHeaderSelectAll ? {} : { headerComponent: EmptySelectionHeader }),
+      headerClass: mergedHeaderClass,
+      cellClass: mergedCellClass,
     };
   },
 

@@ -32,8 +32,9 @@ const EtsButton = ({
   // 기본 스타일: 라이트 모드 -> 흰 배경 + 검은 테두리/텍스트, 다크 모드 -> 흰 배경 + 테두리 제거 + 검은 텍스트
   const baseStyle = {
     width: 'auto',
-    height: '36px',
-    padding: '9.5px 12px',
+    minHeight: '36px',
+    height: 'auto',
+    padding: '8px 12px',
     borderRadius: 999,
     fontWeight: 700,
     fontSize: '13px',
@@ -48,8 +49,9 @@ const EtsButton = ({
     textAlign: 'center',
     fontFamily: 'Sans, sans-serif',
     fontStyle: 'normal',
-    lineHeight: '150%',
+    lineHeight: '1.5',
     boxShadow: 'none',
+    whiteSpace: 'nowrap' as const,
     '&:hover': {
       background: '#F7F8FA',
       filter: 'none',
