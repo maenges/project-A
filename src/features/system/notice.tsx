@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
@@ -22,7 +23,7 @@ type Notices = {
   [key: string]: any;
 };
 
-const Notice = () => {
+const Notice: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
   const gridRef = useRef<EtsGridRef<Notices>>(null);
   const { toast } = useNotify();

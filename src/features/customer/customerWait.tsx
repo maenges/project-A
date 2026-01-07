@@ -10,44 +10,16 @@ import { useNotify } from '@hooks/useNotify';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { buttonForm } from '@/assets/style';
-import MessageSendModal from './messageSendModal';
 
-type Messages = {
+type Customer = {
   [key: string]: any;
 };
 
-const toYesNo = (value: unknown) => {
-  if (value === true || value === 'true') return '예';
-  if (value === false || value === 'false') return '아니오';
-  return value;
-};
-
-const stripHtmlToText = (value: unknown) => {
-  if (value === null || value === undefined) return '';
-  if (typeof value !== 'string') return String(value);
-
-  const html = value
-    .replace(/<\s*br\s*\/?>/gi, '\n')
-    .replace(/<\s*\/\s*p\s*>/gi, '\n')
-    .replace(/<\s*\/\s*div\s*>/gi, '\n');
-
-  if (typeof document !== 'undefined') {
-    const el = document.createElement('div');
-    el.innerHTML = html;
-    const text = (el.textContent ?? el.innerText ?? '').trim();
-    return text.replace(/\n{3,}/g, '\n\n');
-  }
-
-  // SSR/비브라우저 환경 fallback
-  return html.replace(/<[^>]*>/g, '').trim();
-};
-
-const Message: React.FC = () => {
+const CustomerWait: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
-  const gridRef = useRef<EtsGridRef<Messages>>(null);
+  const gridRef = useRef<EtsGridRef<Customer>>(null);
   const { toast } = useNotify();
-  const [rowData, setRowData] = useState<Messages[]>([]);
-  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [rowData, setRowData] = useState<Customer[]>([]);
 
   const columnDefs: (ColDef | ColGroupDef)[] = [
     EtsColumnPreset.SelectionBoxPreset({
@@ -60,94 +32,63 @@ const Message: React.FC = () => {
       headerName: 'No',
       width: 60,
     }),
-
     EtsColumnPreset.TextPreset({
-      field: 'notice_key',
+      field: 'user_key',
       headerName: 'ID',
       hide: true,
     }),
-
     EtsColumnPreset.TextPreset({
-      field: 'notice_title',
-      headerName: '제목',
-      width: 200,
+      field: 'user_id',
+      headerName: '회원 ID',
+      width: 100,
       flex: 1,
     }),
 
     EtsColumnPreset.TextPreset({
-      field: 'notice_content_text',
-      headerName: '내용',
+      field: 'group_name',
+      headerName: '소속',
       width: 200,
       flex: 1,
     }),
-
-    EtsColumnPreset.TextPreset({
-      field: 'notice_target_id',
-      headerName: '수신자',
-      width: 200,
-    }),
-
-    EtsColumnPreset.TextPreset({
-      field: 'notice_receive',
-      headerName: '수신여부',
-      width: 200,
-    }),
-
     EtsColumnPreset.TextPreset({
       field: 'created',
-      headerName: '등록일시',
+      headerName: '가입일시',
+      width: 200,
+      flex: 1,
+    }),
+    EtsColumnPreset.CheckButtonPreset({
+      field: 'user_permission',
+      headerName: '승인 여부',
+      width: 100,
+      editable: isEditable,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_phone',
+      headerName: '전화번호',
       width: 200,
     }),
   ];
-
-  // const [_, setSaveOpen] = useState(false);
-  // const [__, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     onSearch();
   }, []);
 
-  // useActivate(() => {
-  //   // 데이터가 있으면 재조회 실행
-  //   if (rowData && rowData.length > 0) {
-  //     onSearch();
-  //   }
-  // });
-
   const onSearch = () => {
     callApi({
       service: Service.POSTMAN,
-      url: '/api/message',
+      url: '/api/user/wait',
       method: Method.GET,
       params: {},
+      config: { isLoading: true },
     }).then((res) => {
       if (res.successOrNot !== 'Y') {
         return toast.error(res.HeaderMsg);
       }
-
-      const normalized = (Array.isArray(res.data) ? res.data : []).map((row: any) => {
-        const rawReceive = row?.notice_receive ?? row?.notice_recive;
-        return {
-          ...row,
-          notice_receive: toYesNo(rawReceive),
-          notice_content_text: stripHtmlToText(row?.notice_content),
-        };
-      });
-
-      setRowData(normalized);
+      setRowData(res.data);
     });
   };
 
-  const handleDeleteRow = () => {
-    const selected = (gridRef.current?.getSelectedData() ?? []) as Messages[];
-    const row = selected[0];
-    if (!row) {
-      toast.info('삭제할 항목을 선택하세요.');
-      return;
-    }
-    gridRef.current?.deleteBySelectedRows();
-  };
-
+  // GridRow 저장 버튼
   const handleSave = async () => {
     if (gridRef.current) {
       gridRef.current.api.stopEditing();
@@ -155,51 +96,98 @@ const Message: React.FC = () => {
 
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
+    const updateNodes: any[] = [];
     const deleteNodes: any[] = [];
+
     gridRef.current?.api.forEachNode((node) => {
       const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status === 'U') updateNodes.push(node);
       if (status === 'D') deleteNodes.push(node);
     });
 
-    const deletePayload = deleteNodes
-      .map((node) => node?.data?.notice_key)
-      .filter((v): v is string => typeof v === 'string' && v.length > 0)
-      .map((notice_key) => ({ notice_key }));
+    // 업데이트는 키비교(diff) 없이, 변경된 로우 전체를 insert처럼 전송
+    const updatePayload = updateNodes
+      .map((node) => node?.data)
+      .filter(Boolean)
+      .map((row: any) => ({
+        user_key: row?.user_key ?? '',
+        user_id: row?.user_id ?? '',
+        user_permission: row?.user_permission ?? false,
+      }))
+      .filter((row: any) => typeof row.user_key === 'string' && row.user_key.length > 0);
 
-    if (deletePayload.length === 0) {
+    const deletePayload = deleteNodes
+      .map((node) => node?.data?.user_key)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      .map((user_key) => ({ user_key }));
+
+    if (updatePayload.length === 0 && deletePayload.length === 0) {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
 
-    const res = await callApi({
-      service: Service.POSTMAN,
-      url: '/api/message',
-      method: Method.DELETE,
-      params: {
-        bodyParams: deletePayload,
-      },
-      config: { isLoading: true },
-    });
+    const requests: Array<Promise<any>> = [];
 
-    if (res.successOrNot !== 'Y') {
-      toast.error(res.HeaderMsg);
+    if (updatePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/user/permission',
+          method: Method.PATCH,
+          params: {
+            bodyParams: updatePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+    if (deletePayload.length > 0) {
+      requests.push(
+        callApi({
+          service: Service.POSTMAN,
+          url: '/api/user',
+          method: Method.DELETE,
+          params: {
+            bodyParams: deletePayload,
+          },
+          config: { isLoading: true },
+        })
+      );
+    }
+
+    const results = await Promise.all(requests);
+    const failed = results.find((r) => r?.successOrNot !== 'Y');
+    if (failed) {
+      toast.error(failed.HeaderMsg);
       return;
     }
 
-    toast.success('삭제되었습니다.');
+    toast.success('저장되었습니다.');
     onSearch();
     setIsEditable(false);
   };
 
-  const sendModal = sendModalOpen && (
-    <MessageSendModal
-      open={sendModalOpen}
-      onClose={() => {
-        setSendModalOpen(false);
-      }}
-      onSaved={onSearch}
-    />
-  );
+  const handleDeleteRow = () => {
+    const selectedNodes = gridRef.current?.api.getSelectedNodes() ?? [];
+    if (selectedNodes.length === 0) {
+      toast.info('삭제할 항목을 선택하세요.');
+      return;
+    }
+    gridRef.current?.deleteBySelectedRows();
+  };
+
+  const handleUpdatedRow = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+    // 승인 여부 컬럼 체크로 인하여 셀렉트 체크 로직 없음
+    const selectedNodes = gridRef.current?.api.getSelectedNodes() ?? [];
+
+    selectedNodes.forEach((node) => {
+      if (!node) return;
+      node.setDataValue('user_permission', true);
+    });
+  };
 
   const buttonComponent = (
     <buttonForm.Container>
@@ -218,6 +206,16 @@ const Message: React.FC = () => {
             </EtsButton>
             <EtsButton
               type="grey"
+              onClick={async () => {
+                if (gridRef.current) {
+                  await handleUpdatedRow();
+                }
+              }}
+            >
+              승인
+            </EtsButton>
+            <EtsButton
+              type="grey"
               onClick={() => {
                 if (gridRef.current) {
                   gridRef.current.api.stopEditing();
@@ -228,20 +226,17 @@ const Message: React.FC = () => {
             >
               취소
             </EtsButton>
-            <EtsButton type="blue" onClick={handleSave}>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                handleSave();
+              }}
+            >
               저장
             </EtsButton>
           </>
         ) : (
           <>
-            <EtsButton
-              type="grey"
-              onClick={() => {
-                setSendModalOpen(true);
-              }}
-            >
-              메세지 보내기
-            </EtsButton>
             <EtsButton
               type="grey"
               onClick={async () => {
@@ -258,14 +253,13 @@ const Message: React.FC = () => {
 
   return (
     <>
-      {sendModal}
       <PageTemplate
-        title="메세지"
+        title="승인대기"
         gridRef={gridRef}
         columnDefs={columnDefs}
         buttonComponent={buttonComponent}
-        isRowSelectable={() => isEditable}
         rowData={rowData}
+        isRowSelectable={() => isEditable}
         rowSelection="multiple"
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
@@ -274,4 +268,4 @@ const Message: React.FC = () => {
     </>
   );
 };
-export default Message;
+export default CustomerWait;

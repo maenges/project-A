@@ -65,7 +65,7 @@ import {
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
 import { PartnerPartnerListPage } from '@/features/partner';
-import { CustomerWaitPage, CustomerAccessorPage, CustomerPage } from '@features/customer';
+import { CustomerWaitPage, CustomerAccessorPage, CustomerListPage } from '@features/customer';
 import { BetBetListPage, BetLosePage } from '@features/bet';
 import { GameRecordStatisticsPage } from '@/features/gameRecord';
 import { SettlementLoosingPage } from '@/features/settlement';
@@ -74,63 +74,6 @@ import LoginPage from '@/features/LoginPage';
 
 function App() {
   const { isLoading } = useLoadingStore();
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  // const res = await callApi({
-  //   service: Service.POSTMAN,
-  //   url: '/api/v1/session',
-  //   method: Method.POST,
-  // });
-
-  // sessionStorage.setItem('employeeNumber', res.data?.employeeNumber);
-  // sessionStorage.setItem('userEmail', res.data?.userEmail);
-  // sessionStorage.setItem('userGroup', res.data?.userGroup);
-  // sessionStorage.setItem('userName', res.data?.userName);
-  // sessionStorage.setItem('userMenus', JSON.stringify(res.data?.userMenus));
-
-  // if (isInvalidRefreshToken()) {
-  //   console.log('유효한 Refresh Token이 없어 새로 요청합니다.');
-  //   const refreshTokenRes = await axios.get('/oauth2/v1/refresh', { withCredentials: true });
-
-  //   const jsonRefreshToken =
-  //     typeof refreshTokenRes.data === 'string'
-  //       ? JSON.parse(refreshTokenRes.data)
-  //       : refreshTokenRes.data;
-
-  //   if (jsonRefreshToken?.value && jsonRefreshToken?.expiredAt) {
-  //     setLocalRefreshToken(jsonRefreshToken.value, jsonRefreshToken.expiredAt);
-  //   }
-
-  //   // if (typeof refreshTokenRes.data === 'string') {
-  //   //   const tokenData = JSON.parse(refreshTokenRes.data);
-  //   //   if (tokenData?.value && tokenData?.expiredAt) {
-  //   //     setLocalRefreshToken(tokenData.value, tokenData.expiredAt);
-  //   //   }
-  //   // }
-  // } else {
-  //   console.log('localStorage에 유효한 Refresh Token이 존재합니다.');
-  // }
-
-  // const optRes = await callApi({
-  //   service: Service.POSTMAN,
-  //   url: '/api/v1/common/options',
-  //   method: Method.GET,
-  // });
-
-  // // 공통 옵션을 스토어에 저장
-  // setFromApi(optRes.data ?? {});
-
-  // 세션 로드 완료 표시
-  //       setSessionLoaded(true);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [setFromApi]);
 
   return (
     <ThemeModeProvider>
@@ -535,12 +478,12 @@ function App() {
                             path="/customer/customerList"
                             element={
                               <PrivateRoute>
-                                <CustomerPage />
+                                <CustomerListPage />
                               </PrivateRoute>
                             }
                           />
                           <Route
-                            path="/customer/wait"
+                            path="/customer/customerWait"
                             element={
                               <PrivateRoute>
                                 <CustomerWaitPage />
@@ -595,19 +538,6 @@ function App() {
                 }
               />
             </Routes>
-            {/* ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  Loading...
-                </div>
-              )} */}
           </AliveScope>
         </Router>
       </NotifyProvider>

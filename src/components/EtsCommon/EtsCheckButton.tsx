@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import checkedSvg from '@/assets/images/checked.svg';
 import checkSvg from '@/assets/images/check.svg';
 import { Box } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
 export interface EtsCheckButtonProps {
   checked?: boolean;
@@ -16,7 +17,7 @@ const StyledCheckButton = styled('button', {
 })<{
   isChecked?: boolean;
   isReadOnly?: boolean;
-}>(({ isChecked, isReadOnly }) => ({
+}>(({ theme, isChecked, isReadOnly }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -33,42 +34,38 @@ const StyledCheckButton = styled('button', {
   whiteSpace: 'nowrap',
   outline: 'none',
 
+  border:
+    theme.palette.mode === 'dark'
+      ? '2px solid var(--color-border-tertiary, #FFF)'
+      : `2px solid ${alpha(theme.palette.primary.main, 0.35)}`,
+  background: 'var(--color-fill-interaction-form, #FFF)',
+  fontSize: '12px',
+  lineHeight: '150%',
+  '&:hover, &:focus-visible': isReadOnly
+    ? { boxShadow: 'none' }
+    : {
+        borderColor: theme.palette.primary.main,
+        boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
+      },
+
   ...(isChecked
     ? {
-        border: '2px solid var(--color-border-tertiary, #D9D9D9)',
-        background: 'var(--color-fill-interaction-pressed-ghost, #E6E7EF)',
-        color: 'var(--color-text-label, #051766)',
-        fontSize: '12px',
+        borderColor: theme.palette.primary.main,
+        color: 'var(--color-text-label, #000)',
         fontWeight: 700,
-        lineHeight: '150%',
         '& .check-icon': {
-          filter:
-            'brightness(0) saturate(100%) invert(11%) sepia(52%) saturate(4893%) hue-rotate(225deg) brightness(88%) contrast(102%)',
+          filter: 'brightness(0) saturate(100%)',
         },
       }
     : {
-        border: '2px solid var(--color-border-tertiary, #D9D9D9)',
-        background: 'var(--color-fill-interaction-form, #FFF)',
         color: 'var(--color-text-body-secondary, #5E5E5E)',
-        fontSize: '12px',
         fontWeight: 400,
-        lineHeight: '150%',
         '& .check-icon': {},
-        '&:hover, &:focus-visible': {
-          boxShadow: '0 0 0 1px #051766',
-        },
       }),
 
   ...(isReadOnly && {
-    background: 'var(--color-fill-interaction-disabled, #D9D9D9)',
     cursor: 'not-allowed',
-    color: 'var(--color-text-body-secondary, #5E5E5E)',
-    '&:hover, &:focus-visible': {
-      boxShadow: 'none',
-    },
-    '& .check-icon': {
-      filter: 'none',
-    },
+    opacity: 1,
   }),
 }));
 
@@ -91,7 +88,7 @@ export const EtsCheckButton = React.forwardRef<HTMLButtonElement, EtsCheckButton
         {...props}
       >
         <img src={checked ? checkedSvg : checkSvg} alt="check" className="check-icon" />
-        <Box sx={{ marginRight: '5px' }}>{label || (checked ? 'Checked' : 'Check')}</Box>
+        <Box sx={{ marginRight: '5px' }}>{label || (checked ? '승인' : '대기')}</Box>
       </StyledCheckButton>
     );
   }

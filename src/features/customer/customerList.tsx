@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
@@ -23,7 +24,7 @@ type FormValues = {
   endDate: string;
 };
 
-const CustomerPage = () => {
+const CustomerList: React.FC = () => {
   const gridRef = useRef<EtsGridRef<Customer>>(null);
   const { toast } = useNotify();
   const [rowData, setRowData] = useState<Customer[]>([]);
@@ -457,4 +458,4 @@ const CustomerPage = () => {
   );
 };
 
-export default CustomerPage;
+export default CustomerList;
