@@ -1,7 +1,339 @@
 import React from 'react';
 
-const SystemLoginRecordPage: React.FC = () => {
-  return <div>System Login Record Page</div>;
+import { useState, useRef, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { ColDef, ColGroupDef } from 'ag-grid-community';
+import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
+import { Box } from '@mui/material';
+import { searchForm, buttonForm } from '@/assets/style';
+import { PageTemplate } from '@/components/Teamplate';
+import { Service } from '@models/common/Service';
+import { callApi, Method } from '@utils/ApiUtil';
+import { useNotify } from '@hooks/useNotify';
+import dayjs, { Dayjs } from 'dayjs';
+
+import { EtsButton } from '@/components/EtsCommon';
+import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
+
+type loginRecordProps = {
+  [key: string]: any;
 };
 
-export default SystemLoginRecordPage;
+type FormValues = {
+  startDate: string;
+  endDate: string;
+  blockStatus: string;
+  userId: string;
+};
+
+const loginRecord: React.FC = () => {
+  const [isEditable, setIsEditable] = useState(false);
+  const gridRef = useRef<EtsGridRef<loginRecordProps>>(null);
+  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs());
+  const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
+  const { toast } = useNotify();
+  const [rowData, setRowData] = useState<loginRecordProps[]>([]);
+
+  const columnDefs: (ColDef | ColGroupDef)[] = [
+    EtsColumnPreset.SelectionBoxPreset({
+      headerName: '',
+      width: 60,
+      headerCheckboxSelection: true,
+    }),
+    EtsColumnPreset.IdPreset({
+      field: 'no',
+      headerName: 'No',
+      width: 60,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'login_key',
+      headerName: 'id',
+      hide: true,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_key',
+      headerName: 'user_id',
+      hide: true,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_id',
+      headerName: '회원 ID',
+      width: 150,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_type',
+      headerName: '회원 구분',
+      width: 150,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'login_ip',
+      headerName: '접속 IP',
+      width: 150,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'login_success',
+      headerName: '성공 유무',
+      width: 150,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'login_fail_reason',
+      headerName: '실패 사유',
+      width: 200,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'created',
+      headerName: '접속일시',
+      width: 200,
+      flex: 1,
+    }),
+    EtsColumnPreset.CheckButtonPreset({
+      field: 'block_status',
+      headerName: '차단 여부',
+      width: 120,
+      editable: isEditable,
+      context: {
+        checkButtonProps: {
+          checkedLabel: '차단해제',
+          uncheckedLabel: '차단하기',
+        },
+      },
+    }),
+  ];
+
+  useEffect(() => {
+    handleSubmit(onSearch)();
+  }, []);
+
+  const { control, handleSubmit, getValues } = useForm<FormValues>({
+    defaultValues: {
+      startDate: dayjs().format('YYYYMMDD'),
+      endDate: dayjs().format('YYYYMMDD'),
+      userId: '',
+    },
+    mode: 'onChange',
+  });
+
+  const onSearch: SubmitHandler<FormValues> = () => {
+    const { startDate, endDate, userId } = getValues();
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/login-record',
+      method: Method.GET,
+      params: {
+        queryParams: {
+          startDate: startDate,
+          endDate: endDate,
+          userId,
+        },
+      },
+      config: { isLoading: true },
+    }).then((res) => {
+      if (res.successOrNot !== 'Y') {
+        return toast.error(res.HeaderMsg);
+      }
+      const mapped = (res.data || []).map((row: any) => {
+        const raw = row?.block_status;
+        const normalized = raw === 'BLOCKED' ? true : raw === 'UNBLOCKED' ? false : Boolean(raw);
+        const userTypeCode = String(row?.user_type ?? '');
+        const userTypeLabel = userTypeCode === 'CU' ? '고객' : '파트너';
+
+        const loginSuccessRaw = row?.login_success;
+        const loginSuccessCode = String(loginSuccessRaw ?? '').toUpperCase();
+        const loginSuccessLabel =
+          loginSuccessRaw === true || loginSuccessCode === 'TRUE' || loginSuccessCode === 'Y'
+            ? '성공'
+            : loginSuccessRaw === false || loginSuccessCode === 'FALSE' || loginSuccessCode === 'N'
+              ? '실패'
+              : String(loginSuccessRaw ?? '');
+
+        return {
+          ...row,
+          block_status: normalized,
+          user_type_code: userTypeCode,
+          user_type: userTypeLabel,
+          login_success: loginSuccessLabel,
+        };
+      });
+
+      setRowData(mapped);
+    });
+  };
+
+  const handleUpdatedRow = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+    // 승인 여부 컬럼 체크로 인하여 셀렉트 체크 로직 없음
+    const selectedNodes = gridRef.current?.api.getSelectedNodes() ?? [];
+
+    selectedNodes.forEach((node) => {
+      if (!node) return;
+      const current = Boolean(node.data?.block_status);
+      node.setDataValue('block_status', !current);
+    });
+  };
+
+  // GridRow 저장 버튼
+  const handleSave = async () => {
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    const changedRows: any[] = [];
+
+    gridRef.current?.api.forEachNode((node) => {
+      const status = String(node?.data?.rowStatus ?? '').toUpperCase();
+      if (status !== 'I' && status !== 'U' && status !== 'D') return;
+      if (!node?.data) return;
+
+      const { originData, ...rest } = node.data as any;
+      const payloadRow: any = {
+        ...rest,
+        rowStatus: status,
+      };
+
+      changedRows.push(payloadRow);
+    });
+
+    if (changedRows.length === 0) {
+      toast.info('변경된 내용이 없습니다.');
+      return;
+    }
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/block/batch',
+      method: Method.POST,
+      params: {
+        bodyParams: changedRows,
+      },
+      config: { isLoading: true },
+    });
+
+    if (res?.successOrNot !== 'Y') {
+      toast.error(res?.HeaderMsg ?? '저장에 실패했습니다.');
+      return;
+    }
+
+    toast.success('저장되었습니다.');
+    handleSubmit(onSearch)();
+    setIsEditable(false);
+  };
+
+  const searchComponent = (
+    <form onSubmit={handleSubmit(onSearch)}>
+      <searchForm.Container>
+        <searchForm.Row>
+          <EtsDatePickerComponent
+            control={control}
+            startDate={startRangeDate}
+            endDate={endRangeDate}
+            setStartDate={setStartRangeDate}
+            setEndDate={setEndRangeDate}
+          />
+          <EtsInputComponent
+            control={control}
+            name="userId"
+            label="회원 ID"
+            placeholder="회원 ID를 입력하세요."
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key !== 'Enter') return;
+              if ((e.nativeEvent as any)?.isComposing) return;
+              e.preventDefault();
+              handleSubmit(onSearch)();
+            }}
+            // width={250}
+          />
+          <Box sx={{ marginLeft: 'auto' }}>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                handleSubmit(onSearch)();
+              }}
+            >
+              검색
+            </EtsButton>
+          </Box>
+        </searchForm.Row>
+      </searchForm.Container>
+    </form>
+  );
+
+  const buttonComponent = (
+    <buttonForm.Container>
+      <buttonForm.Row>
+        {isEditable ? (
+          <>
+            <EtsButton
+              type="grey"
+              onClick={async () => {
+                if (gridRef.current) {
+                  await handleUpdatedRow();
+                }
+              }}
+            >
+              선택차단 및 해제
+            </EtsButton>
+            <EtsButton
+              type="grey"
+              onClick={() => {
+                if (gridRef.current) {
+                  gridRef.current.api.stopEditing();
+                }
+                handleSubmit(onSearch)();
+                setIsEditable(false);
+              }}
+            >
+              취소
+            </EtsButton>
+            <EtsButton
+              type="blue"
+              onClick={() => {
+                handleSave();
+              }}
+            >
+              저장
+            </EtsButton>
+          </>
+        ) : (
+          <>
+            <EtsButton
+              type="grey"
+              onClick={async () => {
+                setIsEditable(true);
+              }}
+            >
+              편집
+            </EtsButton>
+          </>
+        )}
+      </buttonForm.Row>
+    </buttonForm.Container>
+  );
+
+  return (
+    <>
+      <PageTemplate
+        title="로그인 기록"
+        gridRef={gridRef}
+        columnDefs={columnDefs}
+        searchComponent={searchComponent}
+        buttonComponent={buttonComponent}
+        rowData={rowData}
+        isRowSelectable={() => isEditable}
+        rowSelection="multiple"
+        rowMultiSelectWithClick={true}
+        suppressRowClickSelection={true}
+      />
+    </>
+  );
+};
+
+export default loginRecord;

@@ -36,7 +36,7 @@ const Notice: React.FC = () => {
     EtsColumnPreset.SelectionBoxPreset({
       headerName: '',
       width: 60,
-      headerCheckboxSelection: false,
+      headerCheckboxSelection: true,
     }),
     EtsColumnPreset.IdPreset({
       field: 'no',
@@ -59,6 +59,9 @@ const Notice: React.FC = () => {
       headerName: '제목',
       width: 200,
       flex: 1,
+      context: {
+        clickable: true,
+      },
     }),
     EtsColumnPreset.TextPreset({
       field: 'created',
@@ -109,90 +112,44 @@ const Notice: React.FC = () => {
       gridRef.current.api.stopEditing();
     }
 
-    // stopEditing 이후 rowStatus 반영 타이밍 보장
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-    const deleteNodes: any[] = [];
-    const updateNodes: any[] = [];
+    const changedRows: any[] = [];
 
     gridRef.current?.api.forEachNode((node) => {
       const status = String(node?.data?.rowStatus ?? '').toUpperCase();
-      if (status === 'D') deleteNodes.push(node);
-      if (status === 'U') updateNodes.push(node);
+      if (status !== 'I' && status !== 'U' && status !== 'D') return;
+      if (!node?.data) return;
+
+      const { originData, ...rest } = node.data as any;
+      const payloadRow: any = {
+        ...rest,
+        rowStatus: status,
+      };
+
+      delete payloadRow.no;
+      delete payloadRow.created;
+
+      changedRows.push(payloadRow);
     });
 
-    const deletePayload = deleteNodes
-      .map((node) => node?.data?.notice_key)
-      .filter((v): v is string => typeof v === 'string' && v.length > 0)
-      .map((notice_key) => ({ notice_key }));
-
-    if (updateNodes.length === 0 && deletePayload.length === 0) {
+    if (changedRows.length === 0) {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
 
-    // 전값 비교 후 변경된 컬럼 값만 추출 (U)
-    const updatePayload = updateNodes
-      .map((node) => {
-        if (!node.data) return null;
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/notice/batch',
+      method: Method.POST,
+      params: {
+        bodyParams: changedRows,
+      },
+      config: { isLoading: true },
+    });
 
-        const { originData, rowStatus, ...currentData } = node.data as any;
-        const changedData: Record<string, any> = {
-          notice_key: currentData.notice_key,
-        };
-
-        Object.keys(currentData).forEach((key) => {
-          // no, created 필드는 제외
-          if (key === 'no' || key === 'created') return;
-          const currentValue = currentData[key];
-          const originalValue = originData ? originData[key] : undefined;
-          if (currentValue !== originalValue) {
-            changedData[key] = currentValue;
-          }
-        });
-
-        return Object.keys(changedData).length > 1 ? changedData : null;
-      })
-      .filter(Boolean) as Array<Record<string, any>>;
-
-    if (updatePayload.length === 0 && deletePayload.length === 0) {
-      toast.info('변경된 내용이 없습니다.');
-      return;
-    }
-
-    // 삭제(D) + 수정(U) 한번에 처리
-    const requests: Array<Promise<any>> = [];
-    if (deletePayload.length > 0) {
-      requests.push(
-        callApi({
-          service: Service.POSTMAN,
-          url: '/api/notice',
-          method: Method.DELETE,
-          params: {
-            bodyParams: deletePayload,
-          },
-          config: { isLoading: true },
-        })
-      );
-    }
-    if (updatePayload.length > 0) {
-      requests.push(
-        callApi({
-          service: Service.POSTMAN,
-          url: '/api/notice',
-          method: Method.PATCH,
-          params: {
-            bodyParams: updatePayload,
-          },
-          config: { isLoading: true },
-        })
-      );
-    }
-
-    const results = await Promise.all(requests);
-    const failed = results.find((r) => r?.successOrNot !== 'Y');
-    if (failed) {
-      toast.error(failed.HeaderMsg);
+    if (res?.successOrNot !== 'Y') {
+      toast.error(res?.HeaderMsg ?? '저장에 실패했습니다.');
       return;
     }
 
@@ -211,13 +168,17 @@ const Notice: React.FC = () => {
     gridRef.current?.deleteBySelectedRows();
   };
 
-  const handleUpdatedRow = async () => {
-    const selected = (gridRef.current?.getSelectedData() ?? []) as Notices[];
-    const row = selected[0];
-    if (!row) {
-      toast.info('수정할 항목을 선택하세요.');
-      return;
+  const handleCellClicked = (params: any) => {
+    const field = params?.colDef?.field;
+    if (field !== 'notice_title') return;
+
+    const row = params?.data as Notices | undefined;
+    if (!row) return;
+
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
     }
+
     setSelectedRow(row);
     setUpdateModalOpen(true);
   };
@@ -246,16 +207,6 @@ const Notice: React.FC = () => {
               }}
             >
               삭제
-            </EtsButton>
-            <EtsButton
-              type="grey"
-              onClick={async () => {
-                if (gridRef.current) {
-                  await handleUpdatedRow();
-                }
-              }}
-            >
-              수정
             </EtsButton>
             <EtsButton
               type="grey"
@@ -339,8 +290,9 @@ const Notice: React.FC = () => {
         columnDefs={columnDefs}
         buttonComponent={buttonComponent}
         rowData={rowData}
+        onCellClicked={handleCellClicked}
         isRowSelectable={() => isEditable}
-        rowSelection="single"
+        rowSelection="multiple"
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
         size="no-search"

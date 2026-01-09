@@ -20,28 +20,11 @@ const LoginPage = () => {
     await handleLocalLogin();
   };
 
-  // login page mounted 시
-  // useEffect(() => {
-  //   if (document.getElementById('awswaf-js')) return;
-
-  //   const s = document.createElement('script');
-  //   s.id = 'awswaf-js';
-  //   s.src = 'https://797593cbf480.edge.captcha-sdk.awswaf.com/797593cbf480/jsapi.js';
-  //   s.async = true;
-  //   document.head.appendChild(s);
-
-  //   return () => {
-  //     // 필요하면 제거
-  //     // document.getElementById('awswaf-js')?.remove();
-  //   };
-  // }, []);
-
   const handleLocalLogin = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // const recaptchaToken = await getRecaptchaToken('admin_login');
       const res = await callApi({
         service: Service.POSTMAN,
         url: '/api/auth/login',

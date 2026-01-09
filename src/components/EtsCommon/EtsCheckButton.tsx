@@ -9,6 +9,8 @@ export interface EtsCheckButtonProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   label?: string;
+  checkedLabel?: string;
+  uncheckedLabel?: string;
   readOnly?: boolean;
 }
 
@@ -70,11 +72,17 @@ const StyledCheckButton = styled('button', {
 }));
 
 export const EtsCheckButton = React.forwardRef<HTMLButtonElement, EtsCheckButtonProps>(
-  ({ checked = false, onChange, label, readOnly = false, ...props }, ref) => {
+  (
+    { checked = false, onChange, label, checkedLabel, uncheckedLabel, readOnly = false, ...props },
+    ref
+  ) => {
     const handleClick = () => {
       if (readOnly || !onChange) return;
       onChange(!checked);
     };
+
+    const resolvedLabel =
+      label ?? (checked ? (checkedLabel ?? '승인') : (uncheckedLabel ?? '대기'));
 
     return (
       <StyledCheckButton
@@ -88,7 +96,7 @@ export const EtsCheckButton = React.forwardRef<HTMLButtonElement, EtsCheckButton
         {...props}
       >
         <img src={checked ? checkedSvg : checkSvg} alt="check" className="check-icon" />
-        <Box sx={{ marginRight: '5px' }}>{label || (checked ? '승인' : '대기')}</Box>
+        <Box sx={{ marginRight: '5px' }}>{resolvedLabel}</Box>
       </StyledCheckButton>
     );
   }

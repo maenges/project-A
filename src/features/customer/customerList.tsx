@@ -131,25 +131,7 @@ const CustomerList: React.FC = () => {
             width: 100,
             context: {
               label: '지급',
-              onClick: async (_p: any) => {
-                //   const row = p?.data;
-                //   if (!row) return;
-                //   setSelectedRow(row);
-                //   console.log(row);
-                //   callApi({
-                //     service: Service.POSTMAN,
-                //     url: '/api/macro/reply',
-                //     method: Method.GET,
-                //     params: {},
-                //   }).then((res) => {
-                //     if (res.successOrNot !== 'Y') {
-                //       toast.error(res.HeaderMsg);
-                //       return;
-                //     }
-                //     setModalData(res.data);
-                //     setModalOpen(true);
-                //   });
-              },
+              onClick: async (_p: any) => {},
             },
           }),
           colId: 'charge_pay',
@@ -161,25 +143,7 @@ const CustomerList: React.FC = () => {
             width: 100,
             context: {
               label: '회수',
-              onClick: async (_p: any) => {
-                //   const row = p?.data;
-                //   if (!row) return;
-                //   setSelectedRow(row);
-                //   console.log(row);
-                //   callApi({
-                //     service: Service.POSTMAN,
-                //     url: '/api/macro/reply',
-                //     method: Method.GET,
-                //     params: {},
-                //   }).then((res) => {
-                //     if (res.successOrNot !== 'Y') {
-                //       toast.error(res.HeaderMsg);
-                //       return;
-                //     }
-                //     setModalData(res.data);
-                //     setModalOpen(true);
-                //   });
-              },
+              onClick: async (_p: any) => {},
             },
           }),
           colId: 'charge_recover',
@@ -191,12 +155,20 @@ const CustomerList: React.FC = () => {
       headerName: '보유머니',
       width: 100,
       flex: 1,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_rolling_money',
       headerName: '롤링머니',
       width: 100,
       flex: 1,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
     }),
     EtsColumnPreset.SelectPreset({
       field: 'group_name',
@@ -432,6 +404,10 @@ const CustomerList: React.FC = () => {
       onClose={() => {
         setNewModalOpen(false);
       }}
+      onSaved={() => {
+        if (!selectedTreeId) return;
+        fetchCustomerListByGroupKey(selectedTreeId);
+      }}
       groupKey={selectedTreeId || ''}
     />
   );
@@ -447,6 +423,11 @@ const CustomerList: React.FC = () => {
         buttonComponent={buttonComponent}
         // totalCount={totalCount}
         gridRef={gridRef}
+        alwaysShowHorizontalScroll={true}
+        defaultColDef={{
+          autoHeaderHeight: false,
+          wrapHeaderText: false,
+        }}
         // size="sm-two-header"
         tree={true}
         leftTreeProps={{

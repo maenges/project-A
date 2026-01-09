@@ -100,19 +100,9 @@ const Message: React.FC = () => {
     }),
   ];
 
-  // const [_, setSaveOpen] = useState(false);
-  // const [__, setDeleteOpen] = useState(false);
-
   useEffect(() => {
     onSearch();
   }, []);
-
-  // useActivate(() => {
-  //   // 데이터가 있으면 재조회 실행
-  //   if (rowData && rowData.length > 0) {
-  //     onSearch();
-  //   }
-  // });
 
   const onSearch = () => {
     callApi({

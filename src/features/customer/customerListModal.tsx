@@ -15,6 +15,7 @@ import { AccountKeyOptions } from '@/models/common/CommonSelectCodes';
 export type NoticeNewModalProps = {
   open: boolean;
   onClose: () => void;
+  onSaved?: () => void;
   groupKey: string;
 };
 
@@ -31,9 +32,9 @@ type FormValues = {
   user_bank_won: string;
 };
 
-const NoticeNewModal = ({ open, onClose, groupKey }: NoticeNewModalProps) => {
+const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProps) => {
   const { toast } = useNotify();
-  const bankKeyOptions = AccountKeyOptions.filter((o) => o.value !== 'all');
+  const bankKeyOptions = AccountKeyOptions.filter((o) => o.value !== 'ALL');
 
   const { control, handleSubmit, setFocus, setValue } = useForm<FormValues>({
     defaultValues: {
@@ -108,6 +109,7 @@ const NoticeNewModal = ({ open, onClose, groupKey }: NoticeNewModalProps) => {
 
     toast.success('저장되었습니다.');
     onClose();
+    onSaved?.();
     return true;
   };
 

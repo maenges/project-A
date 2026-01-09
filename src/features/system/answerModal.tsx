@@ -131,6 +131,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
               return;
             }
 
+            // 직접 입력인 경우, 매크로 키와 제목을 빈값으로 설정
             const isCustom = selectedMacroValue === 'CUSTOM';
             const selectedMacro = macroOptions.find((opt) => opt.value === selectedMacroValue);
             const macro_key = isCustom ? '' : String(selectedMacroValue ?? '');

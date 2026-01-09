@@ -12,6 +12,9 @@ import type { EtsCheckBoxProps } from '../../../EtsCommon/EtsCheckBox';
 import { EtsCheckButton, EtsCheckButtonProps } from '../../../EtsCommon/EtsCheckButton';
 import { EtsCheckButton2 } from '../../../EtsCommon/EtsCheckButton2';
 
+import { Box } from '@mui/material';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+
 import { EtsFileButtonProps } from '../../../EtsCommon/EtsFileButton';
 import dayjs from 'dayjs';
 
@@ -31,6 +34,8 @@ export const EtsColumnPreset = {
         formatType?: 'number' | 'text';
         decimalPlaces?: number;
         required?: boolean;
+        /** 클릭(상세 진입 등) 가능함을 표시: 연필 아이콘 + 포인터 커서 */
+        clickable?: boolean;
       };
     }>
   ): ColDef => {
@@ -73,19 +78,33 @@ export const EtsColumnPreset = {
           }
           return value;
         };
-        return isEditable
-          ? EtsRenderer.TextRenderer({
-              ...rendererParams,
-              inputProps: params?.context?.inputProps,
-              type: params?.context?.type,
-            })
-          : rendererParams.value !== undefined && rendererParams.value !== null
+        const displayValue =
+          rendererParams.value !== undefined && rendererParams.value !== null
             ? params?.context?.formatType === 'number'
               ? formatNumber(rendererParams.value)
               : rendererParams.value
             : params?.context?.formatType === 'number'
               ? formatNumber(0)
               : '';
+
+        if (isEditable) {
+          return EtsRenderer.TextRenderer({
+            ...rendererParams,
+            inputProps: params?.context?.inputProps,
+            type: params?.context?.type,
+          });
+        }
+
+        if (params?.context?.clickable) {
+          return (
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}>
+              <EditOutlinedIcon fontSize="inherit" style={{ fontSize: 16 }} />
+              <span>{displayValue}</span>
+            </Box>
+          );
+        }
+
+        return displayValue;
       },
 
       cellEditor: EtsEditor.TextEditor,

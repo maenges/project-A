@@ -117,6 +117,12 @@ export const processStatusOptions = [
   { value: 'COMPLETED', label: '완료' },
 ];
 
+export const blockStatusOptions = [
+  { value: 'BLOCKED', label: '차단' },
+  { value: 'UNBLOCKED', label: '정상' },
+  { value: 'ALL', label: '전체' },
+];
+
 export const rollingCasinoOptions = [
   { value: '0', label: '0%' },
   { value: '1', label: '1%' },

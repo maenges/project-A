@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
@@ -12,7 +12,6 @@ import { callApi, Method } from '@utils/ApiUtil';
 import { processStatusOptions } from '@/models/common/CommonSelectCodes';
 import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
-import { useActivate } from 'react-activation';
 import AnswerModal from './answerModal';
 import AnswerMacroModal from './answerMacroModal';
 
@@ -120,13 +119,13 @@ const Answer: React.FC = () => {
             url: '/api/answer/reply',
             method: Method.GET,
             params: {},
+            config: { isLoading: true },
           }).then((res) => {
             if (res.successOrNot !== 'Y') {
               toast.error(res.HeaderMsg);
               return;
             }
             setModalData(res.data);
-            console.log(selectedRow);
 
             setModalOpen(true);
           });
@@ -140,12 +139,9 @@ const Answer: React.FC = () => {
     }),
   ];
 
-  useActivate(() => {
-    // 데이터가 있으면 재조회 실행
-    // if (rowData && rowData.length > 0) {
-    //   handleSubmit(onSearch)();
-    // }
-  });
+  useEffect(() => {
+    handleSubmit(onSearch)();
+  }, []);
 
   const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {

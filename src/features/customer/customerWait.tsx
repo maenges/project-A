@@ -96,69 +96,42 @@ const CustomerWait: React.FC = () => {
 
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-    const updateNodes: any[] = [];
-    const deleteNodes: any[] = [];
+    const changedRows: any[] = [];
 
     gridRef.current?.api.forEachNode((node) => {
       const status = String(node?.data?.rowStatus ?? '').toUpperCase();
-      if (status === 'U') updateNodes.push(node);
-      if (status === 'D') deleteNodes.push(node);
+      if (status !== 'I' && status !== 'U' && status !== 'D') return;
+      if (!node?.data) return;
+
+      const { originData, ...rest } = node.data as any;
+      const payloadRow: any = {
+        ...rest,
+        rowStatus: status,
+      };
+
+      delete payloadRow.no;
+      delete payloadRow.created;
+
+      changedRows.push(payloadRow);
     });
 
-    // 업데이트는 키비교(diff) 없이, 변경된 로우 전체를 insert처럼 전송
-    const updatePayload = updateNodes
-      .map((node) => node?.data)
-      .filter(Boolean)
-      .map((row: any) => ({
-        user_key: row?.user_key ?? '',
-        user_id: row?.user_id ?? '',
-        user_permission: row?.user_permission ?? false,
-      }))
-      .filter((row: any) => typeof row.user_key === 'string' && row.user_key.length > 0);
-
-    const deletePayload = deleteNodes
-      .map((node) => node?.data?.user_key)
-      .filter((v): v is string => typeof v === 'string' && v.length > 0)
-      .map((user_key) => ({ user_key }));
-
-    if (updatePayload.length === 0 && deletePayload.length === 0) {
+    if (changedRows.length === 0) {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
 
-    const requests: Array<Promise<any>> = [];
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/user/batch',
+      method: Method.POST,
+      params: {
+        bodyParams: changedRows,
+      },
+      config: { isLoading: true },
+    });
 
-    if (updatePayload.length > 0) {
-      requests.push(
-        callApi({
-          service: Service.POSTMAN,
-          url: '/api/user/permission',
-          method: Method.PATCH,
-          params: {
-            bodyParams: updatePayload,
-          },
-          config: { isLoading: true },
-        })
-      );
-    }
-    if (deletePayload.length > 0) {
-      requests.push(
-        callApi({
-          service: Service.POSTMAN,
-          url: '/api/user',
-          method: Method.DELETE,
-          params: {
-            bodyParams: deletePayload,
-          },
-          config: { isLoading: true },
-        })
-      );
-    }
-
-    const results = await Promise.all(requests);
-    const failed = results.find((r) => r?.successOrNot !== 'Y');
-    if (failed) {
-      toast.error(failed.HeaderMsg);
+    if (res?.successOrNot !== 'Y') {
+      toast.error(res?.HeaderMsg ?? '저장에 실패했습니다.');
       return;
     }
 
@@ -196,6 +169,16 @@ const CustomerWait: React.FC = () => {
           <>
             <EtsButton
               type="grey"
+              onClick={async () => {
+                if (gridRef.current) {
+                  await handleUpdatedRow();
+                }
+              }}
+            >
+              선택승인
+            </EtsButton>
+            <EtsButton
+              type="grey"
               onClick={() => {
                 if (gridRef.current) {
                   handleDeleteRow();
@@ -203,16 +186,6 @@ const CustomerWait: React.FC = () => {
               }}
             >
               삭제
-            </EtsButton>
-            <EtsButton
-              type="grey"
-              onClick={async () => {
-                if (gridRef.current) {
-                  await handleUpdatedRow();
-                }
-              }}
-            >
-              승인
             </EtsButton>
             <EtsButton
               type="grey"

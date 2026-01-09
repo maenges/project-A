@@ -332,6 +332,7 @@ export default forwardRef<EtsGridRef, EtsGridProps>(function EtsGrid(
         }}
       >
         <AgGridReact
+          {...props}
           ref={gridRef}
           // 무한 스크롤 모드일 때는 rowData 대신 datasource 사용
           rowData={isInfiniteScroll ? undefined : rows}

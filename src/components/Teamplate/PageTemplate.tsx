@@ -29,6 +29,8 @@ export interface PageTemplateProps {
   onCellClicked?: (_params: any) => void;
   gridRef?: React.Ref<any>;
   defaultColDef?: ColDef;
+  /** 컬럼 전환 시 하단 가로 스크롤바 높이 변동(점프) 방지용 */
+  alwaysShowHorizontalScroll?: boolean;
   isInfiniteScroll?: boolean;
   suppressRowTransform?: boolean;
   showPinnedBottom?: boolean;
@@ -62,6 +64,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   onCellValueChanged,
   onCellClicked,
   gridRef,
+  defaultColDef,
+  alwaysShowHorizontalScroll,
   isInfiniteScroll,
   suppressRowTransform = true,
   showPinnedBottom,
@@ -286,6 +290,8 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               onCellValueChanged={onCellValueChanged}
               onCellClicked={onCellClicked}
               onGridReady={onGridReady}
+              defaultColDef={defaultColDef}
+              alwaysShowHorizontalScroll={alwaysShowHorizontalScroll}
               suppressRowTransform={suppressRowTransform}
               suppressRowClickSelection={suppressRowClickSelection}
               isRowSelectable={isRowSelectable}
