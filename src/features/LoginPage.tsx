@@ -7,6 +7,24 @@ import { Service } from '@models/common/Service';
 import { StatusCode } from '@models/common/CommonResponse';
 import { useNotify } from '../hooks/useNotify';
 
+async function getPublicIp(): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const r = await fetch('https://api.ipify.org?format=json', {
+      signal: controller.signal,
+    });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { ip?: string };
+    return typeof j?.ip === 'string' && j.ip.length > 0 ? j.ip : null;
+  } catch {
+    return null;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 const LoginPage = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +43,7 @@ const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
+      const loginIp = await getPublicIp();
       const res = await callApi({
         service: Service.POSTMAN,
         url: '/api/auth/login',
@@ -33,6 +52,7 @@ const LoginPage = () => {
           bodyParams: {
             id: id,
             password: password,
+            loginIp,
           },
         },
       });
