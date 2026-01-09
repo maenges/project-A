@@ -62,6 +62,7 @@ import {
   SystemAnswerPage,
   SystemMessagePage,
   SystemBlockPage,
+  SystemIpBlockPage,
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
 import { PartnerPartnerListPage } from '@/features/partner';
@@ -439,6 +440,14 @@ function App() {
                             element={
                               <PrivateRoute>
                                 <SystemBlockPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
+                            path="/system/ipBlock"
+                            element={
+                              <PrivateRoute>
+                                <SystemIpBlockPage />
                               </PrivateRoute>
                             }
                           />

@@ -1,27 +1,19 @@
 import React from 'react';
 
 import { useState, useRef, useEffect } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { ColDef, ColGroupDef } from 'ag-grid-community';
+import { ColDef, IRowNode } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
-import { Box } from '@mui/material';
-import { searchForm, buttonForm } from '@/assets/style';
+import { buttonForm } from '@/assets/style';
 import { PageTemplate } from '@/components/Teamplate';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
-import { blockStatusOptions } from '@/models/common/CommonSelectCodes';
 import { useNotify } from '@hooks/useNotify';
+import dayjs from 'dayjs';
 
 import { EtsButton } from '@/components/EtsCommon';
-import { EtsSelectComponent, EtsInputComponent } from '@/components/EtsComponents';
 
 type BlockProps = {
   [key: string]: any;
-};
-
-type FormValues = {
-  blockStatus: string;
-  userId: string;
 };
 
 const Block: React.FC = () => {
@@ -29,13 +21,9 @@ const Block: React.FC = () => {
   const gridRef = useRef<EtsGridRef<BlockProps>>(null);
   const { toast } = useNotify();
   const [rowData, setRowData] = useState<BlockProps[]>([]);
+  const [_, setNewRowNodes] = useState<IRowNode<BlockProps>[]>([]);
 
-  const columnDefs: (ColDef | ColGroupDef)[] = [
-    EtsColumnPreset.SelectionBoxPreset({
-      headerName: '',
-      width: 60,
-      headerCheckboxSelection: true,
-    }),
+  const columnDefs: ColDef<BlockProps>[] = [
     EtsColumnPreset.IdPreset({
       field: 'no',
       headerName: 'No',
@@ -47,46 +35,16 @@ const Block: React.FC = () => {
       hide: true,
     }),
     EtsColumnPreset.TextPreset({
-      field: 'user_key',
-      headerName: 'user_id',
-      hide: true,
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_id',
-      headerName: '회원 ID',
+      field: 'block_ip',
+      headerName: '차단 IP',
       width: 150,
       flex: 1,
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_type',
-      headerName: '회원 구분',
-      width: 150,
-      flex: 1,
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'block_message',
-      headerName: '차단 사유',
-      width: 200,
-      flex: 1,
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_money',
-      headerName: '보유금',
-      width: 200,
-      flex: 1,
+      editable: isEditable,
       context: {
-        formatType: 'number',
-        decimalPlaces: 0,
-      },
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_rolling_money',
-      headerName: '롤링금',
-      width: 200,
-      flex: 1,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
+        inputProps: {
+          placeholder: 'IP 혹은 0으로 끝나는 대역을 입력하세요.',
+        },
+        required: true,
       },
     }),
     EtsColumnPreset.TextPreset({
@@ -98,8 +56,9 @@ const Block: React.FC = () => {
     EtsColumnPreset.CheckButtonPreset({
       field: 'block_status',
       headerName: '차단 여부',
-      width: 120,
-      editable: isEditable,
+      width: 150,
+      editable: (rendererParams: any) => isEditable && !rendererParams?.data?.isNew,
+      flex: 1,
       context: {
         checkButtonProps: {
           checkedLabel: '차단해제',
@@ -110,28 +69,17 @@ const Block: React.FC = () => {
   ];
 
   useEffect(() => {
-    handleSubmit(onSearch)();
+    onSearch();
   }, []);
 
-  const { control, handleSubmit, getValues } = useForm<FormValues>({
-    defaultValues: {
-      blockStatus: blockStatusOptions[0].value,
-      userId: '',
-    },
-    mode: 'onChange',
-  });
-
-  const onSearch: SubmitHandler<FormValues> = () => {
-    const { blockStatus, userId } = getValues();
+  const onSearch = () => {
     callApi({
       service: Service.POSTMAN,
-      url: '/api/block',
+      url: '/api/block/ipBlock',
       method: Method.GET,
       params: {
         queryParams: {
-          blockStatus: blockStatus === 'ALL' ? '' : blockStatus,
-          userId,
-          blockType: 'USER_BLOCK',
+          blockType: 'IP_BLOCK',
         },
       },
       config: { isLoading: true },
@@ -142,13 +90,9 @@ const Block: React.FC = () => {
       const mapped = (res.data || []).map((row: any) => {
         const raw = row?.block_status;
         const normalized = raw === 'BLOCKED' ? true : raw === 'UNBLOCKED' ? false : Boolean(raw);
-        const userTypeCode = String(row?.user_type ?? '');
-        const userTypeLabel = userTypeCode === 'CU' ? '고객' : '파트너';
         return {
           ...row,
           block_status: normalized,
-          user_type_code: userTypeCode,
-          user_type: userTypeLabel,
         };
       });
 
@@ -156,18 +100,19 @@ const Block: React.FC = () => {
     });
   };
 
-  const handleUpdatedRow = async () => {
-    if (gridRef.current) {
-      gridRef.current.api.stopEditing();
-    }
-    // 승인 여부 컬럼 체크로 인하여 셀렉트 체크 로직 없음
-    const selectedNodes = gridRef.current?.api.getSelectedNodes() ?? [];
-
-    selectedNodes.forEach((node) => {
-      if (!node) return;
-      const current = Boolean(node.data?.block_status);
-      node.setDataValue('block_status', !current);
+  const handleAddRow = async () => {
+    const lastRowIndex = gridRef.current?.api.getDisplayedRowCount() ?? 0;
+    gridRef.current?.addRow({
+      block_ip: '',
+      created: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      block_status: true,
+      isNew: true,
     });
+
+    const newNode = gridRef.current?.api.getDisplayedRowAtIndex(lastRowIndex);
+    if (newNode) {
+      setNewRowNodes((prevNodes) => [...prevNodes, newNode]);
+    }
   };
 
   // GridRow 저장 버튼
@@ -189,6 +134,7 @@ const Block: React.FC = () => {
       const payloadRow: any = {
         ...rest,
         rowStatus: status,
+        block_status: rest.block_status ? 'BLOCKED' : 'UNBLOCKED',
       };
 
       changedRows.push(payloadRow);
@@ -201,7 +147,7 @@ const Block: React.FC = () => {
 
     const res = await callApi({
       service: Service.POSTMAN,
-      url: '/api/block/batch',
+      url: '/api/block/ipBlockBatch',
       method: Method.POST,
       params: {
         bodyParams: changedRows,
@@ -215,47 +161,9 @@ const Block: React.FC = () => {
     }
 
     toast.success('저장되었습니다.');
-    handleSubmit(onSearch)();
+    onSearch();
     setIsEditable(false);
   };
-
-  const searchComponent = (
-    <form onSubmit={handleSubmit(onSearch)}>
-      <searchForm.Container>
-        <searchForm.Row>
-          <EtsSelectComponent
-            control={control}
-            name="blockStatus"
-            label="차단 여부"
-            options={blockStatusOptions}
-          />
-          <EtsInputComponent
-            control={control}
-            name="userId"
-            label="회원 ID"
-            placeholder="회원 ID를 입력하세요."
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key !== 'Enter') return;
-              if ((e.nativeEvent as any)?.isComposing) return;
-              e.preventDefault();
-              handleSubmit(onSearch)();
-            }}
-            // width={250}
-          />
-          <Box sx={{ marginLeft: 'auto' }}>
-            <EtsButton
-              type="blue"
-              onClick={() => {
-                handleSubmit(onSearch)();
-              }}
-            >
-              검색
-            </EtsButton>
-          </Box>
-        </searchForm.Row>
-      </searchForm.Container>
-    </form>
-  );
 
   const buttonComponent = (
     <buttonForm.Container>
@@ -266,11 +174,11 @@ const Block: React.FC = () => {
               type="grey"
               onClick={async () => {
                 if (gridRef.current) {
-                  await handleUpdatedRow();
+                  await handleAddRow();
                 }
               }}
             >
-              선택차단 및 해제
+              추가
             </EtsButton>
             <EtsButton
               type="grey"
@@ -278,7 +186,7 @@ const Block: React.FC = () => {
                 if (gridRef.current) {
                   gridRef.current.api.stopEditing();
                 }
-                handleSubmit(onSearch)();
+                onSearch();
                 setIsEditable(false);
               }}
             >
@@ -312,16 +220,12 @@ const Block: React.FC = () => {
   return (
     <>
       <PageTemplate
-        title="회원 차단 관리"
+        title="IP 차단 관리"
         gridRef={gridRef}
         columnDefs={columnDefs}
-        searchComponent={searchComponent}
         buttonComponent={buttonComponent}
         rowData={rowData}
-        isRowSelectable={() => isEditable}
-        rowSelection="multiple"
-        rowMultiSelectWithClick={true}
-        suppressRowClickSelection={true}
+        size="no-search"
       />
     </>
   );

@@ -230,7 +230,7 @@ const loginRecord: React.FC = () => {
   const handleTestIp = async () => {
     const res = await callApi({
       service: Service.POSTMAN,
-      url: '/api/login-record/test-ip',
+      url: '/api/waf-ipset',
       method: Method.GET,
     });
 
