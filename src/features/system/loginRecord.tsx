@@ -227,6 +227,16 @@ const loginRecord: React.FC = () => {
     setIsEditable(false);
   };
 
+  const handleTestIp = async () => {
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/login-record/test-ip',
+      method: Method.GET,
+    });
+
+    console.log(res);
+  };
+
   const searchComponent = (
     <form onSubmit={handleSubmit(onSearch)}>
       <searchForm.Container>
@@ -271,6 +281,16 @@ const loginRecord: React.FC = () => {
       <buttonForm.Row>
         {isEditable ? (
           <>
+            <EtsButton
+              type="grey"
+              onClick={async () => {
+                if (gridRef.current) {
+                  await handleTestIp();
+                }
+              }}
+            >
+              IP 테스트
+            </EtsButton>
             <EtsButton
               type="grey"
               onClick={async () => {
