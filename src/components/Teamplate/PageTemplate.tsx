@@ -27,6 +27,7 @@ export interface PageTemplateProps {
   rowData?: any[];
   onCellValueChanged?: (_params: any) => void;
   onCellClicked?: (_params: any) => void;
+  onSelectionChanged?: (_params: any) => void;
   gridRef?: React.Ref<any>;
   defaultColDef?: ColDef;
   /** 컬럼 전환 시 하단 가로 스크롤바 높이 변동(점프) 방지용 */
@@ -63,6 +64,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   rowData = [],
   onCellValueChanged,
   onCellClicked,
+  onSelectionChanged,
   gridRef,
   defaultColDef,
   alwaysShowHorizontalScroll,
@@ -289,6 +291,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
               rowData={enhancedRowData}
               onCellValueChanged={onCellValueChanged}
               onCellClicked={onCellClicked}
+              onSelectionChanged={onSelectionChanged}
               onGridReady={onGridReady}
               defaultColDef={defaultColDef}
               alwaysShowHorizontalScroll={alwaysShowHorizontalScroll}

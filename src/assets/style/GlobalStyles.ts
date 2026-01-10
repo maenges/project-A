@@ -2,6 +2,23 @@ import { createGlobalStyle } from 'styled-components';
 import reset from 'styled-reset';
 import { agGridStyles } from './agGridStyles';
 
+const hexToRgba = (hex: string, alpha: number) => {
+  const normalized = hex.replace('#', '').trim();
+  const full =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
+  if (full.length !== 6) return hex;
+
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export const GlobalStyles = createGlobalStyle`
   ${reset}
   /* Font faces are now loaded from /public/fonts.css */
@@ -20,6 +37,29 @@ export const GlobalStyles = createGlobalStyle`
     color: ${(props) => props.theme.colors.text.base};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Text selection highlight (theme-friendly) */
+  input::selection,
+  textarea::selection,
+  [contenteditable="true"]::selection,
+  .MuiInputBase-input::selection,
+  .MuiInputBase-inputMultiline::selection,
+  .ag-theme-material input::selection,
+  .ag-theme-material textarea::selection {
+    background: ${(props) => hexToRgba(props.theme.colors.primary.main, 0.28)};
+    color: ${(props) => props.theme.colors.text.base};
+  }
+
+  input::-moz-selection,
+  textarea::-moz-selection,
+  [contenteditable="true"]::-moz-selection,
+  .MuiInputBase-input::-moz-selection,
+  .MuiInputBase-inputMultiline::-moz-selection,
+  .ag-theme-material input::-moz-selection,
+  .ag-theme-material textarea::-moz-selection {
+    background: ${(props) => hexToRgba(props.theme.colors.primary.main, 0.28)};
+    color: ${(props) => props.theme.colors.text.base};
   }
 
   /* MUI Typography override */

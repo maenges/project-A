@@ -7,6 +7,9 @@ const apiOrigin = process.env.VITE_API_ORIGIN;
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Windows에서 백신/인덱서/에디터가 node_modules\.vite 를 잠그면
+  // deps_temp -> deps rename 시 EPERM이 발생할 수 있어 캐시 위치를 분리합니다.
+  cacheDir: resolve(__dirname, './.vite'),
   plugins: [
     react({
       babel: {

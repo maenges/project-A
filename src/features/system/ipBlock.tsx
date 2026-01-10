@@ -22,8 +22,14 @@ const Block: React.FC = () => {
   const { toast } = useNotify();
   const [rowData, setRowData] = useState<BlockProps[]>([]);
   const [_, setNewRowNodes] = useState<IRowNode<BlockProps>[]>([]);
+  const [selectedRowCount, setSelectedRowCount] = useState(0);
 
   const columnDefs: ColDef<BlockProps>[] = [
+    EtsColumnPreset.SelectionBoxPreset({
+      headerName: '',
+      width: 60,
+      headerCheckboxSelection: true,
+    }),
     EtsColumnPreset.IdPreset({
       field: 'no',
       headerName: 'No',
@@ -39,7 +45,7 @@ const Block: React.FC = () => {
       headerName: '차단 IP',
       width: 150,
       flex: 1,
-      editable: isEditable,
+      editable: (rendererParams: any) => isEditable && !!rendererParams?.data?.isNew,
       context: {
         inputProps: {
           placeholder: 'IP 혹은 0으로 끝나는 대역을 입력하세요.',
@@ -100,7 +106,7 @@ const Block: React.FC = () => {
     });
   };
 
-  const handleAddRow = async () => {
+  const handleAddRow = () => {
     const lastRowIndex = gridRef.current?.api.getDisplayedRowCount() ?? 0;
     gridRef.current?.addRow({
       block_ip: '',
@@ -113,6 +119,15 @@ const Block: React.FC = () => {
     if (newNode) {
       setNewRowNodes((prevNodes) => [...prevNodes, newNode]);
     }
+  };
+
+  const handleDeleteRow = () => {
+    gridRef.current?.deleteBySelectedRows();
+  };
+
+  const handleSelectionChanged = () => {
+    const selectedNodes = gridRef.current?.api.getSelectedNodes() ?? [];
+    setSelectedRowCount(selectedNodes.length);
   };
 
   // GridRow 저장 버튼
@@ -172,14 +187,26 @@ const Block: React.FC = () => {
           <>
             <EtsButton
               type="grey"
-              onClick={async () => {
+              onClick={() => {
                 if (gridRef.current) {
-                  await handleAddRow();
+                  handleAddRow();
                 }
               }}
             >
               추가
             </EtsButton>
+            {selectedRowCount > 0 && (
+              <EtsButton
+                type="grey"
+                onClick={() => {
+                  if (gridRef.current) {
+                    handleDeleteRow();
+                  }
+                }}
+              >
+                줄삭제
+              </EtsButton>
+            )}
             <EtsButton
               type="grey"
               onClick={() => {
@@ -225,7 +252,11 @@ const Block: React.FC = () => {
         columnDefs={columnDefs}
         buttonComponent={buttonComponent}
         rowData={rowData}
-        size="no-search"
+        isRowSelectable={() => isEditable}
+        rowSelection="multiple"
+        rowMultiSelectWithClick={true}
+        suppressRowClickSelection={true}
+        onSelectionChanged={handleSelectionChanged}
       />
     </>
   );

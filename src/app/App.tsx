@@ -55,6 +55,7 @@ import GridPaginationTestPage from '@/features/GridPaginationTestPage';
 import EventLogManagementPage from '@/features/admin/eventLogManagement/EventLogManagementPage';
 import PayloadCleansingPage from './../features/management/payloadCleansing/PayloadCleansingPage';
 
+// New
 import {
   SystemNoticePage,
   SystemAccountChangePage,
@@ -66,7 +67,12 @@ import {
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
 import { PartnerPartnerListPage } from '@/features/partner';
-import { CustomerWaitPage, CustomerAccessorPage, CustomerListPage } from '@features/customer';
+import {
+  CustomerWaitPage,
+  CustomerAccessorPage,
+  CustomerListPage,
+  CustomerDetailPage,
+} from '@features/customer';
 import { BetBetListPage, BetLosePage } from '@features/bet';
 import { GameRecordStatisticsPage } from '@/features/gameRecord';
 import { SettlementLoosingPage } from '@/features/settlement';
@@ -488,6 +494,14 @@ function App() {
                             element={
                               <PrivateRoute>
                                 <CustomerListPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
+                            path="/customer/customerDetail"
+                            element={
+                              <PrivateRoute>
+                                <CustomerDetailPage />
                               </PrivateRoute>
                             }
                           />
