@@ -66,7 +66,7 @@ import {
   SystemIpBlockPage,
 } from '@/features/system';
 import { TransTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
-import { PartnerPartnerListPage } from '@/features/partner';
+import { PartnerListPage } from '@/features/partner';
 import {
   CustomerWaitPage,
   CustomerAccessorPage,
@@ -485,7 +485,15 @@ function App() {
                             path="/partner/partnerList"
                             element={
                               <PrivateRoute>
-                                <PartnerPartnerListPage />
+                                <PartnerListPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
+                            path="/customer/partnerDetail"
+                            element={
+                              <PrivateRoute>
+                                <CustomerDetailPage />
                               </PrivateRoute>
                             }
                           />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   Box,
   List,
@@ -32,6 +32,9 @@ export interface EtsLeftTreeProps {
   sx?: any;
   // 선택 이벤트 콜백(선택된 id)
   onSelect?: (id: string) => void;
+
+  /** 값이 변경될 때 트리 데이터를 재조회합니다. */
+  reloadKey?: unknown;
 
   // 체크박스 사용 여부
   checkable?: boolean;
@@ -249,6 +252,7 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
   width,
   sx,
   onSelect,
+  reloadKey,
   checkable = false,
   checkedIds,
   defaultCheckedIds,
@@ -259,6 +263,11 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
   const [treeItems, setTreeItems] = useState<EtsTreeNode[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [orgQuery, setOrgQuery] = useState<string>('');
+
+  const selectedOrgIdRef = useRef<string>('');
+  useEffect(() => {
+    selectedOrgIdRef.current = selectedOrgId;
+  }, [selectedOrgId]);
 
   const [internalCheckedIds, setInternalCheckedIds] = useState<Set<string>>(
     () => new Set(defaultCheckedIds ?? [])
@@ -326,14 +335,24 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
         }
         // API 데이터 트리 변환
         setTreeItems(buildTree(res.data ?? []));
-        // 최상위 노드 자동 선택
-        if (res.data?.length) setSelectedOrgId(res.data[0].group_key);
+        // 최상위 노드 자동 선택(기존 선택 유지 우선)
+        if (res.data?.length) {
+          const currentSelected = selectedOrgIdRef.current;
+          const exists = currentSelected
+            ? (res.data ?? []).some((x: any) => String(x?.group_key) === String(currentSelected))
+            : false;
+          if (!currentSelected || !exists) {
+            const nextId = res.data[0].group_key;
+            setSelectedOrgId(nextId);
+            onSelect?.(nextId);
+          }
+        }
         return res;
       })
       .catch(() => {
         // ignore
       });
-  }, [toast]);
+  }, [toast, reloadKey]);
 
   // 트리 필터링
   const filterTree = (nodes: EtsTreeNode[], q: string): EtsTreeNode[] => {

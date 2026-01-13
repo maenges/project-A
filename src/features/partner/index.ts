@@ -1,1 +1,1 @@
-export { default as PartnerPartnerListPage } from './partnerList';
+export { default as PartnerListPage } from './partnerList';

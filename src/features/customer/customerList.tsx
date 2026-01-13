@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { Box } from '@mui/material';
@@ -27,6 +28,8 @@ type FormValues = {
 const CustomerList: React.FC = () => {
   const gridRef = useRef<EtsGridRef<Customer>>(null);
   const { toast } = useNotify();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<Customer[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [showCasinoSlot, setShowCasinoSlot] = useState(false);
@@ -38,12 +41,17 @@ const CustomerList: React.FC = () => {
     const raw = row?.group_name;
     if (!Array.isArray(raw)) return [];
 
+    const toLevel = (v: any) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : -1;
+    };
+
     // level: 1(하위) ~ 4(상위) => 역순(상위 -> 하위)
-    const sorted = [...raw].sort((a: any, b: any) => (b?.level ?? 0) - (a?.level ?? 0));
+    const sorted = [...raw].sort((a: any, b: any) => toLevel(b?.level) - toLevel(a?.level));
     return sorted
       .map((x: any) => ({
         name: x?.group_name ?? x?.groupName,
-        level: x?.level,
+        level: toLevel(x?.level),
       }))
       .filter((x: any) => Boolean(x?.name))
       .map((x: any) => {
@@ -120,6 +128,9 @@ const CustomerList: React.FC = () => {
       field: 'user_id',
       headerName: '회원 ID',
       width: 100,
+      context: {
+        clickable: true,
+      },
     }),
     {
       headerName: '충환전',
@@ -287,6 +298,27 @@ const CustomerList: React.FC = () => {
     // });
   };
 
+  const handleCellClicked = (params: any) => {
+    const field = params?.colDef?.field;
+    if (field !== 'user_id') return;
+
+    const row = params?.data as Customer | undefined;
+    if (!row) return;
+
+    // row는 userKey를 가지고 있음(요구사항). 실제 API 응답 키가 user_key인 것으로 보임.
+    const userKey = row?.user_key ?? row?.userKey;
+    if (!userKey) {
+      toast.info('회원 키(userKey)가 없어 상세보기로 이동할 수 없습니다.');
+      return;
+    }
+
+    if (gridRef.current) {
+      gridRef.current.api.stopEditing();
+    }
+
+    navigate('/customer/customerDetail', { state: { userKey } });
+  };
+
   const fetchCustomerListByGroupKey = (groupKey: string) => {
     const { startDate, endDate } = getValues();
     callApi({
@@ -309,8 +341,22 @@ const CustomerList: React.FC = () => {
     });
   };
 
+  // 상세 화면으로 갔다가 뒤로 왔을 때도 리스트가 유지되도록
+  // 선택된 트리(groupKey)를 URL 쿼리에 저장하고, 마운트 시 자동 재조회
+  useEffect(() => {
+    const groupKey = searchParams.get('groupKey');
+    if (!groupKey) return;
+    setSelectedTreeId(groupKey);
+    fetchCustomerListByGroupKey(groupKey);
+  }, []);
+
   const handleTreeSelect = (id: string) => {
     setSelectedTreeId(id);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('groupKey', id);
+      return next;
+    });
     fetchCustomerListByGroupKey(id);
   };
 
@@ -428,7 +474,7 @@ const CustomerList: React.FC = () => {
           autoHeaderHeight: false,
           wrapHeaderText: false,
         }}
-        // size="sm-two-header"
+        onCellClicked={handleCellClicked}
         tree={true}
         leftTreeProps={{
           onSelect: handleTreeSelect,

@@ -13,6 +13,7 @@ export default defineConfig({
   plugins: [
     react({
       babel: {
+        compact: false,  // 큰 파일에 대한 경고 메시지 비활성화
         plugins: [
           [
             'babel-plugin-styled-components',
