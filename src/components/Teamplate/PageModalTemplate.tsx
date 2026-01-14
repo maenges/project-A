@@ -174,6 +174,7 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
       <Dialog
         open={open}
         onClose={handleClose}
+        disableScrollLock
         disableEnforceFocus
         disableRestoreFocus
         keepMounted

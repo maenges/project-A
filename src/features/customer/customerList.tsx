@@ -25,6 +25,33 @@ type FormValues = {
   endDate: string;
 };
 
+const CUSTOMER_LIST_UI_STATE_KEY = 'customerList.uiState';
+
+type CustomerListUiState = {
+  groupKey?: string;
+  firstRow?: number;
+  showCasinoSlot?: boolean;
+};
+
+const readCustomerListUiState = (): CustomerListUiState | null => {
+  try {
+    const raw = sessionStorage.getItem(CUSTOMER_LIST_UI_STATE_KEY);
+    return raw ? (JSON.parse(raw) as CustomerListUiState) : null;
+  } catch {
+    return null;
+  }
+};
+
+const getInitialCustomerGroupKey = (): string | null => {
+  try {
+    const urlGroupKey = new URLSearchParams(window.location.search).get('groupKey');
+    const saved = readCustomerListUiState();
+    return urlGroupKey ?? saved?.groupKey ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const CustomerList: React.FC = () => {
   const gridRef = useRef<EtsGridRef<Customer>>(null);
   const { toast } = useNotify();
@@ -32,10 +59,27 @@ const CustomerList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<Customer[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
-  const [showCasinoSlot, setShowCasinoSlot] = useState(false);
-  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [showCasinoSlot, setShowCasinoSlot] = useState(
+    () => readCustomerListUiState()?.showCasinoSlot ?? false
+  );
+  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(() =>
+    getInitialCustomerGroupKey()
+  );
   const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(7, 'day'));
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
+
+  // 복원할 스크롤 위치(첫 표시 row index)
+  const restoreFirstRowRef = useRef<number | null>(null);
+
+  const saveUiState = (patch: Partial<CustomerListUiState>) => {
+    try {
+      const raw = sessionStorage.getItem(CUSTOMER_LIST_UI_STATE_KEY);
+      const prev = raw ? (JSON.parse(raw) as CustomerListUiState) : {};
+      sessionStorage.setItem(CUSTOMER_LIST_UI_STATE_KEY, JSON.stringify({ ...prev, ...patch }));
+    } catch {
+      // ignore
+    }
+  };
 
   const getGroupNameOptionsByRow = (row: any) => {
     const raw = row?.group_name;
@@ -163,7 +207,7 @@ const CustomerList: React.FC = () => {
     },
     EtsColumnPreset.TextPreset({
       field: 'user_money',
-      headerName: '보유머니',
+      headerName: '보유금액',
       width: 100,
       flex: 1,
       context: {
@@ -173,7 +217,7 @@ const CustomerList: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_rolling_money',
-      headerName: '롤링머니',
+      headerName: '롤링금액',
       width: 100,
       flex: 1,
       context: {
@@ -316,6 +360,14 @@ const CustomerList: React.FC = () => {
       gridRef.current.api.stopEditing();
     }
 
+    // 뒤로 돌아올 때 트리/스크롤 위치 복원용 상태 저장
+    const firstRow = (gridRef.current as any)?.api?.getFirstDisplayedRow?.();
+    saveUiState({
+      groupKey: selectedTreeId ?? undefined,
+      firstRow: typeof firstRow === 'number' ? firstRow : undefined,
+      showCasinoSlot,
+    });
+
     navigate('/customer/customerDetail', { state: { userKey } });
   };
 
@@ -337,20 +389,67 @@ const CustomerList: React.FC = () => {
       }
 
       // rowData는 API 응답 그대로 사용 (group_name 배열 포함)
-      setRowData(res.data ?? []);
+      const data = (res.data ?? []) as Customer[];
+      setRowData(data);
+
+      // 데이터 세팅 후 스크롤 위치 복원(최초 1회)
+      const restoreIndex = restoreFirstRowRef.current;
+      if (typeof restoreIndex === 'number') {
+        restoreFirstRowRef.current = null;
+        const api = (gridRef.current as any)?.api;
+        if (api?.ensureIndexVisible) {
+          const safeIndex = Math.max(0, Math.min(restoreIndex, Math.max(0, data.length - 1)));
+          requestAnimationFrame(() => {
+            try {
+              api.ensureIndexVisible(safeIndex, 'top');
+            } catch {
+              // ignore
+            }
+          });
+        }
+      }
     });
   };
 
   // 상세 화면으로 갔다가 뒤로 왔을 때도 리스트가 유지되도록
   // 선택된 트리(groupKey)를 URL 쿼리에 저장하고, 마운트 시 자동 재조회
   useEffect(() => {
-    const groupKey = searchParams.get('groupKey');
+    const urlGroupKey = searchParams.get('groupKey');
+    const saved = readCustomerListUiState();
+    const groupKey = urlGroupKey ?? saved?.groupKey;
     if (!groupKey) return;
+
     setSelectedTreeId(groupKey);
+    if (!urlGroupKey) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('groupKey', groupKey);
+        return next;
+      });
+    }
+
+    if (typeof saved?.showCasinoSlot === 'boolean') {
+      setShowCasinoSlot(saved.showCasinoSlot);
+    }
+    if (typeof saved?.firstRow === 'number') {
+      restoreFirstRowRef.current = saved.firstRow;
+    }
+
     fetchCustomerListByGroupKey(groupKey);
   }, []);
 
   const handleTreeSelect = (id: string) => {
+    // 트리 선택 시에는 항상 기본 컬럼 뷰로 복원
+    setShowCasinoSlot(false);
+    const api = (gridRef.current as any)?.api;
+    if (api) {
+      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible([...casinoSlotFields], false);
+    }
+
+    // 마지막 선택 트리 저장 + 스크롤은 최상단으로 리셋
+    saveUiState({ groupKey: id, firstRow: 0, showCasinoSlot: false });
+
     setSelectedTreeId(id);
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -435,7 +534,11 @@ const CustomerList: React.FC = () => {
           type="grey"
           aria-label={showCasinoSlot ? '카지노/슬롯 컬럼 숨기기' : '카지노/슬롯 컬럼 보기'}
           onClick={() => {
-            setShowCasinoSlot((prev) => !prev);
+            setShowCasinoSlot((prev) => {
+              const next = !prev;
+              saveUiState({ showCasinoSlot: next });
+              return next;
+            });
           }}
         >
           {showCasinoSlot ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
@@ -478,6 +581,7 @@ const CustomerList: React.FC = () => {
         tree={true}
         leftTreeProps={{
           onSelect: handleTreeSelect,
+          selectedId: selectedTreeId ?? undefined,
         }}
         rowSelection="single"
       />

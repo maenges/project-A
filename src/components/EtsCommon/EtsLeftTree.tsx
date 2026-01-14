@@ -33,6 +33,9 @@ export interface EtsLeftTreeProps {
   // 선택 이벤트 콜백(선택된 id)
   onSelect?: (id: string) => void;
 
+  /** 외부에서 선택된 조직 id를 주입(선택 상태 복원) */
+  selectedId?: string;
+
   /** 값이 변경될 때 트리 데이터를 재조회합니다. */
   reloadKey?: unknown;
 
@@ -252,6 +255,7 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
   width,
   sx,
   onSelect,
+  selectedId,
   reloadKey,
   checkable = false,
   checkedIds,
@@ -268,6 +272,15 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
   useEffect(() => {
     selectedOrgIdRef.current = selectedOrgId;
   }, [selectedOrgId]);
+
+  // 외부에서 선택값이 들어오면 내부 선택 상태를 동기화
+  useEffect(() => {
+    if (!selectedId) return;
+    const next = String(selectedId);
+    if (next && next !== selectedOrgIdRef.current) {
+      setSelectedOrgId(next);
+    }
+  }, [selectedId]);
 
   const [internalCheckedIds, setInternalCheckedIds] = useState<Set<string>>(
     () => new Set(defaultCheckedIds ?? [])
@@ -337,11 +350,14 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
         setTreeItems(buildTree(res.data ?? []));
         // 최상위 노드 자동 선택(기존 선택 유지 우선)
         if (res.data?.length) {
-          const currentSelected = selectedOrgIdRef.current;
+          const preferredSelected = selectedId ? String(selectedId) : selectedOrgIdRef.current;
+          const currentSelected = preferredSelected;
           const exists = currentSelected
             ? (res.data ?? []).some((x: any) => String(x?.group_key) === String(currentSelected))
             : false;
-          if (!currentSelected || !exists) {
+          if (currentSelected && exists) {
+            setSelectedOrgId(currentSelected);
+          } else {
             const nextId = res.data[0].group_key;
             setSelectedOrgId(nextId);
             onSelect?.(nextId);
@@ -352,7 +368,7 @@ const EtsLeftTree: React.FC<EtsLeftTreeProps> = ({
       .catch(() => {
         // ignore
       });
-  }, [toast, reloadKey]);
+  }, [toast, reloadKey, selectedId]);
 
   // 트리 필터링
   const filterTree = (nodes: EtsTreeNode[], q: string): EtsTreeNode[] => {

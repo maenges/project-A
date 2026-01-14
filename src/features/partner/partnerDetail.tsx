@@ -12,12 +12,12 @@ import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
 import { useNotify } from '@hooks/useNotify';
 import { MemberTypeOptions } from '@models/common/CommonSelectCodes';
-import CustomerInfoTab from './customerDetailTabs/CustomerInfoTab';
-import RecentLoginTab from './customerDetailTabs/RecentLoginTab';
-import MemoTab from './customerDetailTabs/MemoTab';
-import BalanceHistoryTab from './customerDetailTabs/BalanceHistoryTab';
-import DepositWithdrawTab from './customerDetailTabs/DepositWithdrawTab';
-import GameHistoryTab from './customerDetailTabs/GameHistoryTab';
+import CustomerInfoTab from '../customer/customerDetailTabs/CustomerInfoTab';
+import RecentLoginTab from '../customer/customerDetailTabs/RecentLoginTab';
+import MemoTab from '../customer/customerDetailTabs/MemoTab';
+import BalanceHistoryTab from '../customer/customerDetailTabs/BalanceHistoryTab';
+import DepositWithdrawTab from '../customer/customerDetailTabs/DepositWithdrawTab';
+import GameHistoryTab from '../customer/customerDetailTabs/GameHistoryTab';
 
 type TabDef = { label: string; icon: React.ReactElement };
 
@@ -160,7 +160,7 @@ const TabPanel = ({
   );
 };
 
-const CustomerDetail: React.FC = () => {
+const PartnerDetail: React.FC = () => {
   const { toast } = useNotify();
   const [tabIndex, setTabIndex] = useState(0);
   const location = useLocation();
@@ -173,8 +173,8 @@ const CustomerDetail: React.FC = () => {
     let cancelled = false;
 
     if (!userKey) {
-      toast.error('잘못된 접근입니다. 고객 목록으로 이동합니다.');
-      navigate('/customer/customerList', { replace: true });
+      toast.error('잘못된 접근입니다. 파트너 목록으로 이동합니다.');
+      navigate('/partner/partnerList', { replace: true });
       return;
     }
 
@@ -221,12 +221,12 @@ const CustomerDetail: React.FC = () => {
   };
 
   const summary: Array<{ label: string; value: React.ReactNode }> = [
-    { label: '회원 구분', value: getMemberTypeLabel(detail?.user_type ?? detail?.userType) },
-    { label: '회원 ID', value: detail?.user_id },
+    { label: '파트너 구분', value: getMemberTypeLabel(detail?.user_type ?? detail?.userType) },
+    { label: '파트너 ID', value: detail?.user_id },
     { label: '닉네임', value: detail?.user_nick },
-    { label: '보유금액', value: formatMoney(detail?.user_money) },
-    { label: '롤링금액', value: formatMoney(detail?.user_rolling_money) },
-    { label: '루징금액', value: formatMoney(detail?.user_bonus_money) },
+    { label: '보유금', value: formatMoney(detail?.user_money) },
+    { label: '롤링금', value: formatMoney(detail?.user_rolling_money) },
+    { label: '루징금', value: formatMoney(detail?.user_bonus_money) },
   ];
 
   const tabs: TabDef[] = useMemo(
@@ -306,4 +306,4 @@ const CustomerDetail: React.FC = () => {
   );
 };
 
-export default CustomerDetail;
+export default PartnerDetail;

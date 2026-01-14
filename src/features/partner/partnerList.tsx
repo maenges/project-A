@@ -13,9 +13,24 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 import { EtsButton } from '@/components/EtsCommon';
-import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
+import {
+  EtsInputComponent,
+  EtsDatePickerComponent,
+  EtsSelectComponent,
+} from '@/components/EtsComponents';
+import { MemberTypeOptions } from '@models/common/CommonSelectCodes';
 
 import PartnerListModal from './partnerListModal';
+
+const MEMBER_TYPE_LABEL_BY_VALUE = new Map(
+  MemberTypeOptions.map((x) => [String(x.value).toUpperCase(), x.label] as const)
+);
+
+const getMemberTypeLabel = (value: unknown) => {
+  if (value === null || value === undefined) return '';
+  const key = String(value).toUpperCase();
+  return MEMBER_TYPE_LABEL_BY_VALUE.get(key) ?? String(value);
+};
 
 type Partner = {
   [key: string]: any;
@@ -24,6 +39,34 @@ type Partner = {
 type FormValues = {
   startDate: string;
   endDate: string;
+  userType: string;
+};
+
+const PARTNER_LIST_UI_STATE_KEY = 'partnerList.uiState';
+
+type PartnerListUiState = {
+  groupKey?: string;
+  firstRow?: number;
+  showCasinoSlot?: boolean;
+};
+
+const readPartnerListUiState = (): PartnerListUiState | null => {
+  try {
+    const raw = sessionStorage.getItem(PARTNER_LIST_UI_STATE_KEY);
+    return raw ? (JSON.parse(raw) as PartnerListUiState) : null;
+  } catch {
+    return null;
+  }
+};
+
+const getInitialGroupKey = (): string | null => {
+  try {
+    const urlGroupKey = new URLSearchParams(window.location.search).get('groupKey');
+    const saved = readPartnerListUiState();
+    return urlGroupKey ?? saved?.groupKey ?? null;
+  } catch {
+    return null;
+  }
 };
 
 const PartnerList: React.FC = () => {
@@ -33,46 +76,25 @@ const PartnerList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<Partner[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
-  const [showCasinoSlot, setShowCasinoSlot] = useState(false);
-  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [showCasinoSlot, setShowCasinoSlot] = useState(
+    () => readPartnerListUiState()?.showCasinoSlot ?? false
+  );
+  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(() => getInitialGroupKey());
   const [treeReloadKey, setTreeReloadKey] = useState(0);
   const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(7, 'day'));
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
 
-  const getGroupNameOptionsByRow = (row: any) => {
-    const raw = row?.group_name;
-    if (!Array.isArray(raw)) return [];
+  // 복원할 스크롤 위치(첫 표시 row index)
+  const restoreFirstRowRef = useRef<number | null>(null);
 
-    const toLevel = (v: any) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : -1;
-    };
-
-    // level: 1(하위) ~ 4(상위) => 역순(상위 -> 하위)
-    const sorted = [...raw].sort((a: any, b: any) => toLevel(b?.level) - toLevel(a?.level));
-    return sorted
-      .map((x: any) => ({
-        name: x?.group_name ?? x?.groupName,
-        level: toLevel(x?.level),
-      }))
-      .filter((x: any) => Boolean(x?.name))
-      .map((x: any) => {
-        const name = String(x.name);
-        const level = typeof x.level === 'number' ? x.level : undefined;
-        const prefix = level ? `[L${level}]` : '';
-        return {
-          value: name,
-          label: prefix ? `${prefix} ${name}` : name,
-        };
-      });
-  };
-
-  const getStoreNameByRow = (row: any) => {
-    const raw = row?.group_name;
-    if (!Array.isArray(raw)) return '';
-    const match = raw.find((x: any) => String(x?.group_key) === String(row?.group_key));
-    const store = match ?? raw.find((x: any) => x?.level === 1) ?? raw[0];
-    return store?.group_name ?? store?.groupName ?? '';
+  const saveUiState = (patch: Partial<PartnerListUiState>) => {
+    try {
+      const raw = sessionStorage.getItem(PARTNER_LIST_UI_STATE_KEY);
+      const prev = raw ? (JSON.parse(raw) as PartnerListUiState) : {};
+      sessionStorage.setItem(PARTNER_LIST_UI_STATE_KEY, JSON.stringify({ ...prev, ...patch }));
+    } catch {
+      // ignore
+    }
   };
 
   const defaultViewVisibleColKeys = [
@@ -80,19 +102,22 @@ const PartnerList: React.FC = () => {
     'charge_recover',
     'user_money',
     'user_rolling_money',
-    'group_name',
-    'withdrawal',
-    'deposit',
+    'user_bonus_money',
     'created',
+    'user_type',
+    'user_rolling_s',
+    'user_rolling_c',
+    'user_bonus_s',
+    'user_bonus_c',
   ] as const;
 
   const casinoSlotFields = [
-    'c_betting_amount',
-    'c_winning_amount',
-    'c_rolling_amount',
-    's_betting_amount',
-    's_winning_amount',
-    's_rolling_amount',
+    'period_betting_amount_s',
+    'period_betting_amount_c',
+    'period_rolling_amount_s',
+    'period_rolling_amount_c',
+    'period_bonus_amount_s',
+    'period_bonus_amount_c',
   ] as const;
 
   useEffect(() => {
@@ -128,14 +153,38 @@ const PartnerList: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_id',
-      headerName: '회원 ID',
-      width: 100,
+      headerName: '파트너 ID',
+      width: 150,
       context: {
         clickable: true,
       },
     }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_type',
+      headerName: '조직 유형',
+      width: 100,
+    }),
+    // EtsColumnPreset.SelectPreset({
+    //   field: 'group_name',
+    //   headerName: '소속',
+    //   width: 100,
+    //   editable: true,
+    //   valueGetter: (p: any) => getStoreNameByRow(p?.data),
+    //   valueSetter: () => {
+    //     // 보기용 콤보: 선택해도 rowData(group_name 배열)는 변경하지 않음
+    //     return false;
+    //   },
+    //   cellEditorParams: (p: any) => ({
+    //     ...p,
+    //     options: getGroupNameOptionsByRow(p?.data),
+    //   }),
+    //   context: {
+    //     // renderer는 value만 보여주면 되므로 빈 options
+    //     options: [],
+    //   },
+    // }),
     {
-      headerName: '충환전',
+      headerName: '알',
       children: [
         {
           ...EtsColumnPreset.CheckButtonPreset2({
@@ -165,7 +214,7 @@ const PartnerList: React.FC = () => {
     },
     EtsColumnPreset.TextPreset({
       field: 'user_money',
-      headerName: '보유머니',
+      headerName: '보유금액',
       width: 100,
       flex: 1,
       context: {
@@ -175,7 +224,7 @@ const PartnerList: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_rolling_money',
-      headerName: '롤링머니',
+      headerName: '보유 롤링금액',
       width: 100,
       flex: 1,
       context: {
@@ -183,61 +232,59 @@ const PartnerList: React.FC = () => {
         decimalPlaces: 0,
       },
     }),
-    EtsColumnPreset.SelectPreset({
-      field: 'group_name',
-      headerName: '소속',
+    EtsColumnPreset.TextPreset({
+      field: 'user_bonus_money',
+      headerName: '보유 루징금액',
       width: 100,
       flex: 1,
-      editable: true,
-      valueGetter: (p: any) => getStoreNameByRow(p?.data),
-      valueSetter: () => {
-        // 보기용 콤보: 선택해도 rowData(group_name 배열)는 변경하지 않음
-        return false;
-      },
-      cellEditorParams: (p: any) => ({
-        ...p,
-        options: getGroupNameOptionsByRow(p?.data),
-      }),
       context: {
-        // renderer는 value만 보여주면 되므로 빈 options
-        options: [],
+        formatType: 'number',
+        decimalPlaces: 0,
       },
     }),
     {
-      headerName: '입출금',
+      headerName: '롤링 %',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'withdrawal',
-          headerName: '입금',
-          width: 150,
+          field: 'user_rolling_s',
+          headerName: '슬롯',
+          width: 60,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'deposit',
-          headerName: '출금',
-          width: 150,
+          field: 'user_rolling_c',
+          headerName: '카지노',
+          width: 60,
         }),
       ],
     },
     {
-      headerName: '카지노',
+      headerName: '루징 %',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'c_betting_amount',
-          headerName: '베팅금액',
+          field: 'user_bonus_s',
+          headerName: '슬롯',
+          width: 60,
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'user_bonus_c',
+          headerName: '카지노',
+          width: 60,
+        }),
+      ],
+    },
+    {
+      headerName: '기간별 베팅 금액',
+      children: [
+        EtsColumnPreset.TextPreset({
+          field: 'period_betting_amount_s',
+          headerName: '슬롯',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'c_winning_amount',
-          headerName: '당첨금액',
-          width: 150,
-          hide: true,
-          flex: 1,
-        }),
-        EtsColumnPreset.TextPreset({
-          field: 'c_rolling_amount',
-          headerName: '롤링금액',
+          field: 'period_betting_amount_c',
+          headerName: '카지노',
           width: 150,
           hide: true,
           flex: 1,
@@ -245,25 +292,37 @@ const PartnerList: React.FC = () => {
       ],
     },
     {
-      headerName: '슬롯',
+      headerName: '기간별 롤링 금액',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 's_betting_amount',
-          headerName: '베팅금액',
+          field: 'period_rolling_amount_s',
+          headerName: '슬롯',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 's_winning_amount',
-          headerName: '당첨금액',
+          field: 'period_rolling_amount_c',
+          headerName: '카지노',
+          width: 150,
+          hide: true,
+          flex: 1,
+        }),
+      ],
+    },
+    {
+      headerName: '기간별 루징 금액',
+      children: [
+        EtsColumnPreset.TextPreset({
+          field: 'period_bonus_amount_s',
+          headerName: '슬롯',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 's_rolling_amount',
-          headerName: '롤링금액',
+          field: 'period_bonus_amount_c',
+          headerName: '카지노',
           width: 150,
           hide: true,
           flex: 1,
@@ -281,6 +340,7 @@ const PartnerList: React.FC = () => {
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
+      userType: 'ALL',
     },
     mode: 'onChange',
   });
@@ -319,7 +379,15 @@ const PartnerList: React.FC = () => {
       gridRef.current.api.stopEditing();
     }
 
-    navigate('/customer/customerDetail', { state: { userKey } });
+    // 뒤로 돌아올 때 트리/스크롤 위치 복원용 상태 저장
+    const firstRow = (gridRef.current as any)?.api?.getFirstDisplayedRow?.();
+    saveUiState({
+      groupKey: selectedTreeId ?? undefined,
+      firstRow: typeof firstRow === 'number' ? firstRow : undefined,
+      showCasinoSlot,
+    });
+
+    navigate('/partner/partnerDetail', { state: { userKey } });
   };
 
   const fetchPartnerListByGroupKey = (groupKey: string) => {
@@ -339,21 +407,81 @@ const PartnerList: React.FC = () => {
         return;
       }
 
-      // rowData는 API 응답 그대로 사용 (group_name 배열 포함)
-      setRowData(res.data ?? []);
+      const mapped: Partner[] = Array.isArray(res.data)
+        ? res.data.map((row: any) => {
+            const userTypeCode = row?.user_type ?? row?.userType;
+            const userTypeLabel = getMemberTypeLabel(userTypeCode);
+            return {
+              ...row,
+              user_type_code: userTypeCode,
+              user_type: userTypeLabel || userTypeCode,
+            };
+          })
+        : [];
+
+      // rowData는 API 응답 기반으로 표시용 필드(user_type)만 친화적으로 치환
+      setRowData(mapped);
+
+      // 데이터 세팅 후 스크롤 위치 복원(최초 1회)
+      const restoreIndex = restoreFirstRowRef.current;
+      if (typeof restoreIndex === 'number') {
+        restoreFirstRowRef.current = null;
+        const api = (gridRef.current as any)?.api;
+        if (api?.ensureIndexVisible) {
+          const safeIndex = Math.max(0, Math.min(restoreIndex, Math.max(0, mapped.length - 1)));
+          // 그리드 렌더 타이밍 보장을 위해 다음 프레임에 수행
+          requestAnimationFrame(() => {
+            try {
+              api.ensureIndexVisible(safeIndex, 'top');
+            } catch {
+              // ignore
+            }
+          });
+        }
+      }
     });
   };
 
   // 상세 화면으로 갔다가 뒤로 왔을 때도 리스트가 유지되도록
   // 선택된 트리(groupKey)를 URL 쿼리에 저장하고, 마운트 시 자동 재조회
   useEffect(() => {
-    const groupKey = searchParams.get('groupKey');
+    const urlGroupKey = searchParams.get('groupKey');
+    const saved = readPartnerListUiState();
+    const groupKey = urlGroupKey ?? saved?.groupKey;
     if (!groupKey) return;
+
     setSelectedTreeId(groupKey);
+    if (!urlGroupKey) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('groupKey', groupKey);
+        return next;
+      });
+    }
+
+    if (typeof saved?.showCasinoSlot === 'boolean') {
+      setShowCasinoSlot(saved.showCasinoSlot);
+    }
+    if (typeof saved?.firstRow === 'number') {
+      restoreFirstRowRef.current = saved.firstRow;
+    }
+
     fetchPartnerListByGroupKey(groupKey);
   }, []);
 
+  // 트리 선택 시
   const handleTreeSelect = (id: string) => {
+    // 트리 선택 시에는 항상 기본 컬럼 뷰로 복원
+    setShowCasinoSlot(false);
+    const api = (gridRef.current as any)?.api;
+    if (api) {
+      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible([...casinoSlotFields], false);
+    }
+
+    // 마지막 선택 트리 저장 + 스크롤은 최상단으로 리셋
+    saveUiState({ groupKey: id, firstRow: 0, showCasinoSlot: false });
+
     setSelectedTreeId(id);
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -397,6 +525,12 @@ const PartnerList: React.FC = () => {
             endDate={endRangeDate}
             setStartDate={setStartRangeDate}
             setEndDate={setEndRangeDate}
+          />
+          <EtsSelectComponent
+            control={control}
+            name="userType"
+            label="회원 유형"
+            options={MemberTypeOptions.filter((opt) => opt.value !== 'CU')}
           />
           <EtsInputComponent
             control={control}
@@ -456,6 +590,13 @@ const PartnerList: React.FC = () => {
       onSaved={() => {
         // 신규 등록 후 좌측 조직 트리 재조회
         setTreeReloadKey((prev) => prev + 1);
+
+        // 신규 등록 후 현재 선택 조직의 리스트도 재조회
+        if (selectedTreeId) {
+          restoreFirstRowRef.current = 0;
+          saveUiState({ groupKey: selectedTreeId, firstRow: 0 });
+          fetchPartnerListByGroupKey(selectedTreeId);
+        }
       }}
       groupKey={selectedTreeId || ''}
     />
@@ -482,6 +623,7 @@ const PartnerList: React.FC = () => {
         leftTreeProps={{
           onSelect: handleTreeSelect,
           reloadKey: treeReloadKey,
+          selectedId: selectedTreeId ?? undefined,
         }}
         rowSelection="single"
       />
