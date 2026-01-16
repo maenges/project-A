@@ -380,7 +380,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
         onClose={onClose || (() => {})}
         searchComponent={searchComponent}
         buttonComponent={buttonComponent}
-        title="회원 신규 등록"
+        title="파트너 신규 등록"
         width={800}
         // bodySize={900}
       />

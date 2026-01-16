@@ -122,3 +122,9 @@ export const blockStatusOptions = [
   { value: 'UNBLOCKED', label: '정상' },
   { value: 'ALL', label: '전체' },
 ];
+
+export const transactionStatusOptions = [
+  { value: 'ALL', label: '전체' },
+  { value: 'PAYOUT', label: '지급' },
+  { value: 'RECOVERY', label: '회수' },
+];

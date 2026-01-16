@@ -224,9 +224,9 @@ const PartnerDetail: React.FC = () => {
     { label: '파트너 구분', value: getMemberTypeLabel(detail?.user_type ?? detail?.userType) },
     { label: '파트너 ID', value: detail?.user_id },
     { label: '닉네임', value: detail?.user_nick },
-    { label: '보유금', value: formatMoney(detail?.user_money) },
-    { label: '롤링금', value: formatMoney(detail?.user_rolling_money) },
-    { label: '루징금', value: formatMoney(detail?.user_bonus_money) },
+    { label: '보유금액', value: formatMoney(detail?.user_money) },
+    { label: '롤링금액', value: formatMoney(detail?.user_rolling_money) },
+    { label: '루징금액', value: formatMoney(detail?.user_bonus_money) },
   ];
 
   const tabs: TabDef[] = useMemo(

@@ -59,18 +59,22 @@ const AccountChange: React.FC = () => {
       field: 'user_id',
       headerName: '회원 ID',
       width: 150,
-      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_nick',
+      headerName: '회원 닉네임',
+      width: 150,
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_type',
       headerName: '회원 유형',
-      width: 150,
+      width: 100,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
       field: 'before_key',
       headerName: '이전-은행명',
-      width: 150,
+      width: 100,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
@@ -82,13 +86,13 @@ const AccountChange: React.FC = () => {
     EtsColumnPreset.TextPreset({
       field: 'before_won',
       headerName: '이전-예금주명',
-      width: 150,
+      width: 100,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
       field: 'new_key',
       headerName: '은행명',
-      width: 150,
+      width: 100,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
@@ -100,14 +104,13 @@ const AccountChange: React.FC = () => {
     EtsColumnPreset.TextPreset({
       field: 'new_won',
       headerName: '예금주명',
-      width: 150,
+      width: 100,
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
       field: 'updated',
       headerName: '변경일시',
-      width: 150,
-      flex: 1,
+      width: 200,
     }),
   ];
 

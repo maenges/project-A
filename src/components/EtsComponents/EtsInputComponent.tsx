@@ -12,6 +12,7 @@ export interface EtsInputComponentProps {
   maxLength?: number;
   required?: boolean;
   width?: number;
+  rules?: any;
   [key: string]: any;
 }
 
@@ -25,6 +26,7 @@ const EtsInputComponent = ({
   maxLength,
   required = false,
   width,
+  rules,
   ...props
 }: EtsInputComponentProps) => (
   <searchForm.SelectField>
@@ -35,7 +37,8 @@ const EtsInputComponent = ({
       name={name}
       control={control}
       rules={{
-        required: required ? '필수 입력 항목입니다.' : false,
+        ...(required ? { required: '필수 입력 항목입니다.' } : {}),
+        ...(rules ?? {}),
       }}
       render={({ field, fieldState: { error } }) => (
         <EtsInput

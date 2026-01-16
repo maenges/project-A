@@ -116,7 +116,7 @@ const NoticeNewModal = ({
           <EtsSelectComponent
             control={control}
             name="notice_target_type"
-            label="Partner"
+            label="공지 대상"
             options={PartnerOptions}
           />
         </searchForm.Col>

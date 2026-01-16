@@ -15,6 +15,7 @@ import { useNotify } from '@hooks/useNotify';
 import { EtsButton } from '@/components/EtsCommon';
 import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
 import CustomerListModal from './customerListModal';
+import CustomerChargeModal, { type CustomerChargeModalMode } from './customerChargeModal';
 
 type Customer = {
   [key: string]: any;
@@ -59,9 +60,13 @@ const CustomerList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<Customer[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
+  const [chargeModalOpen, setChargeModalOpen] = useState(false);
+  const [chargeModalMode, setChargeModalMode] = useState<CustomerChargeModalMode>('PAYOUT');
+  const [chargeTargetRow, setChargeTargetRow] = useState<Customer | null>(null);
   const [showCasinoSlot, setShowCasinoSlot] = useState(
     () => readCustomerListUiState()?.showCasinoSlot ?? false
   );
+  const [treeReloadKey, setTreeReloadKey] = useState(0);
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(() =>
     getInitialCustomerGroupKey()
   );
@@ -177,7 +182,7 @@ const CustomerList: React.FC = () => {
       },
     }),
     {
-      headerName: '충환전',
+      headerName: '알 이동',
       children: [
         {
           ...EtsColumnPreset.CheckButtonPreset2({
@@ -186,7 +191,11 @@ const CustomerList: React.FC = () => {
             width: 100,
             context: {
               label: '지급',
-              onClick: async (_p: any) => {},
+              onClick: async (p: any) => {
+                setChargeTargetRow((p?.data ?? null) as Customer | null);
+                setChargeModalMode('PAYOUT');
+                setChargeModalOpen(true);
+              },
             },
           }),
           colId: 'charge_pay',
@@ -198,7 +207,11 @@ const CustomerList: React.FC = () => {
             width: 100,
             context: {
               label: '회수',
-              onClick: async (_p: any) => {},
+              onClick: async (p: any) => {
+                setChargeTargetRow((p?.data ?? null) as Customer | null);
+                setChargeModalMode('RECOVERY');
+                setChargeModalOpen(true);
+              },
             },
           }),
           colId: 'charge_recover',
@@ -498,7 +511,7 @@ const CustomerList: React.FC = () => {
             control={control}
             name="acReg"
             label="회원 ID"
-            placeholder="아이디 or 닉네임을 입력해 주세요."
+            placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
           />
           <Box sx={{ marginLeft: 'auto' }}>
@@ -534,11 +547,7 @@ const CustomerList: React.FC = () => {
           type="grey"
           aria-label={showCasinoSlot ? '카지노/슬롯 컬럼 숨기기' : '카지노/슬롯 컬럼 보기'}
           onClick={() => {
-            setShowCasinoSlot((prev) => {
-              const next = !prev;
-              saveUiState({ showCasinoSlot: next });
-              return next;
-            });
+            setShowCasinoSlot((prev) => !prev);
           }}
         >
           {showCasinoSlot ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
@@ -554,16 +563,42 @@ const CustomerList: React.FC = () => {
         setNewModalOpen(false);
       }}
       onSaved={() => {
-        if (!selectedTreeId) return;
-        fetchCustomerListByGroupKey(selectedTreeId);
+        // 신규 등록 후 좌측 조직 트리 재조회
+        setTreeReloadKey((prev) => prev + 1);
+
+        // 신규 등록 후 현재 선택 조직의 리스트도 재조회
+        if (selectedTreeId) {
+          restoreFirstRowRef.current = 0;
+          saveUiState({ groupKey: selectedTreeId, firstRow: 0 });
+          fetchCustomerListByGroupKey(selectedTreeId);
+        }
       }}
       groupKey={selectedTreeId || ''}
+    />
+  );
+
+  const chargeModal = chargeModalOpen && (
+    <CustomerChargeModal
+      open={chargeModalOpen}
+      mode={chargeModalMode}
+      row={chargeTargetRow ?? undefined}
+      onClose={() => {
+        setChargeModalOpen(false);
+        setChargeTargetRow(null);
+      }}
+      onSaved={() => {
+        if (selectedTreeId) {
+          restoreFirstRowRef.current = 0;
+          fetchCustomerListByGroupKey(selectedTreeId);
+        }
+      }}
     />
   );
 
   return (
     <>
       {newModalOpen && newModal}
+      {chargeModal}
       <PageTemplate
         title="회원목록"
         columnDefs={columnDefs}
@@ -581,6 +616,7 @@ const CustomerList: React.FC = () => {
         tree={true}
         leftTreeProps={{
           onSelect: handleTreeSelect,
+          reloadKey: treeReloadKey,
           selectedId: selectedTreeId ?? undefined,
         }}
         rowSelection="single"

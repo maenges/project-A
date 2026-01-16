@@ -114,6 +114,8 @@ const PartnerList: React.FC = () => {
   const casinoSlotFields = [
     'period_betting_amount_s',
     'period_betting_amount_c',
+    'period_winning_amount_s',
+    'period_winning_amount_c',
     'period_rolling_amount_s',
     'period_rolling_amount_c',
     'period_bonus_amount_s',
@@ -273,37 +275,32 @@ const PartnerList: React.FC = () => {
       ],
     },
     {
-      headerName: '기간별 베팅 금액',
+      headerName: '카지노',
       children: [
-        EtsColumnPreset.TextPreset({
-          field: 'period_betting_amount_s',
-          headerName: '슬롯',
-          width: 150,
-          hide: true,
-          flex: 1,
-        }),
         EtsColumnPreset.TextPreset({
           field: 'period_betting_amount_c',
-          headerName: '카지노',
+          headerName: '베팅금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
-      ],
-    },
-    {
-      headerName: '기간별 롤링 금액',
-      children: [
         EtsColumnPreset.TextPreset({
-          field: 'period_rolling_amount_s',
-          headerName: '슬롯',
+          field: 'period_winning_amount_c',
+          headerName: '당첨금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
           field: 'period_rolling_amount_c',
-          headerName: '카지노',
+          headerName: '롤링금액',
+          width: 150,
+          hide: true,
+          flex: 1,
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'period_bonus_amount_c',
+          headerName: '루징금액',
           width: 150,
           hide: true,
           flex: 1,
@@ -311,18 +308,32 @@ const PartnerList: React.FC = () => {
       ],
     },
     {
-      headerName: '기간별 루징 금액',
+      headerName: '슬롯',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'period_bonus_amount_s',
-          headerName: '슬롯',
+          field: 'period_betting_amount_s',
+          headerName: '베팅금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_bonus_amount_c',
-          headerName: '카지노',
+          field: 'period_winning_amount_s',
+          headerName: '당첨금액',
+          width: 150,
+          hide: true,
+          flex: 1,
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'period_rolling_amount_s',
+          headerName: '롤링금액',
+          width: 150,
+          hide: true,
+          flex: 1,
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'period_bonus_amount_s',
+          headerName: '루징금액',
           width: 150,
           hide: true,
           flex: 1,
@@ -529,14 +540,14 @@ const PartnerList: React.FC = () => {
           <EtsSelectComponent
             control={control}
             name="userType"
-            label="회원 유형"
+            label="파트너 유형"
             options={MemberTypeOptions.filter((opt) => opt.value !== 'CU')}
           />
           <EtsInputComponent
             control={control}
             name="acReg"
-            label="회원 ID"
-            placeholder="아이디 or 닉네임을 입력해 주세요."
+            label="파트너 ID"
+            placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
           />
           <Box sx={{ marginLeft: 'auto' }}>

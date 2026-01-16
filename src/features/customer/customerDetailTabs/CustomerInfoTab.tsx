@@ -112,22 +112,21 @@ const lightContainedButtonSx = (theme: any) => {
     // 기본 contained(주로 primary) 버튼만 톤다운
     '&.MuiButton-contained:not(.MuiButton-containedError):not(.MuiButton-containedWarning):not(.MuiButton-containedInfo)':
       {
-        boxShadow: 'none',
+        boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, isDark ? 0.28 : 0.14)}`,
         backgroundColor: alpha(theme.palette.primary.main, isDark ? 0.22 : 0.1),
         color: isDark ? 'rgba(255,255,255,0.92)' : alpha(theme.palette.primary.main, 0.9),
-        border: `1px solid ${alpha(theme.palette.primary.main, isDark ? 0.28 : 0.14)}`,
         '&:hover': {
-          boxShadow: 'none',
+          boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, isDark ? 0.36 : 0.2)}`,
           backgroundColor: alpha(theme.palette.primary.main, isDark ? 0.3 : 0.16),
         },
       },
     // info(저장 버튼 등)도 다크에서 너무 튀지 않게 tint 처리
     '&.MuiButton-containedInfo': {
-      boxShadow: 'none',
+      boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.info.main, isDark ? 0.28 : 0.16)}`,
       backgroundColor: alpha(theme.palette.info.main, isDark ? 0.22 : 0.12),
       color: isDark ? 'rgba(255,255,255,0.92)' : alpha(theme.palette.info.main, 0.95),
-      border: `1px solid ${alpha(theme.palette.info.main, isDark ? 0.28 : 0.16)}`,
       '&:hover': {
+        boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.info.main, isDark ? 0.36 : 0.22)}`,
         backgroundColor: alpha(theme.palette.info.main, isDark ? 0.3 : 0.18),
       },
     },
@@ -716,8 +715,8 @@ const PersonalInfoSettings = ({
 
     const res = await callApi({
       service: Service.POSTMAN,
-      url: '/api/user',
-      method: Method.PATCH,
+      url: '/api/account-record',
+      method: Method.POST,
       params: {
         bodyParams: {
           user_key: userKey,

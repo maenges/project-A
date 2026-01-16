@@ -80,7 +80,7 @@ const AccountNewModal = ({ open, onClose, onSaved }: AccountNewModalProps) => {
     const res = await callApi({
       service: Service.POSTMAN,
       url: '/api/account-record',
-      method: Method.PATCH,
+      method: Method.POST,
       params: {
         bodyParams: {
           user_bank_key: values.user_bank_key,

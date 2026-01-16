@@ -62,6 +62,12 @@ const loginRecord: React.FC = () => {
       flex: 1,
     }),
     EtsColumnPreset.TextPreset({
+      field: 'user_nick',
+      headerName: '회원 닉네임',
+      width: 150,
+      flex: 1,
+    }),
+    EtsColumnPreset.TextPreset({
       field: 'user_type',
       headerName: '회원 구분',
       width: 150,
@@ -193,7 +199,7 @@ const loginRecord: React.FC = () => {
       if (status !== 'I' && status !== 'U' && status !== 'D') return;
       if (!node?.data) return;
 
-      const { originData, ...rest } = node.data as any;
+      const { ...rest } = node.data as any;
       const payloadRow: any = {
         ...rest,
         rowStatus: status,

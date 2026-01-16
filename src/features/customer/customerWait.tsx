@@ -40,10 +40,15 @@ const CustomerWait: React.FC = () => {
     EtsColumnPreset.TextPreset({
       field: 'user_id',
       headerName: '회원 ID',
-      width: 100,
+      width: 150,
       flex: 1,
     }),
-
+    EtsColumnPreset.TextPreset({
+      field: 'user_nick',
+      headerName: '회원 닉네임',
+      width: 150,
+      flex: 1,
+    }),
     EtsColumnPreset.TextPreset({
       field: 'group_name',
       headerName: '소속',
@@ -103,7 +108,7 @@ const CustomerWait: React.FC = () => {
       if (status !== 'I' && status !== 'U' && status !== 'D') return;
       if (!node?.data) return;
 
-      const { originData, ...rest } = node.data as any;
+      const { ...rest } = node.data as any;
       const payloadRow: any = {
         ...rest,
         rowStatus: status,

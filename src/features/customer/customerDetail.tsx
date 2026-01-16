@@ -226,7 +226,7 @@ const CustomerDetail: React.FC = () => {
     { label: '닉네임', value: detail?.user_nick },
     { label: '보유금액', value: formatMoney(detail?.user_money) },
     { label: '롤링금액', value: formatMoney(detail?.user_rolling_money) },
-    { label: '루징금액', value: formatMoney(detail?.user_bonus_money) },
+    // { label: '루징금액', value: formatMoney(detail?.user_bonus_money) },
   ];
 
   const tabs: TabDef[] = useMemo(
