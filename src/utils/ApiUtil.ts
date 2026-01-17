@@ -5,6 +5,7 @@ import CommonResponse, { StatusCode } from '@/models/common/CommonResponse';
 import { v4 as uuidv4 } from 'uuid';
 import { Service } from '@/models/common/Service';
 import { useLoadingStore } from '@/store/loading';
+import { getEnv } from '@/utils/env';
 
 const TIMESTAMP_FIELDS = ['created', 'updated', 'created_at', 'updated_at'];
 
@@ -97,20 +98,7 @@ export interface ApiRequest {
   redirect?: string;
 }
 
-/**
- * 런타임/빌드 환경 변수 헬퍼
- * - 1순위: window.__ENV (env-config.js에서 주입)
- * - 2순위: Vite 빌드 타임 환경변수 (import.meta.env)
- */
-const runtimeEnv: Record<string, string> =
-  (typeof window !== 'undefined' && (window as any).__ENV) || {};
-
-const getEnv = (key: string): string | undefined => {
-  if (runtimeEnv && key in runtimeEnv) {
-    return runtimeEnv[key];
-  }
-  return (import.meta.env as any)[key];
-};
+// NOTE: 환경 변수 접근은 공용 유틸(src/utils/env.ts)로 분리
 
 /* istanbul ignore next */
 const getInstance = (

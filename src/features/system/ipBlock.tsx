@@ -257,6 +257,7 @@ const Block: React.FC = () => {
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
         onSelectionChanged={handleSelectionChanged}
+        size="no-search"
       />
     </>
   );

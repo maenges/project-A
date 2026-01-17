@@ -620,6 +620,7 @@ const CustomerList: React.FC = () => {
           selectedId: selectedTreeId ?? undefined,
         }}
         rowSelection="single"
+        size="one-search"
       />
     </>
   );

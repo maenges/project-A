@@ -167,6 +167,7 @@ const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChar
           target_user_key: targetUserKey,
           al_trans_amount: amount,
           before_al_trans_amount: myBalance,
+          withdraw_passcode: values.withdraw_passcode,
         },
       },
       config: { isLoading: true },

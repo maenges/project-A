@@ -228,6 +228,7 @@ const AccountChange: React.FC = () => {
         searchComponent={searchComponent}
         buttonComponent={buttonComponent}
         rowData={rowData}
+        size="one-search"
       />
     </>
   );

@@ -357,6 +357,7 @@ const loginRecord: React.FC = () => {
         rowSelection="multiple"
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
+        size="one-search"
       />
     </>
   );

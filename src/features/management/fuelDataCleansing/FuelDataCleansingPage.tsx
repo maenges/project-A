@@ -569,7 +569,6 @@ const FuelDataCleansingPage = () => {
       buttonComponent={buttonComponent}
       totalCount={totalCount}
       rowData={rowData}
-      size="md"
       onCellClicked={handleCellClicked}
     />
   );

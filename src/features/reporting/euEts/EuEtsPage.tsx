@@ -498,7 +498,6 @@ const EuEtsPage = () => {
         rowData={rowData}
         totalCount={totalCount}
         gridRef={gridRef}
-        size="md"
         defaultColDef={{
           sortable: true,
           filter: true,

@@ -443,7 +443,6 @@ const FlightDetailsPage = () => {
           resizable: true,
         }}
         // onCellClicked={onCellClicked}
-        size="md"
       />
       {detailModal}
     </>

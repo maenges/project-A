@@ -19,7 +19,7 @@ import {
   EtsSelectComponent,
 } from '@/components/EtsComponents';
 import { MemberTypeOptions } from '@models/common/CommonSelectCodes';
-
+import CustomerChargeModal, { type CustomerChargeModalMode } from '../customer/customerChargeModal';
 import PartnerListModal from './partnerListModal';
 
 const MEMBER_TYPE_LABEL_BY_VALUE = new Map(
@@ -76,6 +76,9 @@ const PartnerList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<Partner[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
+  const [chargeModalOpen, setChargeModalOpen] = useState(false);
+  const [chargeModalMode, setChargeModalMode] = useState<CustomerChargeModalMode>('PAYOUT');
+  const [chargeTargetRow, setChargeTargetRow] = useState<Partner | null>(null);
   const [showCasinoSlot, setShowCasinoSlot] = useState(
     () => readPartnerListUiState()?.showCasinoSlot ?? false
   );
@@ -163,30 +166,11 @@ const PartnerList: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_type',
-      headerName: '조직 유형',
+      headerName: '파트너 유형',
       width: 100,
     }),
-    // EtsColumnPreset.SelectPreset({
-    //   field: 'group_name',
-    //   headerName: '소속',
-    //   width: 100,
-    //   editable: true,
-    //   valueGetter: (p: any) => getStoreNameByRow(p?.data),
-    //   valueSetter: () => {
-    //     // 보기용 콤보: 선택해도 rowData(group_name 배열)는 변경하지 않음
-    //     return false;
-    //   },
-    //   cellEditorParams: (p: any) => ({
-    //     ...p,
-    //     options: getGroupNameOptionsByRow(p?.data),
-    //   }),
-    //   context: {
-    //     // renderer는 value만 보여주면 되므로 빈 options
-    //     options: [],
-    //   },
-    // }),
     {
-      headerName: '알',
+      headerName: '알 이동',
       children: [
         {
           ...EtsColumnPreset.CheckButtonPreset2({
@@ -195,7 +179,11 @@ const PartnerList: React.FC = () => {
             width: 100,
             context: {
               label: '지급',
-              onClick: async (_p: any) => {},
+              onClick: async (p: any) => {
+                setChargeTargetRow((p?.data ?? null) as Partner | null);
+                setChargeModalMode('PAYOUT');
+                setChargeModalOpen(true);
+              },
             },
           }),
           colId: 'charge_pay',
@@ -207,7 +195,11 @@ const PartnerList: React.FC = () => {
             width: 100,
             context: {
               label: '회수',
-              onClick: async (_p: any) => {},
+              onClick: async (p: any) => {
+                setChargeTargetRow((p?.data ?? null) as Partner | null);
+                setChargeModalMode('RECOVERY');
+                setChargeModalOpen(true);
+              },
             },
           }),
           colId: 'charge_recover',
@@ -613,9 +605,28 @@ const PartnerList: React.FC = () => {
     />
   );
 
+  const chargeModal = chargeModalOpen && (
+    <CustomerChargeModal
+      open={chargeModalOpen}
+      mode={chargeModalMode}
+      row={chargeTargetRow ?? undefined}
+      onClose={() => {
+        setChargeModalOpen(false);
+        setChargeTargetRow(null);
+      }}
+      onSaved={() => {
+        if (selectedTreeId) {
+          restoreFirstRowRef.current = 0;
+          fetchPartnerListByGroupKey(selectedTreeId);
+        }
+      }}
+    />
+  );
+
   return (
     <>
       {newModalOpen && newModal}
+      {chargeModal}
       <PageTemplate
         title="파트너 목록"
         columnDefs={columnDefs}
@@ -637,6 +648,7 @@ const PartnerList: React.FC = () => {
           selectedId: selectedTreeId ?? undefined,
         }}
         rowSelection="single"
+        size="two-search"
       />
     </>
   );

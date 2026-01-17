@@ -328,6 +328,7 @@ const Block: React.FC = () => {
         rowSelection="multiple"
         rowMultiSelectWithClick={true}
         suppressRowClickSelection={true}
+        size="one-search"
       />
     </>
   );

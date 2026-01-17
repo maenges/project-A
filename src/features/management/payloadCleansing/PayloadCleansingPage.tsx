@@ -556,7 +556,6 @@ const PayloadCleansingPage = () => {
         rowData={rowData}
         totalCount={totalCount}
         gridRef={gridRef}
-        size="md"
         onCellValueChanged={onCellValueChanged}
         defaultColDef={{
           sortable: true,
