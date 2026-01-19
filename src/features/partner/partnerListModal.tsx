@@ -108,7 +108,7 @@ const buildStepOptions = (
 };
 
 const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProps) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const bankKeyOptions = AccountKeyOptions.filter((o) => o.value !== 'ALL');
 
   const [maxCaps, setMaxCaps] = useState<MaxCapsResponse | null>(null);
@@ -215,6 +215,9 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
       setFocus('user_password_confirm');
       return false;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const { user_password_confirm: _user_password_confirm, ...payload } = values;
     const res = await callApi({

@@ -31,7 +31,7 @@ const loginRecord: React.FC = () => {
   const gridRef = useRef<EtsGridRef<loginRecordProps>>(null);
   const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs());
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<loginRecordProps[]>([]);
 
   const columnDefs: (ColDef | ColGroupDef)[] = [
@@ -212,6 +212,9 @@ const loginRecord: React.FC = () => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

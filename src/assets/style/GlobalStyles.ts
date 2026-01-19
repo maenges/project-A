@@ -567,6 +567,7 @@ export const GlobalStyles = createGlobalStyle`
   .ets-notify-toast .Toastify__toast,
   .ets-toast-item {
     background: var(--color-neutral-10) !important;
+    color: var(--color-text-base, #252525) !important;
     border-radius: var(--radius-md) !important;
     box-shadow: 0 4px 12px var(--color-neutral-90-alpha50) !important;
     border: 1px solid var(--color-neutral-30) !important;
@@ -596,11 +597,18 @@ export const GlobalStyles = createGlobalStyle`
 
   .ets-notify-toast .Toastify__toast-body,
   .ets-toast-body {
-    color: var(--color-text-base) !important;
+    color: var(--color-text-base, #252525) !important;
     font-size: var(--font-body-ms) !important;
-    font-weight: var(--font-weight-regular) !important;
+    font-weight: var(--font-weight-regular, 400) !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  .ets-notify-toast .Toastify__toast-body *,
+  .ets-toast-body * {
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   .ets-notify-toast .Toastify__toast-icon {

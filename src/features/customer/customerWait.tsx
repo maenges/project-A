@@ -18,7 +18,7 @@ type Customer = {
 const CustomerWait: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
   const gridRef = useRef<EtsGridRef<Customer>>(null);
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<Customer[]>([]);
 
   const columnDefs: (ColDef | ColGroupDef)[] = [
@@ -124,6 +124,9 @@ const CustomerWait: React.FC = () => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

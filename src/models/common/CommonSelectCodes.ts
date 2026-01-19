@@ -76,6 +76,7 @@ export const PartnerOptions = [
 
 export const MemberTypeOptions = [
   { value: 'ALL', label: '전체' },
+  { value: 'HQ', label: '본사' },
   { value: 'SH', label: '부본사' },
   { value: 'BR', label: '지사' },
   { value: 'DM', label: '총판' },
@@ -127,4 +128,10 @@ export const transactionStatusOptions = [
   { value: 'ALL', label: '전체' },
   { value: 'PAYOUT', label: '지급' },
   { value: 'RECOVERY', label: '회수' },
+];
+
+export const transStatusOptions = [
+  { value: 'ALL', label: '전체' },
+  { value: 'RECHARGE', label: '충전' },
+  { value: 'EXCHANGE', label: '환전' },
 ];

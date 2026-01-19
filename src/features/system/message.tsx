@@ -11,6 +11,7 @@ import { useNotify } from '@hooks/useNotify';
 import { EtsButton } from '@/components/EtsCommon';
 import { buttonForm } from '@/assets/style';
 import MessageSendModal from './messageSendModal';
+import HtmlTooltipComponent from '@/components/EtsGrid/helper/HtmlTooltipComponent';
 
 type Messages = {
   [key: string]: any;
@@ -34,7 +35,10 @@ const stripHtmlToText = (value: unknown) => {
   if (typeof document !== 'undefined') {
     const el = document.createElement('div');
     el.innerHTML = html;
-    const text = (el.textContent ?? el.innerText ?? '').trim();
+
+    // innerText는 블록 요소/리스트 등의 줄바꿈을 반영해 주는 편이라
+    // '첫 줄만 표시' 같은 요구에 더 안정적임.
+    const text = (el.innerText ?? el.textContent ?? '').trim();
     return text.replace(/\n{3,}/g, '\n\n');
   }
 
@@ -42,10 +46,16 @@ const stripHtmlToText = (value: unknown) => {
   return html.replace(/<[^>]*>/g, '').trim();
 };
 
+const toFirstLine = (value: unknown) => {
+  const text = stripHtmlToText(value);
+  const lines = text.split(/\r?\n/).map((x) => x.trim());
+  return lines.find((x) => x.length > 0) ?? '';
+};
+
 const Message: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
   const gridRef = useRef<EtsGridRef<Messages>>(null);
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<Messages[]>([]);
   const [sendModalOpen, setSendModalOpen] = useState(false);
 
@@ -79,6 +89,15 @@ const Message: React.FC = () => {
       headerName: '내용',
       width: 200,
       flex: 1,
+      tooltipComponent: HtmlTooltipComponent,
+      tooltipValueGetter: (p: any) => p?.data?.notice_content ?? p?.data?.notice_content_text ?? '',
+      wrapText: false,
+      autoHeight: false,
+      cellStyle: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      },
     }),
 
     EtsColumnPreset.TextPreset({
@@ -117,10 +136,11 @@ const Message: React.FC = () => {
 
       const normalized = (Array.isArray(res.data) ? res.data : []).map((row: any) => {
         const rawReceive = row?.notice_receive ?? row?.notice_recive;
+        const rawContent = row?.notice_content ?? row?.notice_content_text;
         return {
           ...row,
           notice_receive: toYesNo(rawReceive),
-          notice_content_text: stripHtmlToText(row?.notice_content),
+          notice_content_text: toFirstLine(rawContent),
         };
       });
 
@@ -160,6 +180,9 @@ const Message: React.FC = () => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

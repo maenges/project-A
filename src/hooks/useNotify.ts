@@ -29,7 +29,6 @@ export const useNotify = (id?: string) => {
           containerId: providerId,
           toastId: v4(),
           position: 'bottom-center',
-          className: 'ets-notify-toast',
           type: type === 'confirm' ? 'success' : type, // confirm을 success로 매핑
         });
       };

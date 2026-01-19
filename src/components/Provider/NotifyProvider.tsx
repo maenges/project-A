@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Button, Typography, Box } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import EtsModal from '@/components/EtsCommon/EtsModal';
 import { useNotifyStore } from '@/store/notifyStore';
 import { ToastContainer, Slide } from 'react-toastify';
@@ -11,6 +12,8 @@ interface NotifyProviderProps {
 }
 
 const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const { stack } = useNotifyStore();
   const item = useMemo(() => stack[0], [stack]);
 
@@ -39,10 +42,9 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
         draggable
         pauseOnHover
         limit={3}
-        theme="light"
+        theme={theme.palette.mode}
         transition={Slide}
-        toastClassName="ets-toast-item ets-toast-body"
-        // bodyClassName="ets-toast-body"
+        toastClassName="ets-toast-item"
       />
 
       {item && (
@@ -50,6 +52,26 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
           open={true}
           onClose={handleCancel}
           size={item.size === 'LG' ? 'md' : item.size === 'MD' ? 'sm' : 'xs'}
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              backgroundImage: isDark
+                ? `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.16)} 0%, ${alpha(
+                    theme.palette.background.paper,
+                    1
+                  )} 70%)`
+                : `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.06)} 0%, ${alpha(
+                    theme.palette.background.paper,
+                    1
+                  )} 75%)`,
+              color: 'text.primary',
+              boxShadow: theme.shadows[6],
+              border: isDark
+                ? `1px solid ${alpha(theme.palette.primary.main, 0.25)}`
+                : `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
+            },
+          }}
         >
           <EtsModal.Header onClose={handleCancel}>{item.title}</EtsModal.Header>
           <EtsModal.Body>
@@ -57,9 +79,9 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
               <Typography
                 variant="subtitle1"
                 align="center"
-                style={{
+                sx={{
                   whiteSpace: 'pre-wrap',
-                  color: '#252525',
+                  color: 'text.primary',
                 }}
               >
                 {item.message}
@@ -76,10 +98,21 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
                     minWidth: 100,
                     borderRadius: 8,
                     fontWeight: 700,
-                    border: '1px solid #051766',
+                    borderColor: isDark
+                      ? alpha(theme.palette.common.white, 0.22)
+                      : alpha(theme.palette.primary.main, 0.45),
+                    color: isDark ? theme.palette.text.primary : theme.palette.primary.dark,
+                    '&:hover': {
+                      borderColor: isDark
+                        ? alpha(theme.palette.common.white, 0.32)
+                        : theme.palette.primary.main,
+                      backgroundColor: isDark
+                        ? alpha(theme.palette.common.white, 0.06)
+                        : alpha(theme.palette.primary.main, 0.06),
+                    },
                   }}
                 >
-                  Cancel
+                  취소
                 </Button>
                 <Button
                   variant="contained"
@@ -88,11 +121,17 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
                     minWidth: 100,
                     borderRadius: 8,
                     fontWeight: 700,
-                    border: '1px solid #051766',
-                    backgroundColor: '#051766',
+                    backgroundColor: isDark
+                      ? theme.palette.primary.dark
+                      : theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    '&:hover': {
+                      backgroundColor: theme.palette.primary.dark,
+                      filter: isDark ? 'brightness(0.92)' : 'none',
+                    },
                   }}
                 >
-                  Proceed
+                  확인
                 </Button>
               </>
             ) : (
@@ -103,8 +142,12 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
                   minWidth: 100,
                   borderRadius: 8,
                   fontWeight: 700,
-                  border: '1px solid #051766',
-                  backgroundColor: '#051766',
+                  backgroundColor: isDark ? theme.palette.primary.dark : theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primary.dark,
+                    filter: isDark ? 'brightness(0.92)' : 'none',
+                  },
                 }}
               >
                 확인

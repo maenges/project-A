@@ -22,7 +22,7 @@ type FormValues = {
 };
 
 const AccountNewModal = ({ open, onClose, onSaved }: AccountNewModalProps) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const { control, handleSubmit, setFocus, reset } = useForm<FormValues>({
     defaultValues: {
       user_bank_key: AccountKeyOptions.filter((o) => o.value !== 'ALL')[0].value,
@@ -77,6 +77,9 @@ const AccountNewModal = ({ open, onClose, onSaved }: AccountNewModalProps) => {
   };
 
   const onSave = async (values: FormValues) => {
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
+
     const res = await callApi({
       service: Service.POSTMAN,
       url: '/api/account-record',

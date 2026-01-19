@@ -396,13 +396,16 @@ const BlockSettings = ({
   onChangeBlocked: (next: boolean) => void;
   onChangeMessage: (next: string) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const onSaveBlock = async () => {
     if (!userKey) {
       toast.error('회원 키(userKey)가 없어 차단 설정을 저장할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -479,13 +482,16 @@ const EggPermissionSettings = ({
   onChangeGrantEgg: (next: boolean) => void;
   onChangeRevokeEgg: (next: boolean) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const onSaveEggPermission = async () => {
     if (!userKey) {
       toast.error('회원 키(userKey)가 없어 알권한을 변경할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -563,7 +569,7 @@ const PasswordSettings = ({
   onChangePw: (next: string) => void;
   onChangePw2: (next: string) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const onForceChangePassword = async () => {
     if (!userKey) {
@@ -580,6 +586,9 @@ const PasswordSettings = ({
       toast.info('비밀번호가 일치하지 않습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -607,6 +616,9 @@ const PasswordSettings = ({
       toast.error('회원 키(userKey)가 없어 비밀번호를 초기화할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -705,13 +717,16 @@ const PersonalInfoSettings = ({
   onChangeAccount: (next: string) => void;
   onChangeDepositor: (next: string) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const onSavePersonalInfo = async () => {
     if (!userKey) {
       toast.error('회원 키(userKey)가 없어 개인정보를 변경할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -824,7 +839,7 @@ const RollingSettings = ({
   onChangeSlot: (next: number) => void;
   onChangeCasino: (next: number) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   // 예시: max=2.0 기준 0.5 단위
   const slotOptions = useMemo(
@@ -842,6 +857,9 @@ const RollingSettings = ({
       toast.error('회원 키(userKey)가 없어 롤링을 변경할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,
@@ -933,7 +951,7 @@ const LosingSettings = ({
   onChangeSlot: (next: number) => void;
   onChangeCasino: (next: number) => void;
 }) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const slotOptions = useMemo(
     () => buildPercentOptions({ max: slotMaxPct, step: 0.05, current: slot }),
@@ -950,6 +968,9 @@ const LosingSettings = ({
       toast.error('회원 키(userKey)가 없어 루징을 변경할 수 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

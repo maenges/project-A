@@ -38,7 +38,7 @@ const NoticeNewModal = ({
   initialContent,
 }: NoticeNewModalProps): ReactElement => {
   const theme = useTheme();
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [content, setContent] = useState('<p>내용입력</p>');
 
   const { control, handleSubmit, setFocus, reset } = useForm<FormValues>({
@@ -75,6 +75,9 @@ const NoticeNewModal = ({
       toast.error('수정할 공지 ID가 없습니다.');
       return false;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

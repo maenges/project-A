@@ -26,7 +26,7 @@ type Notices = {
 const Notice: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
   const gridRef = useRef<EtsGridRef<Notices>>(null);
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<Notices[]>([]);
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -137,6 +137,9 @@ const Notice: React.FC = () => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

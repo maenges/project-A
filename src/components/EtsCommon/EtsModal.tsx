@@ -8,7 +8,8 @@ import {
   Typography,
   DialogProps,
 } from '@mui/material';
-import closeIcon from '@/assets/images/ic-close.svg';
+import CloseIcon from '@mui/icons-material/Close';
+import { alpha, useTheme } from '@mui/material/styles';
 
 export interface EtsModalProps extends Omit<DialogProps, 'open'> {
   open: boolean;
@@ -78,6 +79,9 @@ const EtsModal: React.FC<EtsModalProps> & {
 };
 
 const ModalHeader: React.FC<ModalHeaderProps> = ({ children, onClose, showCloseButton = true }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <DialogTitle
       sx={{
@@ -92,15 +96,21 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ children, onClose, showCloseB
       {children && <Typography sx={{ fontWeight: 600, fontSize: '16px' }}>{children}</Typography>}
       {showCloseButton && (
         <IconButton
+          aria-label="close"
           onClick={onClose}
           sx={{
             ml: 'auto',
             padding: 0,
             width: 28,
             height: 28,
+            borderRadius: 2,
+            color: theme.palette.text.secondary,
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.08),
+            },
           }}
         >
-          <img src={closeIcon} alt="Close" style={{ width: 28, height: 28 }} />
+          <CloseIcon sx={{ fontSize: 22 }} />
         </IconButton>
       )}
     </DialogTitle>

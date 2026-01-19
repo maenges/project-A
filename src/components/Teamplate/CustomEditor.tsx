@@ -59,7 +59,7 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height, 
               'Blockquote',
             ],
           },
-          { name: 'insert', items: ['Image', 'Table'] },
+          { name: 'insert', items: ['Table'] },
         ],
         contentsCss: [],
       }}

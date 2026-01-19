@@ -24,6 +24,7 @@ type Customer = {
 type FormValues = {
   startDate: string;
   endDate: string;
+  userId: string;
 };
 
 const CUSTOMER_LIST_UI_STATE_KEY = 'customerList.uiState';
@@ -259,22 +260,30 @@ const CustomerList: React.FC = () => {
       },
     }),
     {
-      headerName: '입출금',
+      headerName: '기간내 충환전',
       children: [
         EtsColumnPreset.TextPreset({
           field: 'withdrawal',
-          headerName: '입금',
+          headerName: '충전',
           width: 150,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
         }),
         EtsColumnPreset.TextPreset({
           field: 'deposit',
-          headerName: '출금',
+          headerName: '환전',
           width: 150,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
         }),
       ],
     },
     {
-      headerName: '카지노',
+      headerName: '기간내 카지노',
       children: [
         EtsColumnPreset.TextPreset({
           field: 'c_betting_amount',
@@ -300,7 +309,7 @@ const CustomerList: React.FC = () => {
       ],
     },
     {
-      headerName: '슬롯',
+      headerName: '기간내 슬롯',
       children: [
         EtsColumnPreset.TextPreset({
           field: 's_betting_amount',
@@ -336,23 +345,17 @@ const CustomerList: React.FC = () => {
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
+      userId: '',
     },
     mode: 'onChange',
   });
 
   const onSearch = () => {
-    // 충환전 끝나면 작성, 신규등록후 재조회도 해야함
-    // callApi({
-    //   service: Service.POSTMAN,
-    //   url: '/api/notice',
-    //   method: Method.GET,
-    //   params: {},
-    // }).then((res) => {
-    //   if (res.successOrNot !== 'Y') {
-    //     return toast.error(res.HeaderMsg);
-    //   }
-    //   setRowData(res.data);
-    // });
+    if (!selectedTreeId) {
+      toast.info('좌측 트리를 선택해 주세요.');
+      return;
+    }
+    fetchCustomerListByGroupKey(selectedTreeId);
   };
 
   const handleCellClicked = (params: any) => {
@@ -385,13 +388,18 @@ const CustomerList: React.FC = () => {
   };
 
   const fetchCustomerListByGroupKey = (groupKey: string) => {
-    const { startDate, endDate } = getValues();
+    const { startDate, endDate, userId } = getValues();
     callApi({
       service: Service.POSTMAN,
       url: '/api/user/cuInfo',
       method: Method.GET,
       params: {
-        queryParams: { groupKey, startDate, endDate },
+        queryParams: {
+          groupKey,
+          startDate,
+          endDate,
+          userId,
+        },
       },
       config: { isLoading: true },
     }).then((res) => {
@@ -509,10 +517,16 @@ const CustomerList: React.FC = () => {
           />
           <EtsInputComponent
             control={control}
-            name="acReg"
+            name="userId"
             label="회원 ID"
             placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key !== 'Enter') return;
+              if ((e.nativeEvent as any)?.isComposing) return;
+              e.preventDefault();
+              handleSubmit(onSearch)();
+            }}
           />
           <Box sx={{ marginLeft: 'auto' }}>
             <EtsButton

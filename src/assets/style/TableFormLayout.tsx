@@ -20,14 +20,13 @@ const BodyDiv = styled(Box)`
   align-self: stretch;
   width: 100%;
   max-width: auto;
-  height: 100px;
   flex: 1;
+  min-height: 0;
   box-sizing: border-box;
   overflow-y: auto;
   @media (max-width: 1340px) {
     max-width: calc(100vw - 40px);
     padding: 16px 20px 16px 20px;
-    height: calc(880px - 68px);
   }
   @media (max-width: 768px) {
     padding: 16px 16px 16px 16px;

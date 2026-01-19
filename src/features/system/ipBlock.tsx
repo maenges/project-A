@@ -19,7 +19,7 @@ type BlockProps = {
 const Block: React.FC = () => {
   const [isEditable, setIsEditable] = useState(false);
   const gridRef = useRef<EtsGridRef<BlockProps>>(null);
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<BlockProps[]>([]);
   const [_, setNewRowNodes] = useState<IRowNode<BlockProps>[]>([]);
   const [selectedRowCount, setSelectedRowCount] = useState(0);
@@ -159,6 +159,9 @@ const Block: React.FC = () => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

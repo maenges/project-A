@@ -27,7 +27,6 @@ import {
 } from '@mui/icons-material';
 import { Service } from '@/models/common/Service';
 import { callApi, Method } from '@/utils/ApiUtil';
-import { getEnv } from '@/utils/env';
 
 interface StyledButtonProps {
   $isOpen: boolean;
@@ -310,7 +309,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
-  const brandName = getEnv('VITE_BRAND_NAME') || '스타솔루션';
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -357,7 +355,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     switch (menuName) {
       case '시스템':
         return <AdminPanelSettings />;
-      case '충환전':
+      case '거래':
         return <CurrencyExchange />;
       case '파트너':
         return <Handshake />;
@@ -496,7 +494,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       {!collapsed && (
         <LogoContainer>
           <Star color="primary" sx={{ fontSize: 28 }} />
-          <LogoText>{brandName}</LogoText>
+          <LogoText>스타솔루션</LogoText>
         </LogoContainer>
       )}
       <MenuSpacer $collapsed={collapsed} />

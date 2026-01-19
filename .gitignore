@@ -11,6 +11,8 @@ out/
 # Cache directories
 .cache/
 .parcel-cache/
+.vite/
+.vite/**
 .next/
 .nuxt/
 

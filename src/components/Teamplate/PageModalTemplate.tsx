@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { Dialog, DialogTitle, IconButton, Typography, Box } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { tableForm } from '@/assets/style';
-import closeIcon from '@/assets/images/ic-close.svg';
-import { alpha, useTheme } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 // import chevronRight from '@/assets/images/chevron-right.svg';
 // import { useLocation } from 'react-router-dom';
 // import styled from 'styled-components';
@@ -91,7 +91,7 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
   rowMultiSelectWithClick,
 }) => {
   // const { pathname } = useLocation();
-  const theme = useTheme();
+  // const theme = useTheme();
   const gridHeight = useMemo(() => 'calc(100vh - 500px)', []);
 
   const { sx: leftTreeSx, ...restLeftTreeProps } = leftTreeProps ?? {};
@@ -225,8 +225,21 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             borderRadius: '16px 16px 0 0',
             background:
               theme.palette.mode === 'dark'
-                ? alpha(theme.palette.primary.dark, 0.1)
-                : alpha(theme.palette.primary.main, 0.1),
+                ? `linear-gradient(135deg, ${alpha(
+                    theme.palette.primary.main,
+                    0.22
+                  )} 0%, ${alpha(theme.palette.primary.dark, 0.12)} 55%, ${alpha(
+                    theme.palette.background.paper,
+                    0
+                  )} 100%)`
+                : `linear-gradient(135deg, ${alpha(
+                    theme.palette.primary.main,
+                    0.14
+                  )} 0%, ${alpha(theme.palette.primary.light, 0.1)} 55%, ${alpha(
+                    theme.palette.background.paper,
+                    0
+                  )} 100%)`,
+            borderBottom: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.55 : 0.9)}`,
             '@media (max-width: 1340px)': {
               padding: 'var(--spacing-16, 16px) 20px',
             },
@@ -240,25 +253,37 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
           <tableForm.HeaderContent>
             <Typography
               sx={(theme) => ({
-                color:
-                  theme.palette.mode === 'dark'
-                    ? theme.palette.common.white
-                    : theme.palette.common.black,
+                color: theme.palette.text.primary,
+                fontWeight: 700,
               })}
             >
               {title}
             </Typography>
           </tableForm.HeaderContent>
-          <IconButton onClick={onClose} sx={{ padding: 0, width: 28, height: 28 }}>
-            <img
-              src={closeIcon}
-              alt="Close"
-              style={{
-                filter: theme.palette.mode === 'dark' ? 'brightness(0) invert(1)' : 'brightness(0)',
-                width: 28,
-                height: 28,
-              }}
-            />
+          <IconButton
+            onClick={onClose}
+            aria-label="닫기"
+            sx={(theme) => ({
+              width: 32,
+              height: 32,
+              p: 0,
+              borderRadius: 1.5,
+              color: theme.palette.text.secondary,
+              border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.5 : 0.9)}`,
+              backgroundColor: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'dark' ? 0.18 : 0.45
+              ),
+              '&:hover': {
+                backgroundColor: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === 'dark' ? 0.2 : 0.12
+                ),
+                color: theme.palette.text.primary,
+              },
+            })}
+          >
+            <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
         <Box sx={{ display: 'flex', width: '100%', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
@@ -297,7 +322,9 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
             <tableForm.BodyDiv>
               <>
                 {searchComponent && (
-                  <Box sx={{ mt: 7, mb: 3, flexShrink: 0 }}>
+                  <Box
+                    sx={{ mt: 3, mb: 2, flexShrink: 0, width: '100%', maxWidth: 1220, mx: 'auto' }}
+                  >
                     <SearchPanel searchComponent={searchComponent} />
                   </Box>
                 )}
@@ -305,12 +332,15 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
                   <Box
                     sx={{
                       display: 'flex',
-                      mt: '24px',
+                      mt: '16px',
                       paddingBottom: '12px',
                       justifyContent: 'space-between',
                       alignItems: 'flex-end',
                       alignSelf: 'stretch',
                       flexShrink: 0,
+                      width: '100%',
+                      maxWidth: 1220,
+                      mx: 'auto',
                     }}
                   >
                     <Typography className="label"></Typography>
@@ -322,6 +352,8 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
                     <Box
                       sx={{
                         width: '100%',
+                        maxWidth: 1220,
+                        mx: 'auto',
                         flex: 1,
                         minHeight: 0,
                       }}
@@ -349,7 +381,9 @@ export const PageModalTemplate: React.FC<PageModalTemplateProps> = ({
                   </>
                 ) : (
                   <>
-                    <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>{component}</Box>
+                    <Box sx={{ width: '100%', maxWidth: 1220, mx: 'auto', flex: 1, minHeight: 0 }}>
+                      {component}
+                    </Box>
                   </>
                 )}
               </>

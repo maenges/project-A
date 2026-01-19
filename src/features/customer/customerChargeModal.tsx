@@ -38,7 +38,7 @@ const formatNumber = (value: unknown) => {
 };
 
 const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChargeModalProps) => {
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
 
   const [myBalance, setMyBalance] = useState<number>(0);
   const [myUserKey, setMyUserKey] = useState<string>('');
@@ -59,7 +59,7 @@ const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChar
   }, [mode, myBalance, userMoney]);
 
   const availableLabel = useMemo(() => {
-    if (mode === 'PAYOUT') return '충전 가능';
+    if (mode === 'PAYOUT') return '지급 가능';
     return '회수 가능';
   }, [mode]);
 
@@ -156,6 +156,9 @@ const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChar
       return false;
     }
 
+    const ok = await confirm(`${title} 하시겠습니까?`);
+    if (!ok) return;
+
     const res = await callApi({
       service: Service.POSTMAN,
       url: '/api/al-trans-record',
@@ -166,7 +169,7 @@ const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChar
           user_key: myUserKey,
           target_user_key: targetUserKey,
           al_trans_amount: amount,
-          before_al_trans_amount: myBalance,
+          al_trans_before_amount: myBalance,
           withdraw_passcode: values.withdraw_passcode,
         },
       },

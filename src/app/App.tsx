@@ -65,7 +65,7 @@ import {
   SystemBlockPage,
   SystemIpBlockPage,
 } from '@/features/system';
-import { TransAlTransferPage, TransRechargePage, TransExchangePage } from '@features/trans';
+import { TransAlTransferPage, TransTransferPage } from '@features/trans';
 import { PartnerListPage, PartnerDetailPage } from '@/features/partner';
 import {
   CustomerWaitPage,
@@ -466,18 +466,10 @@ function App() {
                             }
                           />
                           <Route
-                            path="/trans/recharge"
+                            path="/trans/transfer"
                             element={
                               <PrivateRoute>
-                                <TransRechargePage />
-                              </PrivateRoute>
-                            }
-                          />
-                          <Route
-                            path="/trans/exchange"
-                            element={
-                              <PrivateRoute>
-                                <TransExchangePage />
+                                <TransTransferPage />
                               </PrivateRoute>
                             }
                           />

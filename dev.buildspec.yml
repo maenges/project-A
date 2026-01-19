@@ -17,7 +17,6 @@ phases:
           VITE_API_BASE_URL: "${VITE_API_BASE_URL}",
           VITE_API_ORIGIN: "${VITE_API_ORIGIN}",
           VITE_API_WITH_CREDENTIALS: "${VITE_API_WITH_CREDENTIALS}",
-          VITE_BRAND_NAME: "${VITE_BRAND_NAME}",
           NODE_ENV: "${NODE_ENV}"
         };
         EOF

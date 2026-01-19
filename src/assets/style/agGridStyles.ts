@@ -501,6 +501,23 @@ export const agGridStyles = css`
     background-color: rgba(145, 158, 171, 0.12) !important;
   }
 
+  /* Tooltip: 다크모드에서 기본 툴팁(흰 배경)에 흰 글씨가 겹쳐 안 보이는 현상 방지 */
+  .ag-theme-material .ag-tooltip {
+    background-color: #ffffff;
+    color: #111827;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    box-shadow: var(--ag-popup-shadow);
+    padding: 8px 10px;
+    max-width: 720px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  body[data-theme='dark'] .ag-theme-material .ag-tooltip {
+    background-color: rgba(17, 24, 39, 0.96);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+
   .ag-theme-material .ag-checkbox-input-wrapper {
     width: 18px !important;
     height: 18px !important;

@@ -40,6 +40,7 @@ type FormValues = {
   startDate: string;
   endDate: string;
   userType: string;
+  userId: string;
 };
 
 const PARTNER_LIST_UI_STATE_KEY = 'partnerList.uiState';
@@ -344,23 +345,17 @@ const PartnerList: React.FC = () => {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
       userType: 'ALL',
+      userId: '',
     },
     mode: 'onChange',
   });
 
   const onSearch = () => {
-    // 충환전 끝나면 작성, 신규등록후 재조회도 해야함
-    // callApi({
-    //   service: Service.POSTMAN,
-    //   url: '/api/notice',
-    //   method: Method.GET,
-    //   params: {},
-    // }).then((res) => {
-    //   if (res.successOrNot !== 'Y') {
-    //     return toast.error(res.HeaderMsg);
-    //   }
-    //   setRowData(res.data);
-    // });
+    if (!selectedTreeId) {
+      toast.info('좌측 트리를 선택해 주세요.');
+      return;
+    }
+    fetchPartnerListByGroupKey(selectedTreeId);
   };
 
   // 상세 화면으로 이동
@@ -394,13 +389,19 @@ const PartnerList: React.FC = () => {
   };
 
   const fetchPartnerListByGroupKey = (groupKey: string) => {
-    const { startDate, endDate } = getValues();
+    const { startDate, endDate, userId, userType } = getValues();
     callApi({
       service: Service.POSTMAN,
       url: '/api/user/partnerInfo',
       method: Method.GET,
       params: {
-        queryParams: { groupKey, startDate, endDate },
+        queryParams: {
+          groupKey,
+          startDate,
+          endDate,
+          userId: userId?.trim() || '',
+          userType: userType === 'ALL' ? '' : userType,
+        },
       },
       config: { isLoading: true },
     }).then((res) => {
@@ -537,10 +538,16 @@ const PartnerList: React.FC = () => {
           />
           <EtsInputComponent
             control={control}
-            name="acReg"
+            name="userId"
             label="파트너 ID"
             placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key !== 'Enter') return;
+              if ((e.nativeEvent as any)?.isComposing) return;
+              e.preventDefault();
+              handleSubmit(onSearch)();
+            }}
           />
           <Box sx={{ marginLeft: 'auto' }}>
             <EtsButton

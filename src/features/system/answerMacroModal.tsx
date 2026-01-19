@@ -30,8 +30,7 @@ const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
   const gridRef = useRef<EtsGridRef<Macro>>(null);
   const [_, setNewRowNodes] = useState<IRowNode<Macro>[]>([]);
   const [rowData, setRowData] = useState<any[]>([]);
-  const { toast } = useNotify();
-
+  const { toast, confirm } = useNotify();
   const columnDefs: ColDef[] = [
     EtsColumnPreset.SelectionBoxPreset({
       headerName: '',
@@ -124,6 +123,9 @@ const AnswerMacroModal = ({ open, onClose }: AnswerMacroModalProps) => {
       toast.info('변경된 내용이 없습니다.');
       return;
     }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
 
     const res = await callApi({
       service: Service.POSTMAN,

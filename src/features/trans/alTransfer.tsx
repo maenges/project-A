@@ -26,6 +26,7 @@ type FormValues = {
   startDate: string;
   endDate: string;
   transType: string;
+  userId: string;
 };
 
 const AlTransfer: React.FC = () => {
@@ -114,6 +115,7 @@ const AlTransfer: React.FC = () => {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
       transType: transactionStatusOptions[0]?.value ?? '',
+      userId: '',
     },
     mode: 'onChange',
   });
@@ -127,7 +129,7 @@ const AlTransfer: React.FC = () => {
   };
 
   const fetchCustomerListByGroupKey = (groupKey: string) => {
-    const { startDate, endDate, transType } = getValues();
+    const { startDate, endDate, transType, userId } = getValues();
     callApi({
       service: Service.POSTMAN,
       url: '/api/al-trans-record/alTransInfo',
@@ -138,6 +140,7 @@ const AlTransfer: React.FC = () => {
           startDate,
           endDate,
           transType: transType === 'ALL' ? '' : transType,
+          userId,
         },
       },
       config: { isLoading: true },
@@ -187,10 +190,16 @@ const AlTransfer: React.FC = () => {
           />
           <EtsInputComponent
             control={control}
-            name="acReg"
+            name="userId"
             label="회원 ID"
             placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key !== 'Enter') return;
+              if ((e.nativeEvent as any)?.isComposing) return;
+              e.preventDefault();
+              handleSubmit(onSearch)();
+            }}
           />
           <Box sx={{ marginLeft: 'auto' }}>
             <EtsButton

@@ -36,7 +36,7 @@ type FormValues = {
 const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
   const theme = useTheme();
   const [content, setContent] = useState('');
-  const { toast } = useNotify();
+  const { toast, confirm } = useNotify();
   const macroOptions = useMemo(() => {
     const base = (data?.macroList || []).map((m: any) => ({
       label: m?.label ?? m?.macro_title ?? String(m),
@@ -130,6 +130,9 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
               toast.error('notice_key가 없습니다.');
               return;
             }
+
+            const ok = await confirm('저장하시겠습니까?');
+            if (!ok) return;
 
             // 직접 입력인 경우, 매크로 키와 제목을 빈값으로 설정
             const isCustom = selectedMacroValue === 'CUSTOM';

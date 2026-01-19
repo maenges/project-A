@@ -1,8 +1,8 @@
 import React from 'react';
 import { Dialog, DialogTitle, IconButton, Typography, Container, Box, Stack } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { tableForm } from '@/assets/style';
-import closeIcon from '@/assets/images/ic-close.svg';
-import { alpha, useTheme } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 // import chevronRight from '@/assets/images/chevron-right.svg';
 // import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -43,9 +43,6 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
   searchComponent,
   buttonComponent,
 }) => {
-  // const { pathname } = useLocation();
-  const theme = useTheme();
-
   const handleClose = (_event: {}) => {
     onClose?.();
   };
@@ -144,8 +141,21 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
             borderRadius: '16px 16px 0 0',
             background:
               theme.palette.mode === 'dark'
-                ? alpha(theme.palette.primary.dark, 0.1)
-                : alpha(theme.palette.primary.main, 0.1),
+                ? `linear-gradient(135deg, ${alpha(
+                    theme.palette.primary.main,
+                    0.22
+                  )} 0%, ${alpha(theme.palette.primary.dark, 0.12)} 55%, ${alpha(
+                    theme.palette.background.paper,
+                    0
+                  )} 100%)`
+                : `linear-gradient(135deg, ${alpha(
+                    theme.palette.primary.main,
+                    0.14
+                  )} 0%, ${alpha(theme.palette.primary.light, 0.1)} 55%, ${alpha(
+                    theme.palette.background.paper,
+                    0
+                  )} 100%)`,
+            borderBottom: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.55 : 0.9)}`,
             '@media (max-width: 1340px)': {
               padding: 'var(--spacing-16, 16px) 20px',
             },
@@ -160,26 +170,38 @@ export const TableTemplate: React.FC<TableTemplateProps> = ({
             <Typography
               // className="label-modal-title-lg"
               sx={(theme) => ({
-                color:
-                  theme.palette.mode === 'dark'
-                    ? theme.palette.common.white
-                    : theme.palette.common.black,
+                color: theme.palette.text.primary,
+                fontWeight: 700,
               })}
             >
               {title}
             </Typography>
             {/* {subTitle && <Typography className="label-modal-title-sm">{subTitle}</Typography>} */}
           </tableForm.HeaderContent>
-          <IconButton onClick={onClose} sx={{ padding: 0, width: 28, height: 28 }}>
-            <img
-              src={closeIcon}
-              alt="Close"
-              style={{
-                filter: theme.palette.mode === 'dark' ? 'brightness(0) invert(1)' : 'brightness(0)',
-                width: 28,
-                height: 28,
-              }}
-            />
+          <IconButton
+            onClick={onClose}
+            aria-label="닫기"
+            sx={(theme) => ({
+              width: 32,
+              height: 32,
+              p: 0,
+              borderRadius: 1.5,
+              color: theme.palette.text.secondary,
+              border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === 'dark' ? 0.5 : 0.9)}`,
+              backgroundColor: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'dark' ? 0.18 : 0.45
+              ),
+              '&:hover': {
+                backgroundColor: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === 'dark' ? 0.2 : 0.12
+                ),
+                color: theme.palette.text.primary,
+              },
+            })}
+          >
+            <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
         <tableForm.BodyDiv>{component}</tableForm.BodyDiv>
