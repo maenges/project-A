@@ -112,6 +112,12 @@ const getEnv = (key: string): string | undefined => {
   return (import.meta.env as any)[key];
 };
 
+const getEnvBool = (key: string, defaultValue: boolean): boolean => {
+  const value = getEnv(key);
+  if (value == null) return defaultValue;
+  return value === 'true';
+};
+
 /* istanbul ignore next */
 const getInstance = (
   serviceName: Service,
@@ -133,7 +139,9 @@ const getInstance = (
 
   // 쿠키 기반 인증(HTTPOnly access_token) 사용 시, 로컬 포함 항상 쿠키를 주고받아야 합니다.
   // (특히 프론트/백엔드가 다른 Origin이면 withCredentials=false일 때 Set-Cookie가 저장되지 않음)
-  axios.defaults.withCredentials = import.meta.env.VITE_API_WITH_CREDENTIALS === 'true';
+  // 기본값은 true (쿠키 기반 인증 전제)
+  const withCredentials = getEnvBool('VITE_API_WITH_CREDENTIALS', true);
+  axios.defaults.withCredentials = withCredentials;
 
   let baseURL = '';
   const sessionUtil = new SessionUtil();
@@ -153,17 +161,10 @@ const getInstance = (
       break;
   }
 
-  // 디버깅용 로그 (원하면 나중에 제거)
-  if (!baseURL) {
-    console.warn('[API] baseURL 이 비어 있습니다. service =', serviceName);
-  } else {
-    console.log('[API] baseURL =', baseURL, 'service =', serviceName);
-  }
-
   const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL,
     params: params || {},
-    withCredentials: import.meta.env.VITE_API_WITH_CREDENTIALS === 'true',
+    withCredentials,
   });
 
   // 공통 요청 처리
@@ -328,7 +329,7 @@ const getInstance = (
 
           // refresh 성공 후, 실패했던 요청을 그대로 재시도
           return await instance.request(originalRequest);
-        } catch (e) {
+        } catch (_e) {
           window.location.href = '/login';
           return {
             successOrNot: 'N',

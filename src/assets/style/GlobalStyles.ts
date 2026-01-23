@@ -23,6 +23,17 @@ export const GlobalStyles = createGlobalStyle`
   ${reset}
   /* Font faces are now loaded from /public/fonts.css */
 
+  /* Prevent layout shift when scrollbar appears/disappears */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  @supports not (scrollbar-gutter: stable) {
+    html {
+      overflow-y: scroll;
+    }
+  }
+
   /* Ensure fonts are loaded before applying */
   * {
     font-family: ${(props) => props.theme.fonts.family.primary};

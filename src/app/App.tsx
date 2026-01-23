@@ -36,7 +36,6 @@ import {
   VerificationPage,
 } from '@features/reporting';
 import { FuelDataCleansingPage, FuelDetailPage } from '@features/management';
-import { MenuManagementPage, LogManagementPage, CommonCodeManagementPage } from '@features/admin';
 import { MrvPlan, SafUsage } from '@features/library';
 
 import TestBobPage from '@/features/TestBobPage';
@@ -52,7 +51,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import EtsGridEditorTestPage from '@/features/EtsGridEditorTestPage';
 import GridPaginationTestPage from '@/features/GridPaginationTestPage';
-import EventLogManagementPage from '@/features/admin/eventLogManagement/EventLogManagementPage';
 import PayloadCleansingPage from './../features/management/payloadCleansing/PayloadCleansingPage';
 
 // New
@@ -78,6 +76,9 @@ import { GameRecordStatisticsPage } from '@/features/gameRecord';
 import { SettlementLoosingPage } from '@/features/settlement';
 // import DashboardLoginPage from '@/features/DashboardLoginPage';
 import LoginPage from '@/features/LoginPage';
+import ClientLayout from '@layout/ClientLayout';
+import { ClientHomePage } from '@/features/client';
+import ClientMenuPage from '@/features/client/ClientMenuPage';
 
 function App() {
   const { isLoading } = useLoadingStore();
@@ -93,6 +94,11 @@ function App() {
             {/* {sessionLoaded ? ( */}
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/client" element={<ClientLayout />}>
+                <Route index element={<ClientHomePage />} />
+                <Route path="menu/:key" element={<ClientMenuPage />} />
+                <Route path="*" element={<Navigate to="/client" replace />} />
+              </Route>
               <Route
                 path="*"
                 element={
@@ -337,46 +343,6 @@ function App() {
                               <KeepAlive id="management">
                                 <PrivateRoute>
                                   <FuelDetailPage />
-                                </PrivateRoute>
-                              </KeepAlive>
-                            }
-                          />
-                          <Route
-                            path="/admin/menu-management"
-                            element={
-                              <KeepAlive id="admin-menu-management">
-                                <PrivateRoute>
-                                  <MenuManagementPage />
-                                </PrivateRoute>
-                              </KeepAlive>
-                            }
-                          />
-                          <Route
-                            path="/admin/event-log-management"
-                            element={
-                              <KeepAlive id="admin">
-                                <PrivateRoute>
-                                  <EventLogManagementPage />
-                                </PrivateRoute>
-                              </KeepAlive>
-                            }
-                          />
-                          <Route
-                            path="/admin/log-management"
-                            element={
-                              <KeepAlive id="admin-log-management">
-                                <PrivateRoute>
-                                  <LogManagementPage />
-                                </PrivateRoute>
-                              </KeepAlive>
-                            }
-                          />
-                          <Route
-                            path="/admin/common-code-management"
-                            element={
-                              <KeepAlive id="admin-common-code-management">
-                                <PrivateRoute>
-                                  <CommonCodeManagementPage />
                                 </PrivateRoute>
                               </KeepAlive>
                             }

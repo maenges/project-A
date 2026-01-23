@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 
 type Props = {
   value?: unknown;
@@ -85,6 +86,8 @@ const sanitizeTooltipHtml = (html: string) => {
 };
 
 export default function HtmlTooltipComponent({ value }: Props) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const raw = typeof value === 'string' ? value : value == null ? '' : String(value);
 
   // ag-grid tooltip은 hover 때마다 자주 렌더될 수 있어 최소한의 처리만 수행
@@ -98,11 +101,11 @@ export default function HtmlTooltipComponent({ value }: Props) {
     <Box
       sx={{
         // 카드(미리보기) 느낌: 컴포넌트 자체에 배경/패딩을 줘서 투명해 보이지 않게
-        backgroundColor: 'rgba(17, 24, 39, 0.96)',
-        color: '#ffffff',
-        border: '1px solid rgba(255,255,255,0.14)',
+        backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
+        color: isDark ? '#ffffff' : '#111827',
+        border: isDark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.12)',
         borderRadius: '10px',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.25)',
+        boxShadow: isDark ? '0 10px 25px rgba(0,0,0,0.25)' : '0 10px 25px rgba(0,0,0,0.12)',
         padding: '14px 16px',
 
         // 크기(미리보기): 넉넉하게
@@ -126,7 +129,7 @@ export default function HtmlTooltipComponent({ value }: Props) {
         '& hr': {
           margin: '10px 0',
           border: 0,
-          borderTop: '1px solid rgba(255,255,255,0.18)',
+          borderTop: isDark ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(0,0,0,0.12)',
         },
       }}
       dangerouslySetInnerHTML={{ __html: safeHtml }}

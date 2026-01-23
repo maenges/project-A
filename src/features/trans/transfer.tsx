@@ -270,6 +270,10 @@ const AlTransfer: React.FC = () => {
       field: 'trans_total',
       headerName: '요청 합계',
       width: 100,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
     }),
   ];
 

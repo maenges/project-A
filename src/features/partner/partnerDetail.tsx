@@ -288,16 +288,16 @@ const PartnerDetail: React.FC = () => {
         <CustomerInfoTab detail={detail} />
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
-        <RecentLoginTab />
+        <RecentLoginTab userId={detail?.user_id} />
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
         <MemoTab />
       </TabPanel>
       <TabPanel value={tabIndex} index={3}>
-        <BalanceHistoryTab />
+        <BalanceHistoryTab userId={detail?.user_id} groupKey={detail?.group_key} />
       </TabPanel>
       <TabPanel value={tabIndex} index={4}>
-        <DepositWithdrawTab />
+        <DepositWithdrawTab userId={detail?.user_id} groupKey={detail?.group_key} />
       </TabPanel>
       <TabPanel value={tabIndex} index={5}>
         <GameHistoryTab />
