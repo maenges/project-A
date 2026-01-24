@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
+
 import banner1 from '@/assets/images/banner/banner_1.png';
 import banner2 from '@/assets/images/banner/banner_2.png';
 import banner3 from '@/assets/images/banner/banner_3.png';
@@ -13,6 +14,7 @@ import banner10 from '@/assets/images/banner/banner_10.png';
 import banner11 from '@/assets/images/banner/banner_11.png';
 import banner12 from '@/assets/images/banner/banner_12.png';
 import banner13 from '@/assets/images/banner/banner_13.png';
+
 import mobileBanner1 from '@/assets/images/banner/mobile/banner_1.png';
 import mobileBanner2 from '@/assets/images/banner/mobile/banner_2.png';
 import mobileBanner3 from '@/assets/images/banner/mobile/banner_3.png';
@@ -41,9 +43,15 @@ import micro_c from '@/assets/images/logo/casino/micro.png';
 import dream_c from '@/assets/images/logo/casino/dream.png';
 import sa_c from '@/assets/images/logo/casino/sa.png';
 // import oriental_c from '@/assets/images/logo/casino/oriental.png';
+
 import { useEffect, useState, type CSSProperties } from 'react';
+import { callApi, Method } from '@/utils/ApiUtil';
+import { Service } from '@/models/common/Service';
+import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 
 export type ProviderTab = 'casino' | 'slot';
+
+type Platform = 'WEB' | 'MOBILE';
 
 // 개발 중 sub(한글 라벨) 스타일을 한 곳에서 빠르게 조절하기 위한 기본값
 const SUB_DEV_STYLE = {
@@ -302,6 +310,117 @@ const useIsMobile = () => {
 const ClientProviderGrid = ({ tab }: Props) => {
   const isMobile = useIsMobile();
 
+  const platform: Platform = isMobile ? 'MOBILE' : 'WEB';
+
+  const openGamePopup = (): Window | null => {
+    if (typeof window === 'undefined') return null;
+
+    // 가로가 잘리는 경우가 많아서 화면에 최대한 가깝게(거의 꽉 차게) 띄웁니다.
+    // 너무 큰 값은 브라우저가 자동 보정하므로 min/max만 현실적으로 잡습니다.
+    const width = Math.min(1600, Math.max(1100, Math.round(window.innerWidth * 0.98)));
+    const height = Math.min(980, Math.max(720, Math.round(window.innerHeight * 0.94)));
+    const left = Math.max(0, Math.round((window.screen.width - width) / 2));
+    const top = Math.max(0, Math.round((window.screen.height - height) / 2));
+
+    // 팝업 차단을 피하려면 사용자 클릭 이벤트 내에서 즉시 window.open을 호출해야 합니다.
+    const features = [
+      'popup=yes',
+      `width=${width}`,
+      `height=${height}`,
+      `left=${left}`,
+      `top=${top}`,
+      'resizable=yes',
+      'scrollbars=yes',
+      'toolbar=no',
+      'menubar=no',
+      'location=no',
+      'status=no',
+    ].join(',');
+
+    const popup = window.open('about:blank', 'clientGamePopup', features);
+    try {
+      popup?.document?.write(
+        '<!doctype html><title>Loading...</title><body style="margin:0;font-family:system-ui;background:#0f0f13;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">게임 로딩 중...</body>'
+      );
+      popup?.document?.close();
+    } catch {
+      // ignore
+    }
+    return popup;
+  };
+
+  const launchGame = async (name: string) => {
+    // 모바일 브라우저는 팝업(크기/위치 제어)이 불안정하거나 새 탭으로 열리는 경우가 많아서
+    // 모바일에서는 팝업 대신 현재 페이지에서 게임 URL로 이동합니다.
+    const usePopup = platform === 'WEB';
+    const popup = usePopup ? openGamePopup() : null;
+    if (usePopup && !popup) {
+      window.alert('팝업이 차단되어 게임을 열 수 없습니다. 이 사이트의 팝업을 허용해주세요.');
+      return;
+    }
+
+    const ok = await ensureClientLoggedIn({ openModal: true });
+    if (!ok) {
+      popup?.close();
+      return;
+    }
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/group/game/excute',
+      method: Method.GET,
+      redirect: false,
+      params: {
+        queryParams: {
+          name,
+          platform,
+        },
+      },
+    });
+
+    // 1) 프론트-백 통신 규격 레벨 체크
+    // - successOrNot: 'N'이면 통신문제/인증/서버에러 등
+    // - 이때는 HeaderMsg를 사용자에게 그대로 노출
+    if ((res as any)?.successOrNot !== 'Y') {
+      const msg = (res as any)?.HeaderMsg ?? (res as any)?.message ?? '요청에 실패했습니다.';
+      window.alert(msg);
+      popup?.close();
+      return;
+    }
+
+    // 백엔드 계약: res.data에 { result, url }이 항상 존재.
+    // - result: 0 성공 / 1 실패
+    // - 실패 시 message로 사유 전달
+    const data: any = (res as any)?.data;
+
+    if (data.result !== 0) {
+      window.alert('서버 점검 중 입니다.');
+      popup?.close();
+      return;
+    }
+
+    const url = data.url;
+
+    if (typeof url !== 'string' || !url) {
+      window.alert('게임 URL을 받지 못했습니다.');
+      popup?.close();
+      return;
+    }
+
+    try {
+      if (!usePopup) {
+        window.location.href = url;
+        return;
+      }
+
+      popup!.location.href = url;
+      popup!.focus();
+    } catch {
+      popup?.close();
+      window.alert('팝업에서 게임을 여는 데 실패했습니다.');
+    }
+  };
+
   const desktopCardBgs = [
     banner1,
     banner2,
@@ -354,14 +473,14 @@ const ClientProviderGrid = ({ tab }: Props) => {
     mobileMetaStyle?: CSSProperties;
   }> = [
     {
-      name: 'PRAGMATIC PLAY',
+      name: 'pragmatic_casino',
       sub: '프라그마틱 카지노',
       labelImage: pragmatic_c,
       logoScale: 1.5,
       mobileLogoScale: 3.5,
     },
     {
-      name: 'Evolution Gaming',
+      name: 'evolution',
       sub: '에볼루션 카지노',
       labelImage: evolution_c,
       logoScale: 1.5,
@@ -369,7 +488,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'CQ9 ',
+      name: 'cq9_casino',
       sub: '씨큐9 카지노',
       labelImage: cq9_c,
       logoScale: 1.5,
@@ -377,7 +496,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Sexy Gaming',
+      name: 'SEXYBCRT',
       sub: '섹시 카지노',
       labelImage: sexy_c,
       logoScale: 1.5,
@@ -385,7 +504,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Vota',
+      name: 'VOTA',
       sub: '보타 카지노',
       labelImage: vota_c,
       logoScale: 1.5,
@@ -393,7 +512,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Dowinn',
+      name: 'dowin',
       sub: '두윈 카지노',
       labelImage: dowinn_c,
       logoScale: 1.5,
@@ -401,7 +520,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Vivo',
+      name: 'TOMHORN_VIVO',
       sub: '비보 카지노',
       labelImage: vivo_c,
       logoScale: 1.5,
@@ -409,14 +528,14 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'AG',
+      name: 'AGIN',
       sub: '아시아 게이밍 카지노',
       labelImage: ag_c,
       logoScale: 1.5,
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Dream',
+      name: 'dream',
       sub: '드림게임 카지노',
       labelImage: dream_c,
       logoScale: 1.5,
@@ -424,7 +543,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Micro',
+      name: 'MICRO_Casino',
       sub: '마이크로소프트 게임',
       labelImage: micro_c,
       logoScale: 1.5,
@@ -432,21 +551,21 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Tomhorn Mojos',
+      name: 'TOMHORN_7Mojos',
       sub: '탐혼 7모조 카지노',
       labelImage: tomhornMojo_c,
       logoScale: 1.4,
       mobileLogoScale: 2.0,
     },
     {
-      name: 'Tomhorn Absolute',
+      name: 'TOMHORN_AbsoluteLive',
       sub: '탐혼 앱솔루트 카지노',
       labelImage: tomhornAbsolute_c,
       logoScale: 1.5,
       mobileLogoScale: 2.0,
     },
     {
-      name: 'SA',
+      name: 'sa',
       sub: '에스에이 카지노',
       labelImage: sa_c,
       logoScale: 1.5,
@@ -487,7 +606,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
                   ? (mobileCardBgs[idx] ?? mobileCardBgs[0])
                   : desktopCardBgs[idx % desktopCardBgs.length]
               }
-              onClick={() => window.alert(`${c.name}(데모)`)}
+              onClick={() => void launchGame(c.name)}
             >
               <div className="label">
                 <img

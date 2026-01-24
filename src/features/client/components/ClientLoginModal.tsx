@@ -238,12 +238,13 @@ type Props = {
   open: boolean;
   onClose: () => void;
   showVisual?: boolean;
+  onSuccess?: () => void;
   onLogin?: (payload: { username: string; password: string }) => void;
   onSignup?: () => void;
   onTelegram?: () => void;
 };
 
-const ClientLoginModal = ({ open, onClose, onLogin, showVisual = true }: Props) => {
+const ClientLoginModal = ({ open, onClose, onLogin, onSuccess, showVisual = true }: Props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -323,6 +324,7 @@ const ClientLoginModal = ({ open, onClose, onLogin, showVisual = true }: Props) 
         return;
       }
 
+      onSuccess?.();
       onClose();
       navigate('/client', { replace: true });
     } finally {

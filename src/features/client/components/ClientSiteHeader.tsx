@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
@@ -13,8 +12,14 @@ import goldenLogoGif from '@/assets/images/logo/brand/golden7.png';
 import deposit from '@/assets/images/icon/deposit.svg';
 import withdraw from '@/assets/images/icon/withdraw.svg';
 import ClientLoginModal from './ClientLoginModal';
+import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
+import { callApi, Method } from '@/utils/ApiUtil';
+import { Service } from '@/models/common/Service';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useClientBalanceStore, type ClientBalance } from '@/store/clientBalance';
+import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 
-type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox' | 'mypage';
+type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox';
 type MobileMenuKey = MenuKey | 'login';
 
 const Bar = styled.header`
@@ -27,7 +32,7 @@ const Bar = styled.header`
 `;
 
 const Inner = styled.div`
-  height: 96px;
+  min-height: 96px;
   max-width: ${CLIENT_MAX_WIDTH};
   margin: 0 auto;
   padding: 0 ${CLIENT_SIDE_PADDING};
@@ -38,8 +43,12 @@ const Inner = styled.div`
   position: relative;
 
   @media (max-width: 980px) {
+    height: auto;
     grid-template-columns: 1fr;
     justify-items: center;
+    padding-top: 10px;
+    padding-bottom: 12px;
+    gap: 10px;
   }
 
   @media (max-width: 520px) {
@@ -171,6 +180,90 @@ const Right = styled.div`
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
+  }
+`;
+
+const DesktopUserInfo = styled.div`
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  max-width: min(46vw, 520px);
+  overflow: hidden;
+
+  .id {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 1000;
+    font-size: 14px;
+    letter-spacing: -0.2px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .money {
+    color: rgba(255, 205, 120, 0.95);
+    font-weight: 1000;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 980px) {
+    display: none;
+  }
+`;
+
+const MobileQuickBar = styled.div`
+  display: none;
+  width: 100%;
+  margin-top: 10px;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 980px) {
+    display: flex;
+  }
+`;
+
+const MobileUserInfo = styled.div`
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  line-height: 1.12;
+
+  .id {
+    max-width: 52%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 1000;
+    font-size: 13px;
+    letter-spacing: -0.2px;
+  }
+
+  .money {
+    color: rgba(255, 205, 120, 0.95);
+    font-weight: 1000;
+    font-size: 12px;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
   }
 `;
 
@@ -328,18 +421,102 @@ const ClientSiteHeader = () => {
   const [open, setOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginShowVisual, setLoginShowVisual] = useState(true);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const navigate = useNavigate();
+
+  const balance = useClientBalanceStore((s) => s.balance);
+  const setBalance = useClientBalanceStore((s) => s.setBalance);
+  const clearBalance = useClientBalanceStore((s) => s.clearBalance);
+
+  const isLoggedIn = !!balance?.userId;
+
+  const parseBalance = (raw: any): ClientBalance | null => {
+    if (!raw || typeof raw !== 'object') return null;
+    const userId = raw.user_id;
+    const money = raw.user_money;
+
+    const normalizedId = typeof userId === 'string' ? userId : String(userId ?? '').trim();
+    const numericMoney = Number(
+      typeof money === 'string' ? money.replace(/[^0-9-]/g, '') : (money as any)
+    );
+    if (!normalizedId) return null;
+
+    return {
+      userId: normalizedId,
+      money: Number.isFinite(numericMoney) ? numericMoney : 0,
+    };
+  };
+
+  const fetchBalance = async (opts?: { suppressAuthEvent?: boolean }) => {
+    if (balanceLoading) return;
+    setBalanceLoading(true);
+    try {
+      const res = await callApi({
+        service: Service.POSTMAN,
+        url: '/api/client/balance',
+        method: Method.GET,
+        redirect: false,
+        suppressAuthEvent: opts?.suppressAuthEvent ?? false,
+      });
+
+      if (res.successOrNot !== 'Y') {
+        // 페이지 이동 시 헤더가 리마운트되더라도, 요청 완료 전에는 기존 표시를 유지해 플리커를 막습니다.
+        // (실제로 로그아웃/세션만료면 응답이 돌아온 뒤에만 상태가 바뀌도록)
+        clearBalance();
+        return;
+      }
+
+      const payload = res.data;
+      const next = parseBalance(payload);
+      setBalance(next);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  const openLoginByViewport = () => {
+    const showVisual = typeof window !== 'undefined' ? window.innerWidth > 860 : true;
+    openLogin(showVisual);
+  };
+
+  const logout = async () => {
+    try {
+      await callApi({
+        service: Service.POSTMAN,
+        url: '/api/auth/logout',
+        method: Method.POST,
+        redirect: false,
+        suppressAuthEvent: true,
+      });
+    } finally {
+      clearBalance();
+    }
+  };
+
+  useEffect(() => {
+    void fetchBalance({ suppressAuthEvent: true });
+  }, []);
+
+  useEffect(() => {
+    return ClientAuthAddEventListeners('authRequired', () => {
+      setOpen(false);
+      setLoginShowVisual(true);
+      setLoginOpen(true);
+    });
+  }, []);
 
   const getMenuIcon = (key: MobileMenuKey) => {
     switch (key) {
       case 'login':
-        return <LoginOutlinedIcon fontSize="small" />;
+        return isLoggedIn ? (
+          <LogoutIcon fontSize="small" />
+        ) : (
+          <LoginOutlinedIcon fontSize="small" />
+        );
       case 'deposit':
         return <DepositIcon aria-hidden="true" />;
       case 'withdraw':
         return <WithdrawIcon aria-hidden="true" />;
-      case 'mypage':
-        return <PersonOutlineIcon fontSize="small" />;
       case 'notice':
         return <NotificationsNoneIcon fontSize="small" />;
       case 'support':
@@ -358,14 +535,13 @@ const ClientSiteHeader = () => {
       { key: 'notice' as const, label: '공지사항' },
       { key: 'support' as const, label: '문의' },
       { key: 'inbox' as const, label: '쪽지함' },
-      { key: 'mypage' as const, label: '내정보' },
     ],
     []
   );
 
   const mobileItems = useMemo(
-    () => [{ key: 'login' as const, label: '로그인' }, ...navItems],
-    [navItems]
+    () => [{ key: 'login' as const, label: isLoggedIn ? '로그아웃' : '로그인' }, ...navItems],
+    [navItems, isLoggedIn]
   );
 
   useEffect(() => {
@@ -378,9 +554,21 @@ const ClientSiteHeader = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
-  const goMenu = (key: MenuKey) => {
+  const goMenu = async (key: MenuKey) => {
     setOpen(false);
-    navigate(`/client/menu/${key}`);
+
+    if (!isLoggedIn) {
+      // 저장소 캐시 없이 쿠키 기반 인증 전제이므로,
+      // 잔액 조회가 아직 끝나지 않았거나(unknown) 로그인 상태가 확실치 않을 때는
+      // 서버에 조용히 확인한 뒤, 실패 시에만 우리가 정한 UX(로그인 모달)를 띄웁니다.
+      const ok = await ensureClientLoggedIn({ openModal: false });
+      if (!ok) {
+        openLoginByViewport();
+        return;
+      }
+    }
+
+    navigate(`/client/menu/${key}`, { state: { clientAuthChecked: true } });
   };
 
   const goHome = () => {
@@ -396,10 +584,22 @@ const ClientSiteHeader = () => {
 
   const goMobileMenu = (key: MobileMenuKey) => {
     if (key === 'login') {
+      if (isLoggedIn) {
+        void logout();
+        return;
+      }
       openLogin(false);
       return;
     }
     goMenu(key);
+  };
+
+  const openAuth = (showVisual: boolean) => {
+    if (isLoggedIn) {
+      void logout();
+      return;
+    }
+    openLogin(showVisual);
   };
 
   return (
@@ -414,7 +614,7 @@ const ClientSiteHeader = () => {
 
           <Nav aria-label="main navigation">
             {navItems.map((x) => (
-              <NavItem key={x.key} type="button" onClick={() => goMenu(x.key)}>
+              <NavItem key={x.key} type="button" onClick={() => void goMenu(x.key)}>
                 {getMenuIcon(x.key)}
                 {x.label}
               </NavItem>
@@ -422,14 +622,40 @@ const ClientSiteHeader = () => {
           </Nav>
 
           <Right>
-            <Pill $tone="gold" onClick={() => openLogin(true)}>
-              로그인
+            {isLoggedIn && (
+              <DesktopUserInfo aria-label="user info">
+                <span className="id">{balance?.userId}</span>
+                <span className="money">
+                  보유머니 {Number(balance?.money ?? 0).toLocaleString('ko-KR')}원
+                </span>
+              </DesktopUserInfo>
+            )}
+
+            <Pill $tone="gold" onClick={() => openAuth(true)}>
+              {isLoggedIn ? '로그아웃' : '로그인'}
             </Pill>
 
             <MenuBtn aria-label="menu" onClick={() => setOpen(true)}>
               <MenuIcon fontSize="small" />
             </MenuBtn>
           </Right>
+
+          <MobileQuickBar aria-label="mobile quick bar">
+            <MobileUserInfo aria-label="user info">
+              {isLoggedIn ? (
+                <>
+                  <div className="id">{balance?.userId}</div>
+                  <div className="money">
+                    보유머니 {Number(balance?.money ?? 0).toLocaleString('ko-KR')}원
+                  </div>
+                </>
+              ) : (
+                <div className="id" style={{ opacity: 0.65 }}>
+                  로그인 필요
+                </div>
+              )}
+            </MobileUserInfo>
+          </MobileQuickBar>
         </Inner>
       </Bar>
 
@@ -459,6 +685,9 @@ const ClientSiteHeader = () => {
       <ClientLoginModal
         open={loginOpen}
         showVisual={loginShowVisual}
+        onSuccess={() => {
+          void fetchBalance({ suppressAuthEvent: true });
+        }}
         onClose={() => {
           setLoginOpen(false);
           setLoginShowVisual(true);

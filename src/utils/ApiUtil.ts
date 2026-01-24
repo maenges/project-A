@@ -5,6 +5,7 @@ import CommonResponse, { StatusCode } from '@/models/common/CommonResponse';
 import { v4 as uuidv4 } from 'uuid';
 import { Service } from '@/models/common/Service';
 import { useLoadingStore } from '@/store/loading';
+import { ClientAuthEventDispatch } from '@/utils/clientAuthEventBus';
 
 const TIMESTAMP_FIELDS = ['created', 'updated', 'created_at', 'updated_at'];
 
@@ -94,7 +95,19 @@ export interface ApiRequest {
   method: Method;
   params?: ParamObject;
   config?: Config;
-  redirect?: string;
+  /**
+   * 인증 만료/401 처리 시 리다이렉트 제어
+   * - string: 해당 경로로 이동 (예: '/login')
+   * - false: 리다이렉트 하지 않음 (client 영역 등에서 모달로 처리할 때)
+   * - undefined: 기본 정책 적용 (현재 경로가 /client면 리다이렉트 안함, 그 외는 /login)
+   */
+  redirect?: string | false;
+
+  /**
+   * redirect=false(=client 영역 기본)일 때, authRequired 이벤트(로그인 모달 오픈)를 억제합니다.
+   * - 헤더에서 로그인 여부를 조용히 판별하는 용도 등
+   */
+  suppressAuthEvent?: boolean;
 }
 
 /**
@@ -118,12 +131,47 @@ const getEnvBool = (key: string, defaultValue: boolean): boolean => {
   return value === 'true';
 };
 
+const getDefaultAuthRedirect = (): string | false => {
+  if (typeof window === 'undefined') return '/login';
+  // client 영역은 강제 /login 이동 대신 화면에서 모달/토스트 처리할 수 있도록 기본값을 'no redirect'로 둠
+  if (window.location.pathname.startsWith('/client')) return false;
+  return '/login';
+};
+
+const redirectToAuth = (
+  redirect: string | false | undefined,
+  meta?: {
+    reason?: 'unauthorized' | 'session-expired' | 'refresh-failed' | 'unknown';
+    status?: string;
+    url?: string;
+  },
+  suppressAuthEvent?: boolean
+) => {
+  const target = redirect ?? getDefaultAuthRedirect();
+
+  if (target === false) {
+    if (suppressAuthEvent) return;
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/client')) {
+      ClientAuthEventDispatch('authRequired', {
+        reason: meta?.reason ?? 'unauthorized',
+        status: meta?.status,
+        url: meta?.url,
+      });
+    }
+    return;
+  }
+
+  window.location.href = target;
+};
+
 /* istanbul ignore next */
 const getInstance = (
   serviceName: Service,
   isLoading: boolean,
   params?: any,
-  isFile?: boolean
+  isFile?: boolean,
+  redirect?: string | false,
+  suppressAuthEvent?: boolean
 ): AxiosInstance => {
   const { showLoading, hideLoading } = useLoadingStore.getState();
   if (isLoading) {
@@ -274,7 +322,11 @@ const getInstance = (
           error.response?.headers['content-type'] === 'text/html'
         ) {
           // refresh token 만료시 로그인으로 이동
-          window.location.href = '/login';
+          redirectToAuth(
+            redirect,
+            { reason: 'refresh-failed', status, url: error.response?.config?.url },
+            suppressAuthEvent
+          );
         } else if (error.response.status.toString() === '500') {
           let HeaderMsg;
           switch (error.response.config.method.toString().toUpperCase()) {
@@ -330,13 +382,40 @@ const getInstance = (
           // refresh 성공 후, 실패했던 요청을 그대로 재시도
           return await instance.request(originalRequest);
         } catch (_e) {
-          window.location.href = '/login';
+          redirectToAuth(
+            redirect,
+            { reason: 'refresh-failed', status, url: originalRequest.url },
+            suppressAuthEvent
+          );
           return {
             successOrNot: 'N',
             statusCode: StatusCode.SESSION_EXPIRED,
             data: {},
           } as CommonResponse;
         }
+      }
+
+      // refresh 후에도 401이 계속 발생하거나, refresh 대상이 아닌 401은 로그인 처리로 위임
+      if (
+        status === '401' &&
+        originalRequest &&
+        !isRefreshRequest(originalRequest.url) &&
+        !isLoginRequest(originalRequest.url)
+      ) {
+        redirectToAuth(
+          redirect,
+          {
+            reason: 'unauthorized',
+            status,
+            url: originalRequest.url,
+          },
+          suppressAuthEvent
+        );
+        return {
+          successOrNot: 'N',
+          statusCode: StatusCode.SESSION_EXPIRED,
+          data: {},
+        } as CommonResponse;
       }
 
       if (error.response && error.response.status.toString().indexOf('40') === 0) {
@@ -401,7 +480,6 @@ export const callApi = async (apiRequest: ApiRequest): Promise<CommonResponse> =
   const url: string = apiRequest.url + getQueryStringFormat(apiRequest.params?.queryParams);
   const isLoading = apiRequest.config?.isLoading || false;
   const isFile = apiRequest.config?.isFile || false;
-  const sessionUtil = new SessionUtil();
 
   let response: CommonResponse = {
     successOrNot: 'N',
@@ -410,38 +488,69 @@ export const callApi = async (apiRequest: ApiRequest): Promise<CommonResponse> =
   };
   switch (apiRequest.method) {
     case Method.GET:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).get(url);
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect,
+        apiRequest.suppressAuthEvent
+      ).get(url);
       break;
     case Method.POST:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).post(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect,
+        apiRequest.suppressAuthEvent
+      ).post(url, apiRequest.params?.bodyParams);
       break;
     case Method.PUT:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).put(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect,
+        apiRequest.suppressAuthEvent
+      ).put(url, apiRequest.params?.bodyParams);
       break;
     case Method.PATCH:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).patch(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect,
+        apiRequest.suppressAuthEvent
+      ).patch(url, apiRequest.params?.bodyParams);
       break;
     case Method.DELETE:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url, {
-        data: apiRequest.params?.bodyParams,
-      });
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect,
+        apiRequest.suppressAuthEvent
+      ).delete(url, { data: apiRequest.params?.bodyParams });
       break;
     default:
       break;
   }
 
   if (response.successOrNot === 'N' && response.statusCode === 'SESSION_EXPIRE') {
-    sessionUtil.deleteSessionInfo();
-    window.location.href = '/login';
+    redirectToAuth(
+      apiRequest.redirect,
+      {
+        reason: 'session-expired',
+        status: String(response.statusCode),
+        url: apiRequest.url,
+      },
+      apiRequest.suppressAuthEvent
+    );
   }
 
   return response;
@@ -455,30 +564,49 @@ export const callApiForFile = async (apiRequest: ApiRequest): Promise<any> => {
 
   switch (apiRequest.method) {
     case Method.GET:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).get(url);
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect
+      ).get(url);
       break;
     case Method.POST:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).post(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect
+      ).post(url, apiRequest.params?.bodyParams);
       break;
     case Method.PUT:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).put(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect
+      ).put(url, apiRequest.params?.bodyParams);
       break;
     case Method.PATCH:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).patch(
-        url,
-        apiRequest.params?.bodyParams
-      );
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect
+      ).patch(url, apiRequest.params?.bodyParams);
       break;
     case Method.DELETE:
-      response = await getInstance(apiRequest.service, isLoading, {}, isFile).delete(url, {
-        data: apiRequest.params?.bodyParams,
-      });
+      response = await getInstance(
+        apiRequest.service,
+        isLoading,
+        {},
+        isFile,
+        apiRequest.redirect
+      ).delete(url, { data: apiRequest.params?.bodyParams });
       break;
     default:
       throw Error('Not Supported Method');

@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 import {
-  ClientSiteHeader,
   ClientHeroBanner,
   ClientCategoryRow,
   ClientProviderGrid,
@@ -25,7 +24,6 @@ const ClientHomePage = () => {
 
   return (
     <Page id="top">
-      <ClientSiteHeader />
       <ClientHeroBanner />
       <ClientCategoryRow activeTab={tab} onChange={setTab} />
       <Spacer />

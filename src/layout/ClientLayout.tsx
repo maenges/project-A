@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import { ClientBottomNav, ClientFooter } from '@/features/client/components';
+import { ClientBottomNav, ClientFooter, ClientSiteHeader } from '@/features/client/components';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -29,6 +29,7 @@ const Main = styled.main`
 const ClientLayout: React.FC = () => {
   return (
     <Container>
+      <ClientSiteHeader />
       <Main>
         <Outlet />
       </Main>

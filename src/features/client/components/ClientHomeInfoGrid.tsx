@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
+import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 
 type SimpleItem = {
   title: string;
@@ -336,18 +337,26 @@ const ClientHomeInfoGrid = () => {
     { kind: '출금', amount: '3,000,000원', user: 'nx***', date: '2026-01-22' },
   ];
 
-  const goNoticePage = (item: SimpleItem) => {
+  const goNoticePage = async (item: SimpleItem) => {
+    const ok = await ensureClientLoggedIn({ openModal: true });
+    if (!ok) return;
+
     navigate('/client/menu/notice', {
       state: {
+        clientAuthChecked: true,
         from: 'home',
         title: item.title,
       },
     });
   };
 
-  const goInquiryPage = (item: SimpleItem) => {
+  const goInquiryPage = async (item: SimpleItem) => {
+    const ok = await ensureClientLoggedIn({ openModal: true });
+    if (!ok) return;
+
     navigate('/client/menu/support', {
       state: {
+        clientAuthChecked: true,
         from: 'home',
         title: item.title,
       },

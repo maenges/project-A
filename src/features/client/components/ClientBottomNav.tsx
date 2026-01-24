@@ -8,6 +8,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
 import deposit from '@/assets/images/icon/deposit.svg';
 import withdraw from '@/assets/images/icon/withdraw.svg';
+import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 
 type Item = {
   key: 'deposit' | 'withdraw' | 'home' | 'support' | 'inbox';
@@ -187,7 +188,17 @@ const ClientBottomNav = () => {
                 $home={x.isHome}
                 aria-current={active ? 'page' : undefined}
                 aria-label={x.isHome ? x.label : undefined}
-                onClick={() => navigate(x.to)}
+                onClick={async () => {
+                  if (x.isHome) {
+                    navigate(x.to);
+                    return;
+                  }
+
+                  const ok = await ensureClientLoggedIn({ openModal: true });
+                  if (!ok) return;
+
+                  navigate(x.to, { state: { clientAuthChecked: true } });
+                }}
               >
                 {x.isHome ? <span className="homePill">{x.icon}</span> : x.icon}
                 {!x.isHome && <span>{x.label}</span>}
