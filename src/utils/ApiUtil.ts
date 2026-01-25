@@ -197,7 +197,8 @@ const getInstance = (
   switch (serviceName) {
     case Service.POSTMAN:
       // 여기서만 사용하니까 이 값만 잘 주입되면 됨
-      baseURL = getEnv('VITE_API_BASE_URL') || getEnv('REACT_APP_API_URL') || '';
+      // baseURL = getEnv('VITE_API_BASE_URL') || getEnv('REACT_APP_API_URL') || '';
+      baseURL = '';
       break;
 
     case Service.HOST:
