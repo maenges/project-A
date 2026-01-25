@@ -13,6 +13,7 @@ import deposit from '@/assets/images/icon/deposit.svg';
 import withdraw from '@/assets/images/icon/withdraw.svg';
 import ClientLoginModal from './ClientLoginModal';
 import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
+import { ClientBalanceAddEventListeners } from '@/utils/clientBalanceEventBus';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -502,6 +503,12 @@ const ClientSiteHeader = () => {
       setOpen(false);
       setLoginShowVisual(true);
       setLoginOpen(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    return ClientBalanceAddEventListeners('refreshBalance', () => {
+      void fetchBalance({ suppressAuthEvent: true });
     });
   }, []);
 

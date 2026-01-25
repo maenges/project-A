@@ -419,7 +419,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const loadMenuData = async () => {
     try {
       const response = await callApi({
-        service: Service.HOST,
+        service: Service.POSTMAN,
         url: '/api/menu',
         method: Method.GET,
         params: {

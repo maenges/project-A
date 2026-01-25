@@ -1,33 +1,7 @@
 import styled from 'styled-components';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
 
-import banner1 from '@/assets/images/banner/banner_1.png';
-import banner2 from '@/assets/images/banner/banner_2.png';
-import banner3 from '@/assets/images/banner/banner_3.png';
-import banner4 from '@/assets/images/banner/banner_4.png';
-import banner5 from '@/assets/images/banner/banner_5.png';
-import banner6 from '@/assets/images/banner/banner_6.png';
-import banner7 from '@/assets/images/banner/banner_7.png';
-import banner8 from '@/assets/images/banner/banner_8.png';
-import banner9 from '@/assets/images/banner/banner_9.png';
-import banner10 from '@/assets/images/banner/banner_10.png';
-import banner11 from '@/assets/images/banner/banner_11.png';
-import banner12 from '@/assets/images/banner/banner_12.png';
-import banner13 from '@/assets/images/banner/banner_13.png';
-
-import mobileBanner1 from '@/assets/images/banner/mobile/banner_1.png';
-import mobileBanner2 from '@/assets/images/banner/mobile/banner_2.png';
-import mobileBanner3 from '@/assets/images/banner/mobile/banner_3.png';
-import mobileBanner4 from '@/assets/images/banner/mobile/banner_4.png';
-import mobileBanner5 from '@/assets/images/banner/mobile/banner_5.png';
-import mobileBanner6 from '@/assets/images/banner/mobile/banner_6.png';
-import mobileBanner7 from '@/assets/images/banner/mobile/banner_7.png';
-import mobileBanner8 from '@/assets/images/banner/mobile/banner_8.png';
-import mobileBanner9 from '@/assets/images/banner/mobile/banner_9.png';
-import mobileBanner10 from '@/assets/images/banner/mobile/banner_10.png';
-import mobileBanner11 from '@/assets/images/banner/mobile/banner_11.png';
-import mobileBanner12 from '@/assets/images/banner/mobile/banner_12.png';
-import mobileBanner13 from '@/assets/images/banner/mobile/banner_13.png';
+import { desktopBanners, mobileBanners } from '@/assets/images/banner/banners';
 
 import pragmatic_c from '@/assets/images/logo/casino/pragmatic.png';
 import evolution_c from '@/assets/images/logo/casino/evolution.png';
@@ -44,10 +18,11 @@ import dream_c from '@/assets/images/logo/casino/dream.png';
 import sa_c from '@/assets/images/logo/casino/sa.png';
 // import oriental_c from '@/assets/images/logo/casino/oriental.png';
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
+import { ClientBalanceEventDispatch } from '@/utils/clientBalanceEventBus';
 
 export type ProviderTab = 'casino' | 'slot';
 
@@ -312,6 +287,17 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
   const platform: Platform = isMobile ? 'MOBILE' : 'WEB';
 
+  const popupClosePollerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (popupClosePollerRef.current) {
+        window.clearInterval(popupClosePollerRef.current);
+        popupClosePollerRef.current = null;
+      }
+    };
+  }, []);
+
   const openGamePopup = (): Window | null => {
     if (typeof window === 'undefined') return null;
 
@@ -415,44 +401,29 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
       popup!.location.href = url;
       popup!.focus();
+
+      // 팝업이 닫히는 순간을 감지해서 balance를 새로고침합니다.
+      // (교차 도메인 이동 후에도 popup.closed 조회는 가능합니다)
+      if (popupClosePollerRef.current) {
+        window.clearInterval(popupClosePollerRef.current);
+      }
+      popupClosePollerRef.current = window.setInterval(() => {
+        if (!popup || popup.closed) {
+          if (popupClosePollerRef.current) {
+            window.clearInterval(popupClosePollerRef.current);
+            popupClosePollerRef.current = null;
+          }
+          void ClientBalanceEventDispatch('refreshBalance', { source: 'popup-close' });
+        }
+      }, 600);
     } catch {
       popup?.close();
       window.alert('팝업에서 게임을 여는 데 실패했습니다.');
     }
   };
 
-  const desktopCardBgs = [
-    banner1,
-    banner2,
-    banner3,
-    banner4,
-    banner5,
-    banner6,
-    banner7,
-    banner8,
-    banner9,
-    banner10,
-    banner11,
-    banner12,
-    banner13,
-  ];
-
-  // 현재 mobile/banner_1.png 한 장으로 먼저 모델링 (추후 mobile/banner_2~ 추가되면 배열만 늘리면 됩니다)
-  const mobileCardBgs = [
-    mobileBanner1,
-    mobileBanner2,
-    mobileBanner3,
-    mobileBanner4,
-    mobileBanner5,
-    mobileBanner6,
-    mobileBanner7,
-    mobileBanner8,
-    mobileBanner9,
-    mobileBanner10,
-    mobileBanner11,
-    mobileBanner12,
-    mobileBanner13,
-  ];
+  const desktopCardBgs = desktopBanners;
+  const mobileCardBgs = mobileBanners;
 
   const casinoCards: Array<{
     name: string;
