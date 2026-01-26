@@ -148,26 +148,20 @@ const NavItem = styled.button`
   }
 `;
 
-const DepositIcon = styled.span`
+const DepositIcon = styled.img.attrs({ src: deposit, alt: '' })`
   width: 22px;
   height: 22px;
   display: inline-block;
-  background: rgba(255, 205, 120, 0.95);
   opacity: 0.95;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
-  -webkit-mask: url(${deposit}) center / contain no-repeat;
-  mask: url(${deposit}) center / contain no-repeat;
 `;
 
-const WithdrawIcon = styled.span`
+const WithdrawIcon = styled.img.attrs({ src: withdraw, alt: '' })`
   width: 22px;
   height: 22px;
   display: inline-block;
-  background: rgba(255, 205, 120, 0.95);
   opacity: 0.95;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
-  -webkit-mask: url(${withdraw}) center / contain no-repeat;
-  mask: url(${withdraw}) center / contain no-repeat;
 `;
 
 const Right = styled.div`
@@ -481,7 +475,6 @@ const ClientSiteHeader = () => {
   };
 
   const logout = async () => {
-    window.alert('[client-logout] start');
     try {
       await callApi({
         service: Service.POSTMAN,
@@ -490,12 +483,9 @@ const ClientSiteHeader = () => {
         redirect: false,
         suppressAuthEvent: true,
       });
-      window.alert('[client-logout] api success');
     } finally {
-      window.alert('[client-logout] emit logout');
       void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
-      window.alert('[client-logout] done');
     }
   };
 

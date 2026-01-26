@@ -290,17 +290,16 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
   const popupClosePollerRef = useRef<number | null>(null);
   const popupWindowRef = useRef<Window | null>(null);
+  const popupWindowName = 'clientGamePopup';
 
   const closeGamePopup = (reason: 'logout' | 'unmount') => {
-    window.alert(
-      `[game-popup] closeGamePopup: ${reason}, hasPopup=${Boolean(popupWindowRef.current)}`
-    );
     if (popupClosePollerRef.current) {
       window.clearInterval(popupClosePollerRef.current);
       popupClosePollerRef.current = null;
     }
 
-    const popup = popupWindowRef.current;
+    const fallbackPopup = typeof window !== 'undefined' ? window.open('', popupWindowName) : null;
+    const popup = popupWindowRef.current ?? fallbackPopup;
     popupWindowRef.current = null;
 
     try {
@@ -322,7 +321,6 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
   useEffect(() => {
     return ClientAuthAddEventListeners('logout', () => {
-      window.alert('[game-popup] logout event received');
       closeGamePopup('logout');
     });
   }, []);
@@ -352,7 +350,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       'status=no',
     ].join(',');
 
-    const popup = window.open('about:blank', 'clientGamePopup', features);
+    const popup = window.open('about:blank', popupWindowName, features);
     try {
       popup?.document?.write(
         '<!doctype html><title>Loading...</title><body style="margin:0;font-family:system-ui;background:#0f0f13;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">게임 로딩 중...</body>'
