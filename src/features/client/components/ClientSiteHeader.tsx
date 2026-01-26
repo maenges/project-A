@@ -12,7 +12,7 @@ import goldenLogoGif from '@/assets/images/logo/brand/golden7.png';
 import deposit from '@/assets/images/icon/deposit.svg';
 import withdraw from '@/assets/images/icon/withdraw.svg';
 import ClientLoginModal from './ClientLoginModal';
-import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
+import { ClientAuthAddEventListeners, ClientAuthEventDispatch } from '@/utils/clientAuthEventBus';
 import { ClientBalanceAddEventListeners } from '@/utils/clientBalanceEventBus';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
@@ -490,6 +490,7 @@ const ClientSiteHeader = () => {
         suppressAuthEvent: true,
       });
     } finally {
+      void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
     }
   };

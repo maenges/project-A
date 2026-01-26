@@ -1,7 +1,7 @@
 import { EventBus } from './EventBus';
 
 type Events = {
-  refreshBalance: { source?: 'popup-close' | 'manual' | 'unknown' } | void;
+  refreshBalance: { source?: 'popup-close' | 'logout-close-popup' | 'manual' | 'unknown' } | void;
 };
 
 const bus = new EventBus<Events>();

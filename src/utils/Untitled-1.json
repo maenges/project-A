@@ -28,20 +28,8 @@
       "룰렛 오브 아긴",
       "https://icon.vinus-gaming.com/AGIN/26.png"
     ],
-    "32": [
-      "AGIN",
-      "Asia",
-      "BullBull",
-      "불불",
-      "https://icon.vinus-gaming.com/AGIN/32.png"
-    ],
-    "33": [
-      "AGIN",
-      "Asia",
-      "Blackjack",
-      "블랙잭",
-      "https://icon.vinus-gaming.com/AGIN/33.png"
-    ],
+    "32": ["AGIN", "Asia", "BullBull", "불불", "https://icon.vinus-gaming.com/AGIN/32.png"],
+    "33": ["AGIN", "Asia", "Blackjack", "블랙잭", "https://icon.vinus-gaming.com/AGIN/33.png"],
     "36": [
       "AGIN",
       "Asia",
@@ -653,69 +641,15 @@
     ]
   },
   "SEXYBCRT": {
-    "MX-LIVE-001": [
-      "SEXYBCRT",
-      "Awc",
-      "Baccarat Classic",
-      "바카라 클레식",
-      ""
-    ],
-    "MX-LIVE-002": [
-      "SEXYBCRT",
-      "Awc",
-      "Baccarat",
-      "바카라",
-      ""
-    ],
-    "MX-LIVE-003": [
-      "SEXYBCRT",
-      "Awc",
-      "Baccarat Insurance",
-      "바카라 인슈어런스",
-      ""
-    ],
-    "MX-LIVE-006": [
-      "SEXYBCRT",
-      "Awc",
-      "DragonTiger",
-      "드레곤 타이거 ",
-      ""
-    ],
-    "MX-LIVE-007": [
-      "SEXYBCRT",
-      "Awc",
-      "SicBo",
-      "식보",
-      ""
-    ],
-    "MX-LIVE-009": [
-      "SEXYBCRT",
-      "Awc",
-      "Roulette",
-      "룰렛",
-      ""
-    ],
-    "MX-LIVE-010": [
-      "SEXYBCRT",
-      "Awc",
-      "Red Blue Duel",
-      "레드 블루 듀얼",
-      ""
-    ],
-    "MX-LIVE-014": [
-      "SEXYBCRT",
-      "Awc",
-      "Thai Hi Lo",
-      "타이 하이 로",
-      ""
-    ],
-    "MX-LIVE-016": [
-      "SEXYBCRT",
-      "Awc",
-      "Extra SicBo",
-      "엑스트라 시크보",
-      ""
-    ]
+    "MX-LIVE-001": ["SEXYBCRT", "Awc", "Baccarat Classic", "바카라 클레식", ""],
+    "MX-LIVE-002": ["SEXYBCRT", "Awc", "Baccarat", "바카라", ""],
+    "MX-LIVE-003": ["SEXYBCRT", "Awc", "Baccarat Insurance", "바카라 인슈어런스", ""],
+    "MX-LIVE-006": ["SEXYBCRT", "Awc", "DragonTiger", "드레곤 타이거 ", ""],
+    "MX-LIVE-007": ["SEXYBCRT", "Awc", "SicBo", "식보", ""],
+    "MX-LIVE-009": ["SEXYBCRT", "Awc", "Roulette", "룰렛", ""],
+    "MX-LIVE-010": ["SEXYBCRT", "Awc", "Red Blue Duel", "레드 블루 듀얼", ""],
+    "MX-LIVE-014": ["SEXYBCRT", "Awc", "Thai Hi Lo", "타이 하이 로", ""],
+    "MX-LIVE-016": ["SEXYBCRT", "Awc", "Extra SicBo", "엑스트라 시크보", ""]
   },
   "booongo": {
     "812": [
@@ -1835,31 +1769,13 @@
     ]
   },
   "bt1": {
-    "bt1": [
-      "bt1",
-      "Bt1",
-      "BT1 Sports",
-      "비티원 스포츠",
-      ""
-    ]
+    "bt1": ["bt1", "Bt1", "BT1 Sports", "비티원 스포츠", ""]
   },
   "color": {
-    "color": [
-      "color",
-      "Color",
-      "Color Game",
-      "컬러 게임",
-      ""
-    ]
+    "color": ["color", "Color", "Color Game", "컬러 게임", ""]
   },
   "dowin": {
-    "dowin": [
-      "dowin",
-      "Dowin",
-      "Dowin Casino",
-      "더윈 카지노",
-      ""
-    ]
+    "dowin": ["dowin", "Dowin", "Dowin Casino", "더윈 카지노", ""]
   },
   "dream": {
     "Baccarat": [
@@ -1897,20 +1813,8 @@
       "룰렛",
       "https://icon.vinus-gaming.com/dream/Roulette.png"
     ],
-    "Sicbo": [
-      "dream",
-      "Dream",
-      "Sicbo",
-      "식보",
-      "https://icon.vinus-gaming.com/dream/Sicbo.png"
-    ],
-    "Bull": [
-      "dream",
-      "Dream",
-      "Bull",
-      "불",
-      "https://icon.vinus-gaming.com/dream/Bull.png"
-    ],
+    "Sicbo": ["dream", "Dream", "Sicbo", "식보", "https://icon.vinus-gaming.com/dream/Sicbo.png"],
+    "Bull": ["dream", "Dream", "Bull", "불", "https://icon.vinus-gaming.com/dream/Bull.png"],
     "ThreeCards": [
       "dream",
       "Dream",
@@ -1925,13 +1829,7 @@
       "쓰리 페이스",
       "https://icon.vinus-gaming.com/dream/threeface.png"
     ],
-    "sedie": [
-      "dream",
-      "Dream",
-      "sedie",
-      "세디",
-      "https://icon.vinus-gaming.com/dream/sedie.png"
-    ],
+    "sedie": ["dream", "Dream", "sedie", "세디", "https://icon.vinus-gaming.com/dream/sedie.png"],
     "AndarBahar": [
       "dream",
       "Dream",
@@ -3068,13 +2966,7 @@
       "다이너스티 스피드 바카라 7",
       "https://bshots.egcvi.com/thumbnail/perceb7_bs_med_L.jpg"
     ],
-    "srxtzegif4fcay5l": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srxtzegif4fcay5l": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "srx3hkdyf4fd7wgq": [
       "evolution",
       "Evolution",
@@ -3236,13 +3128,7 @@
       "스피드 바카라 W",
       "https://bshots.egcvi.com/thumbnail/bac13_bs_med_L.jpg"
     ],
-    "srxr2zvpf4fbrmof": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srxr2zvpf4fbrmof": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "srxq5gref4fbkqe3": [
       "evolution",
       "Evolution",
@@ -4160,13 +4046,7 @@
       "살롱 프라이베잇 바카라 D",
       "https://bshots.egcvi.com/thumbnail/spr3_bs_med_L.jpg"
     ],
-    "srxr2zvof4fbrmnp": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srxr2zvof4fbrmnp": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "s7bdqcy2ztjqpaoe": [
       "evolution",
       "Evolution",
@@ -4356,13 +4236,7 @@
       "살롱 프라이빗 바카라 C",
       "https://bshots.egcvi.com/thumbnail/spr7_bs_med_L.jpg"
     ],
-    "srxq5grff4fbkqfu": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srxq5grff4fbkqfu": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "tfqawgah4cwqcrqs": [
       "evolution",
       "Evolution",
@@ -4790,13 +4664,7 @@
       "본사이 스피드 바카라 A",
       "https://bshots.egcvi.com/thumbnail/bonca1_bs_med_L.jpg"
     ],
-    "srxt25t4f4fcbh7m": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srxt25t4f4fcbh7m": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "tki3b7vlirjaaiwg": [
       "evolution",
       "Evolution",
@@ -4839,13 +4707,7 @@
       "블랙잭 VIP N",
       "https://bshots.egcvi.com/thumbnail/bj_cgent67_med_L.jpg"
     ],
-    "srx2eligf4fdwmhk": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srx2eligf4fdwmhk": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "srxq5gref4fbkqe2": [
       "evolution",
       "Evolution",
@@ -4874,13 +4736,7 @@
       "룰레타 볼라 라피다 엔 비보",
       "https://bshots.egcvi.com/thumbnail/revmu2_imr_med_L.jpg"
     ],
-    "srxr2zvpf4fbrmoi": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srxr2zvpf4fbrmoi": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "PlatPrivBJ000014": [
       "evolution",
       "Evolution",
@@ -5210,13 +5066,7 @@
       "블랙잭 VIP B",
       "https://bshots.egcvi.com/thumbnail/bj_vipro2_med_L.jpg"
     ],
-    "srxt25t3f4fcbh65": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srxt25t3f4fcbh65": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "rpjvp2tbmruw7dke": [
       "evolution",
       "Evolution",
@@ -6617,13 +6467,7 @@
       "플래티넘 프라이빗 블랙잭 7",
       "https://bshots.egcvi.com/thumbnail/bj_plaa7_med_L.jpg"
     ],
-    "srx3hkdxf4fd7wgl": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srx3hkdxf4fd7wgl": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "Kogwbaccarat0001": [
       "evolution",
       "Evolution",
@@ -7226,13 +7070,7 @@
       "엠퍼러 스피드 바카라 B",
       "https://bshots.egcvi.com/thumbnail/eprca2_bs_med_L.jpg"
     ],
-    "srx3hkdxf4fd7wgi": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srx3hkdxf4fd7wgi": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "srxr2zvof4fbrmnw": [
       "evolution",
       "Evolution",
@@ -8059,13 +7897,7 @@
       "스피드 바카라 J",
       "https://bshots.egcvi.com/thumbnail/bact8_bs_med_L.jpg"
     ],
-    "rep6d5n2nyjmcv7d": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "rep6d5n2nyjmcv7d": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "tki4opyfirjaajce": [
       "evolution",
       "Evolution",
@@ -8108,13 +7940,7 @@
       "다이너스티 스피드 바카라 1",
       "https://bshots.egcvi.com/thumbnail/perceb1_bs_med_L.jpg"
     ],
-    "srxtzeghf4fcay4o": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srxtzeghf4fcay4o": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "tbnhsvo42emisgwo": [
       "evolution",
       "Evolution",
@@ -9004,13 +8830,7 @@
       "풋볼 스튜디오 다이스",
       "https://bshots.egcvi.com/thumbnail/fsdicem1_bs_med_L.jpg"
     ],
-    "srxq5grlf4fbkqgp": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srxq5grlf4fbkqgp": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "tfljgakaiqsabman": [
       "evolution",
       "Evolution",
@@ -9067,13 +8887,7 @@
       "VIP 벳 스태커 블랙잭 8",
       "https://bshots.egcvi.com/thumbnail/bj_vbsa8_med_L.jpg"
     ],
-    "srx2eligf4fdwmha": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srx2eligf4fdwmha": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "lr6t4k3lcd4qgyrk": [
       "evolution",
       "Evolution",
@@ -9914,13 +9728,7 @@
       "VIP 벳 스태커 블랙잭 6",
       "https://bshots.egcvi.com/thumbnail/bj_vbsa6_med_L.jpg"
     ],
-    "srx2eligf4fdwmhd": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srx2eligf4fdwmhd": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "srx2eligf4fdwmhm": [
       "evolution",
       "Evolution",
@@ -10145,13 +9953,7 @@
       "플래티넘 프라이빗 블랙잭 2",
       "https://bshots.egcvi.com/thumbnail/bj_plak2_med_L.jpg"
     ],
-    "srxtzegif4fcay5k": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srxtzegif4fcay5k": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "tcweqoqq3scqizwk": [
       "evolution",
       "Evolution",
@@ -10446,13 +10248,7 @@
       "모노폴리 빅 볼러",
       "https://bshots.egcvi.com/thumbnail/monbbk1_mb_en_med_L.jpg"
     ],
-    "srxq5gref4fbkqe4": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "srxq5gref4fbkqe4": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "srx2elief4fdwmfz": [
       "evolution",
       "Evolution",
@@ -10887,13 +10683,7 @@
       "블랙잭 일리미타도 엔 비보",
       "https://bshots.egcvi.com/thumbnail/bj_infmed1_med_L.jpg"
     ],
-    "srx3hkdzf4fd7wha": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "srx3hkdzf4fd7wha": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "s6vvtcxlq4xaclh6": [
       "evolution",
       "Evolution",
@@ -11202,13 +10992,7 @@
       "재퍼니즈 스피드 블랙잭 D",
       "https://bshots.egcvi.com/thumbnail/bj_japmad4_med_L.jpg"
     ],
-    "rep6g26enyjmdbdk": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 15",
-      "스피드 바카라 15",
-      ""
-    ],
+    "rep6g26enyjmdbdk": ["evolution", "Evolution", "Speed Baccarat 15", "스피드 바카라 15", ""],
     "rng-rt-xxxtreme1": [
       "evolution",
       "Evolution",
@@ -11398,13 +11182,7 @@
       "코리안 스피드 바카라 E",
       "https://bshots.egcvi.com/thumbnail/korgca5_bs_med_L.jpg"
     ],
-    "rep6e5znnyjmc2pz": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 14",
-      "스피드 바카라 14",
-      ""
-    ],
+    "rep6e5znnyjmc2pz": ["evolution", "Evolution", "Speed Baccarat 14", "스피드 바카라 14", ""],
     "JapSpeedBac00001": [
       "evolution",
       "Evolution",
@@ -11426,13 +11204,7 @@
       "VIP 블랙잭 엔 에스파뇰 7",
       "https://bshots.egcvi.com/thumbnail/bj_vespmed7_med_L.jpg"
     ],
-    "srxt25t3f4fcbh7d": [
-      "evolution",
-      "Evolution",
-      "Speed Baccarat 13",
-      "스피드 바카라 13",
-      ""
-    ],
+    "srxt25t3f4fcbh7d": ["evolution", "Evolution", "Speed Baccarat 13", "스피드 바카라 13", ""],
     "tki2vrkwirjaait7": [
       "evolution",
       "Evolution",
@@ -22717,13 +22489,7 @@
     ]
   },
   "kgame": {
-    "kgame": [
-      "kgame",
-      "Kgame",
-      "KPlay Sports",
-      "크플레이 스포어트스",
-      ""
-    ]
+    "kgame": ["kgame", "Kgame", "KPlay Sports", "크플레이 스포어트스", ""]
   },
   "MICRO_Slot": {
     "SMG_adventurePalaceVT": [
@@ -24741,13 +24507,7 @@
       "행운의 나무",
       "https://icon.vinus-gaming.com/pgsoft/26.png"
     ],
-    "7": [
-      "pgsoft",
-      "Pgsoft",
-      "Medusa",
-      "메두사",
-      "https://icon.vinus-gaming.com/pgsoft/7.png"
-    ],
+    "7": ["pgsoft", "Pgsoft", "Medusa", "메두사", "https://icon.vinus-gaming.com/pgsoft/7.png"],
     "25": [
       "pgsoft",
       "Pgsoft",
@@ -24769,13 +24529,7 @@
       "후드 대 울프",
       "https://icon.vinus-gaming.com/pgsoft/18.png"
     ],
-    "28": [
-      "pgsoft",
-      "Pgsoft",
-      "Hotpot",
-      "핫팟팟",
-      "https://icon.vinus-gaming.com/pgsoft/28.png"
-    ],
+    "28": ["pgsoft", "Pgsoft", "Hotpot", "핫팟팟", "https://icon.vinus-gaming.com/pgsoft/28.png"],
     "29": [
       "pgsoft",
       "Pgsoft",
@@ -25632,13 +25386,7 @@
       "드레곤 쉽",
       "https://icon.vinus-gaming.com/PLAYNGO/dragonship.png"
     ],
-    "239": [
-      "PLAYNGO",
-      "Playngo",
-      "Keno",
-      "키노",
-      "https://icon.vinus-gaming.com/PLAYNGO/keno.png"
-    ],
+    "239": ["PLAYNGO", "Playngo", "Keno", "키노", "https://icon.vinus-gaming.com/PLAYNGO/keno.png"],
     "241": [
       "PLAYNGO",
       "Playngo",
@@ -25660,13 +25408,7 @@
       "아즈텍 아이돌",
       "https://icon.vinus-gaming.com/PLAYNGO/aztecidols.png"
     ],
-    "245": [
-      "PLAYNGO",
-      "Playngo",
-      "Myth",
-      "신화",
-      "https://icon.vinus-gaming.com/PLAYNGO/myth.png"
-    ],
+    "245": ["PLAYNGO", "Playngo", "Myth", "신화", "https://icon.vinus-gaming.com/PLAYNGO/myth.png"],
     "246": [
       "PLAYNGO",
       "Playngo",
@@ -35417,78 +35159,18 @@
     ]
   },
   "realholdem": {
-    "realholdem": [
-      "realholdem",
-      "RealHoldem",
-      "Real Holdem",
-      "리얼 홀덤",
-      ""
-    ]
+    "realholdem": ["realholdem", "RealHoldem", "Real Holdem", "리얼 홀덤", ""]
   },
   "sa": {
-    "xocdia": [
-      "sa",
-      "Sa",
-      "M Xóc Đĩa",
-      "M 소크 다",
-      ""
-    ],
-    "sicbo": [
-      "sa",
-      "Sa",
-      "M Sic Bo",
-      "M 식 보우",
-      ""
-    ],
-    "rot": [
-      "sa",
-      "Sa",
-      "C Roulette",
-      "C 룰렛",
-      ""
-    ],
-    "pokdeng": [
-      "sa",
-      "Sa",
-      "M Pok Deng",
-      "M 폭 뎅",
-      ""
-    ],
-    "blackjack": [
-      "sa",
-      "Sa",
-      "D Blackjack",
-      "D 블랙잭",
-      ""
-    ],
-    "andarbahar": [
-      "sa",
-      "Sa",
-      "M Andar Bahar",
-      "M 안다르 바하르",
-      ""
-    ],
-    "teenpatti2020": [
-      "sa",
-      "Sa",
-      "M Teen Patti 20-20",
-      "M 틴 패티 20-20",
-      ""
-    ],
-    "bac": [
-      "sa",
-      "Sa",
-      "Speed Baccarat D08",
-      "스피드 바카라 D08",
-      ""
-    ],
-    "dtx": [
-      "sa",
-      "Sa",
-      "D Dragon Tiger",
-      "D 드래곤 타이거",
-      ""
-    ]
+    "xocdia": ["sa", "Sa", "M Xóc Đĩa", "M 소크 다", ""],
+    "sicbo": ["sa", "Sa", "M Sic Bo", "M 식 보우", ""],
+    "rot": ["sa", "Sa", "C Roulette", "C 룰렛", ""],
+    "pokdeng": ["sa", "Sa", "M Pok Deng", "M 폭 뎅", ""],
+    "blackjack": ["sa", "Sa", "D Blackjack", "D 블랙잭", ""],
+    "andarbahar": ["sa", "Sa", "M Andar Bahar", "M 안다르 바하르", ""],
+    "teenpatti2020": ["sa", "Sa", "M Teen Patti 20-20", "M 틴 패티 20-20", ""],
+    "bac": ["sa", "Sa", "Speed Baccarat D08", "스피드 바카라 D08", ""],
+    "dtx": ["sa", "Sa", "D Dragon Tiger", "D 드래곤 타이거", ""]
   },
   "TOMHORN_SLOT": {
     "VS3RibbonP_TNP": [
@@ -36843,13 +36525,7 @@
     ]
   },
   "VOTA": {
-    "vota": [
-      "VOTA",
-      "Vota",
-      "vota casino",
-      "보타 카지노",
-      ""
-    ]
+    "vota": ["VOTA", "Vota", "vota casino", "보타 카지노", ""]
   },
   "cq9": {
     "CQ9_1": [
@@ -37041,13 +36717,7 @@
       "재물신 M",
       "https://icon.vinus-gaming.com/cq9/CQ9_131.png"
     ],
-    "CQ9_132": [
-      "cq9",
-      "Zenith",
-      "Meow",
-      "야옹",
-      "https://icon.vinus-gaming.com/cq9/CQ9_132.png"
-    ],
+    "CQ9_132": ["cq9", "Zenith", "Meow", "야옹", "https://icon.vinus-gaming.com/cq9/CQ9_132.png"],
     "CQ9_133": [
       "cq9",
       "Zenith",
@@ -37146,13 +36816,7 @@
       "포춘 토템",
       "https://icon.vinus-gaming.com/cq9/CQ9_148.png"
     ],
-    "CQ9_15": [
-      "cq9",
-      "Zenith",
-      "GuGuGu",
-      "구구구",
-      "https://icon.vinus-gaming.com/cq9/CQ9_15.png"
-    ],
+    "CQ9_15": ["cq9", "Zenith", "GuGuGu", "구구구", "https://icon.vinus-gaming.com/cq9/CQ9_15.png"],
     "CQ9_150": [
       "cq9",
       "Zenith",
@@ -37195,13 +36859,7 @@
       "블랙 우공",
       "https://icon.vinus-gaming.com/cq9/CQ9_158.png"
     ],
-    "CQ9_16": [
-      "cq9",
-      "Zenith",
-      "Super5",
-      "오행",
-      "https://icon.vinus-gaming.com/cq9/CQ9_16.png"
-    ],
+    "CQ9_16": ["cq9", "Zenith", "Super5", "오행", "https://icon.vinus-gaming.com/cq9/CQ9_16.png"],
     "CQ9_160": [
       "cq9",
       "Zenith",
@@ -37363,13 +37021,7 @@
       "체스의 신",
       "https://icon.vinus-gaming.com/cq9/CQ9_2.png"
     ],
-    "CQ9_20": [
-      "cq9",
-      "Zenith",
-      "888",
-      "888",
-      "https://icon.vinus-gaming.com/cq9/CQ9_20.png"
-    ],
+    "CQ9_20": ["cq9", "Zenith", "888", "888", "https://icon.vinus-gaming.com/cq9/CQ9_20.png"],
     "CQ9_201": [
       "cq9",
       "Zenith",
@@ -37622,13 +37274,7 @@
       "손 오공 ",
       "https://icon.vinus-gaming.com/cq9/CQ9_253.png"
     ],
-    "CQ9_26": [
-      "cq9",
-      "Zenith",
-      "777",
-      "777",
-      "https://icon.vinus-gaming.com/cq9/CQ9_26.png"
-    ],
+    "CQ9_26": ["cq9", "Zenith", "777", "777", "https://icon.vinus-gaming.com/cq9/CQ9_26.png"],
     "CQ9_27": [
       "cq9",
       "Zenith",
@@ -37832,13 +37478,7 @@
       "서머 무드",
       "https://icon.vinus-gaming.com/cq9/CQ9_59.png"
     ],
-    "CQ9_64": [
-      "cq9",
-      "Zenith",
-      "Zeus",
-      "제우스",
-      "https://icon.vinus-gaming.com/cq9/CQ9_64.png"
-    ],
+    "CQ9_64": ["cq9", "Zenith", "Zeus", "제우스", "https://icon.vinus-gaming.com/cq9/CQ9_64.png"],
     "CQ9_66": [
       "cq9",
       "Zenith",
@@ -37909,13 +37549,7 @@
       "레드 피닉스",
       "https://icon.vinus-gaming.com/cq9/CQ9_77.png"
     ],
-    "CQ9_78": [
-      "cq9",
-      "Zenith",
-      "Apollo",
-      "아폴로",
-      "https://icon.vinus-gaming.com/cq9/CQ9_78.png"
-    ],
+    "CQ9_78": ["cq9", "Zenith", "Apollo", "아폴로", "https://icon.vinus-gaming.com/cq9/CQ9_78.png"],
     "CQ9_79": [
       "cq9",
       "Zenith",
@@ -37958,13 +37592,7 @@
       "러닝 토로",
       "https://icon.vinus-gaming.com/cq9/CQ9_86.png"
     ],
-    "CQ9_89": [
-      "cq9",
-      "Zenith",
-      "THOR",
-      "토르",
-      "https://icon.vinus-gaming.com/cq9/CQ9_89.png"
-    ],
+    "CQ9_89": ["cq9", "Zenith", "THOR", "토르", "https://icon.vinus-gaming.com/cq9/CQ9_89.png"],
     "CQ9_9": [
       "cq9",
       "Zenith",
@@ -48022,13 +47650,7 @@
       "워쉽 걸스",
       "https://icon.vinus-gaming.com/cg/CG_AzurLaneEX.png"
     ],
-    "CG_BAKI": [
-      "cg",
-      "Zenith",
-      "BAKI",
-      "바키",
-      "https://icon.vinus-gaming.com/cg/CG_BAKI.png"
-    ],
+    "CG_BAKI": ["cg", "Zenith", "BAKI", "바키", "https://icon.vinus-gaming.com/cg/CG_BAKI.png"],
     "CG_BarBarSheepEX": [
       "cg",
       "Zenith",
@@ -48477,13 +48099,7 @@
       "쥬라기 공원",
       "https://icon.vinus-gaming.com/cg/CG_JurassicWorldEX.png"
     ],
-    "CG_Kimba": [
-      "cg",
-      "Zenith",
-      "Kimba",
-      "킴바",
-      "https://icon.vinus-gaming.com/cg/CG_Kimba.png"
-    ],
+    "CG_Kimba": ["cg", "Zenith", "Kimba", "킴바", "https://icon.vinus-gaming.com/cg/CG_Kimba.png"],
     "CG_KingsOfCashEX": [
       "cg",
       "Zenith",
@@ -48610,13 +48226,7 @@
       "밀러테어리",
       "https://icon.vinus-gaming.com/cg/CG_Military.png"
     ],
-    "CG_Mojin2": [
-      "cg",
-      "Zenith",
-      "Tomb",
-      "툼",
-      "https://icon.vinus-gaming.com/cg/CG_Mojin2.png"
-    ],
+    "CG_Mojin2": ["cg", "Zenith", "Tomb", "툼", "https://icon.vinus-gaming.com/cg/CG_Mojin2.png"],
     "CG_MoneyFarm": [
       "cg",
       "Zenith",
@@ -48645,13 +48255,7 @@
       "닌자 전사",
       "https://icon.vinus-gaming.com/cg/CG_NinjaEX.png"
     ],
-    "CG_OdinEX": [
-      "cg",
-      "Zenith",
-      "Odin",
-      "오딘",
-      "https://icon.vinus-gaming.com/cg/CG_OdinEX.png"
-    ],
+    "CG_OdinEX": ["cg", "Zenith", "Odin", "오딘", "https://icon.vinus-gaming.com/cg/CG_OdinEX.png"],
     "CG_OnmologistEX": [
       "cg",
       "Zenith",
@@ -48841,13 +48445,7 @@
       "트라이얼바이바이킹",
       "https://icon.vinus-gaming.com/cg/CG_TrialByViking.png"
     ],
-    "CG_Triple7": [
-      "cg",
-      "Zenith",
-      "777",
-      "777",
-      "https://icon.vinus-gaming.com/cg/CG_Triple7.png"
-    ],
+    "CG_Triple7": ["cg", "Zenith", "777", "777", "https://icon.vinus-gaming.com/cg/CG_Triple7.png"],
     "CG_Triple7EX": [
       "cg",
       "Zenith",

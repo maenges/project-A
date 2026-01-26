@@ -6,8 +6,13 @@ export type ClientAuthRequiredPayload = {
   url?: string;
 };
 
+export type ClientLogoutPayload = {
+  source?: 'client' | 'unknown';
+};
+
 type Events = {
   authRequired: ClientAuthRequiredPayload;
+  logout: ClientLogoutPayload;
 };
 
 const bus = new EventBus<Events>();

@@ -23,6 +23,7 @@ import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 import { ClientBalanceEventDispatch } from '@/utils/clientBalanceEventBus';
+import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
 
 export type ProviderTab = 'casino' | 'slot';
 
@@ -288,14 +289,38 @@ const ClientProviderGrid = ({ tab }: Props) => {
   const platform: Platform = isMobile ? 'MOBILE' : 'WEB';
 
   const popupClosePollerRef = useRef<number | null>(null);
+  const popupWindowRef = useRef<Window | null>(null);
+
+  const closeGamePopup = (reason: 'logout' | 'unmount') => {
+    if (popupClosePollerRef.current) {
+      window.clearInterval(popupClosePollerRef.current);
+      popupClosePollerRef.current = null;
+    }
+
+    const popup = popupWindowRef.current;
+    popupWindowRef.current = null;
+
+    try {
+      if (popup && !popup.closed) popup.close();
+    } catch {
+      // ignore
+    }
+
+    if (reason === 'logout') {
+      void ClientBalanceEventDispatch('refreshBalance', { source: 'logout-close-popup' });
+    }
+  };
 
   useEffect(() => {
     return () => {
-      if (popupClosePollerRef.current) {
-        window.clearInterval(popupClosePollerRef.current);
-        popupClosePollerRef.current = null;
-      }
+      closeGamePopup('unmount');
     };
+  }, []);
+
+  useEffect(() => {
+    return ClientAuthAddEventListeners('logout', () => {
+      closeGamePopup('logout');
+    });
   }, []);
 
   const openGamePopup = (): Window | null => {
@@ -345,9 +370,14 @@ const ClientProviderGrid = ({ tab }: Props) => {
       return;
     }
 
+    if (usePopup) {
+      popupWindowRef.current = popup;
+    }
+
     const ok = await ensureClientLoggedIn({ openModal: true });
     if (!ok) {
       popup?.close();
+      if (popupWindowRef.current === popup) popupWindowRef.current = null;
       return;
     }
 
@@ -371,6 +401,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
       const msg = (res as any)?.HeaderMsg ?? (res as any)?.message ?? '요청에 실패했습니다.';
       window.alert(msg);
       popup?.close();
+      if (popupWindowRef.current === popup) popupWindowRef.current = null;
       return;
     }
 
@@ -382,6 +413,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
     if (data.result !== 0) {
       window.alert('서버 점검 중 입니다.');
       popup?.close();
+      if (popupWindowRef.current === popup) popupWindowRef.current = null;
       return;
     }
 
@@ -390,6 +422,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
     if (typeof url !== 'string' || !url) {
       window.alert('게임 URL을 받지 못했습니다.');
       popup?.close();
+      if (popupWindowRef.current === popup) popupWindowRef.current = null;
       return;
     }
 
@@ -413,11 +446,13 @@ const ClientProviderGrid = ({ tab }: Props) => {
             window.clearInterval(popupClosePollerRef.current);
             popupClosePollerRef.current = null;
           }
+          if (popupWindowRef.current === popup) popupWindowRef.current = null;
           void ClientBalanceEventDispatch('refreshBalance', { source: 'popup-close' });
         }
       }, 600);
     } catch {
       popup?.close();
+      if (popupWindowRef.current === popup) popupWindowRef.current = null;
       window.alert('팝업에서 게임을 여는 데 실패했습니다.');
     }
   };

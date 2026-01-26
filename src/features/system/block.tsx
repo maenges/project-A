@@ -137,7 +137,6 @@ const Block: React.FC = () => {
         queryParams: {
           blockStatus: blockStatus === 'ALL' ? '' : blockStatus,
           userId,
-          blockType: 'USER_BLOCK',
         },
       },
       config: { isLoading: true },

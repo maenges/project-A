@@ -83,11 +83,7 @@ const Block: React.FC = () => {
       service: Service.POSTMAN,
       url: '/api/block/ipBlock',
       method: Method.GET,
-      params: {
-        queryParams: {
-          blockType: 'IP_BLOCK',
-        },
-      },
+      params: {},
       config: { isLoading: true },
     }).then((res) => {
       if (res.successOrNot !== 'Y') {
