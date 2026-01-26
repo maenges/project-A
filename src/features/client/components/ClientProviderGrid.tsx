@@ -292,7 +292,9 @@ const ClientProviderGrid = ({ tab }: Props) => {
   const popupWindowRef = useRef<Window | null>(null);
 
   const closeGamePopup = (reason: 'logout' | 'unmount') => {
-    console.info('[game-popup] closeGamePopup', { reason, hasPopup: !!popupWindowRef.current });
+    window.alert(
+      `[game-popup] closeGamePopup: ${reason}, hasPopup=${Boolean(popupWindowRef.current)}`
+    );
     if (popupClosePollerRef.current) {
       window.clearInterval(popupClosePollerRef.current);
       popupClosePollerRef.current = null;
@@ -320,7 +322,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
   useEffect(() => {
     return ClientAuthAddEventListeners('logout', () => {
-      console.info('[game-popup] logout event received');
+      window.alert('[game-popup] logout event received');
       closeGamePopup('logout');
     });
   }, []);

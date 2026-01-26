@@ -481,7 +481,7 @@ const ClientSiteHeader = () => {
   };
 
   const logout = async () => {
-    console.info('[client-logout] start');
+    window.alert('[client-logout] start');
     try {
       await callApi({
         service: Service.POSTMAN,
@@ -490,12 +490,12 @@ const ClientSiteHeader = () => {
         redirect: false,
         suppressAuthEvent: true,
       });
-      console.info('[client-logout] api success');
+      window.alert('[client-logout] api success');
     } finally {
-      console.info('[client-logout] emit logout');
+      window.alert('[client-logout] emit logout');
       void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
-      console.info('[client-logout] done');
+      window.alert('[client-logout] done');
     }
   };
 
