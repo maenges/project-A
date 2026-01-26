@@ -133,6 +133,7 @@ const AlTransfer: React.FC = () => {
       field: 'trans_type',
       headerName: '거래 유형',
       width: 100,
+      flex: 1,
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_id',

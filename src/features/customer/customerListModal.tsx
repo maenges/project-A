@@ -127,6 +127,12 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="아이디를 입력해주세요."
             width={400}
             required={true}
+            maxLength={10}
+            rules={{
+              maxLength: { value: 10, message: '최대 10자까지 입력 가능합니다.' },
+              pattern: { value: /^[a-z0-9]+$/, message: '소문자/숫자만 입력해주세요.' },
+            }}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -137,6 +143,11 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="닉네임을 입력해주세요."
             width={400}
             required={true}
+            maxLength={10}
+            rules={{
+              maxLength: { value: 10, message: '최대 10자까지 입력 가능합니다.' },
+            }}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -147,6 +158,8 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="비밀번호를 입력해주세요."
             width={400}
             required={true}
+            inputProps={{ style: { WebkitTextSecurity: 'disc' } }}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -157,6 +170,8 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="비밀번호를 다시 입력해주세요."
             width={400}
             required={true}
+            inputProps={{ style: { WebkitTextSecurity: 'disc' } }}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -168,6 +183,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             width={400}
             onlyNumber={true}
             maxLength={11}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -177,6 +193,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             label="은행명"
             width={400}
             options={bankKeyOptions}
+            autoComplete="off"
           />
         </searchForm.Row>
         <searchForm.Row>
@@ -185,6 +202,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             name="user_bank_won"
             label="입금자명"
             placeholder="입금자명을 입력해주세요."
+            autoComplete="off"
             width={400}
           />
         </searchForm.Row>
@@ -194,6 +212,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             name="user_bank_account"
             label="계좌번호"
             placeholder="계좌번호를 입력해주세요."
+            autoComplete="off"
             width={400}
           />
         </searchForm.Row>
