@@ -213,7 +213,7 @@ const CustomerAccessorPage: React.FC = () => {
       width: 150,
     }),
     EtsColumnPreset.TextPreset({
-      field: 'last_game',
+      field: 'last_game_type',
       headerName: '최근 게임',
       width: 180,
       flex: 1,
