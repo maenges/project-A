@@ -42,10 +42,9 @@ const CustomerAccessorPage: React.FC = () => {
   useEffect(() => {
     // VITE_API_BASE_URL과 동일한 서버에서 Socket.IO 실행
     const apiBaseUrl = getEnv('VITE_API_BASE_URL') || '';
-    const isLocal = apiBaseUrl.includes('localhost');
 
     const socket = io(`${apiBaseUrl}/user-status`, {
-      withCredentials: !isLocal, // 로컬에서는 false, 운영에서는 true
+      withCredentials: true,
     });
 
     socketRef.current = socket;
