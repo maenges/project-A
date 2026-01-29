@@ -4,7 +4,6 @@ import { ColDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { Box, Typography, Chip, Stack } from '@mui/material';
 import { PageTemplate } from '@/components/Teamplate';
-import { getEnv } from '@/utils/env';
 import { Circle } from '@mui/icons-material';
 import dayjs from 'dayjs';
 
@@ -40,10 +39,9 @@ const CustomerAccessorPage: React.FC = () => {
 
   // 소켓 연결
   useEffect(() => {
-    // VITE_API_BASE_URL과 동일한 서버에서 Socket.IO 실행
-    const apiBaseUrl = getEnv('VITE_API_BASE_URL') || '';
-
-    const socket = io(`${apiBaseUrl}/user-status`, {
+    // ApiUtil처럼 상대 경로 사용 → CloudFront를 통해 요청 → 쿠키 자동 전송
+    // CloudFront에서 /socket.io/* 경로를 API Gateway로 프록시해야 함
+    const socket = io('/user-status', {
       withCredentials: true,
     });
 
