@@ -299,8 +299,8 @@ const ClientProviderGrid = ({ tab }: Props) => {
       popupClosePollerRef.current = null;
     }
 
-    const fallbackPopup = typeof window !== 'undefined' ? window.open('', popupWindowName) : null;
-    const popup = popupWindowRef.current ?? fallbackPopup;
+    // popupWindowRef에 저장된 창만 닫기 (window.open으로 빈 창 열지 않음)
+    const popup = popupWindowRef.current;
     popupWindowRef.current = null;
 
     try {
@@ -309,7 +309,9 @@ const ClientProviderGrid = ({ tab }: Props) => {
       // ignore
     }
 
+    // 모바일 iframe 게임도 닫기
     if (reason === 'logout') {
+      useGameFrameStore.getState().closeGame();
       void ClientBalanceEventDispatch('refreshBalance', { source: 'logout-close-popup' });
     }
   };

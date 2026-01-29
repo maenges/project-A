@@ -70,7 +70,7 @@ const ClientLayout: React.FC = () => {
       <ClientFooter />
 
       {/* 모바일 게임 iframe 오버레이 */}
-      {gameUrl && (
+      {gameUrl && gameUrl.startsWith('http') && (
         <GameOverlay>
           <GameFrame src={gameUrl} allow="fullscreen" />
         </GameOverlay>
