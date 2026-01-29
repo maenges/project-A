@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import { ClientBottomNav, ClientFooter, ClientSiteHeader } from '@/features/client/components';
@@ -45,6 +45,20 @@ const GameFrame = styled.iframe`
 
 const ClientLayout: React.FC = () => {
   const { gameUrl } = useGameFrameStore();
+
+  // 뒤로가기(스와이프) 감지하여 게임 닫기
+  useEffect(() => {
+    const handlePopState = () => {
+      // 게임이 열려있으면 닫기
+      const { gameUrl } = useGameFrameStore.getState();
+      if (gameUrl) {
+        useGameFrameStore.getState().closeGame();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   return (
     <Container>

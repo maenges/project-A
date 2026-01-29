@@ -106,36 +106,26 @@ const ItemBtn = styled.button<{ $active?: boolean; $home?: boolean }>`
   }
 `;
 
-const DepositIcon = styled.span`
+const DepositIcon = styled.img.attrs({ src: deposit, alt: '' })`
   width: 22px;
   height: 22px;
   display: inline-block;
-  background-color: currentColor;
-  -webkit-mask-image: url(${deposit});
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-image: url(${deposit});
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
 `;
 
-const WithdrawIcon = styled.span`
+const WithdrawIcon = styled.img.attrs({ src: withdraw, alt: '' })`
   width: 22px;
   height: 22px;
   display: inline-block;
-  background-color: currentColor;
-  -webkit-mask-image: url(${withdraw});
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-image: url(${withdraw});
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+`;
+
+const GoldSupportAgentIcon = styled(SupportAgentIcon)`
+  color: rgba(255, 205, 120, 0.95);
+`;
+
+const GoldMailOutlineIcon = styled(MailOutlineIcon)`
+  color: rgba(255, 205, 120, 0.95);
 `;
 
 const ClientBottomNav = () => {
@@ -170,14 +160,14 @@ const ClientBottomNav = () => {
         key: 'support',
         label: '문의',
         to: '/client/menu/support',
-        icon: <SupportAgentIcon aria-hidden="true" />,
+        icon: <GoldSupportAgentIcon aria-hidden="true" />,
         isActive: (p) => p.startsWith('/client/menu/support'),
       },
       {
         key: 'inbox',
         label: '쪽지함',
         to: '/client/menu/inbox',
-        icon: <MailOutlineIcon aria-hidden="true" />,
+        icon: <GoldMailOutlineIcon aria-hidden="true" />,
         isActive: (p) => p.startsWith('/client/menu/inbox'),
       },
     ],
