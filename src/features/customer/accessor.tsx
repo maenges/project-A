@@ -43,6 +43,7 @@ const CustomerAccessorPage: React.FC = () => {
     // CloudFront에서 /socket.io/* 경로를 API Gateway로 프록시해야 함
     const socket = io('/user-status', {
       withCredentials: true,
+      transports: ['websocket'], // polling 대신 websocket만 사용
     });
 
     socketRef.current = socket;
