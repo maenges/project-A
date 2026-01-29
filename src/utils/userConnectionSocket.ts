@@ -17,17 +17,17 @@ export function connectUserSocket(): void {
     transports: ['websocket'],
   });
 
-  userSocket.on('connect', () => {
-    console.log('✅ 회원 접속 WebSocket 연결됨:', userSocket?.id);
-  });
+  //   userSocket.on('connect', () => {
+  //     console.log('✅ 회원 접속 WebSocket 연결됨:', userSocket?.id);
+  //   });
 
-  userSocket.on('connect_error', (err) => {
-    console.error('❌ 회원 접속 WebSocket 연결 실패:', err.message);
-  });
+  //   userSocket.on('connect_error', (err) => {
+  //     console.error('❌ 회원 접속 WebSocket 연결 실패:', err.message);
+  //   });
 
-  userSocket.on('disconnect', (reason) => {
-    console.log('🔌 회원 접속 WebSocket 해제:', reason);
-  });
+  //   userSocket.on('disconnect', (reason) => {
+  //     console.log('🔌 회원 접속 WebSocket 해제:', reason);
+  //   });
 }
 
 /**

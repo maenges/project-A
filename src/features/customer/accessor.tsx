@@ -1,19 +1,43 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { Box, Typography, Chip, Stack } from '@mui/material';
 import { PageTemplate } from '@/components/Teamplate';
 import { Circle } from '@mui/icons-material';
-import dayjs from 'dayjs';
+
+export function formatDate(dateString?: string | null): string {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    ' ' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes()) +
+    ':' +
+    pad(date.getSeconds())
+  );
+}
 
 type AccessorUser = {
   user_key: string;
   user_id: string;
   user_nick: string;
   user_money: number;
-  user_rolling_money: number;
-  user_bonus_money: number;
+  casino_bet: number;
+  casino_win: number;
+  slot_bet: number;
+  slot_win: number;
   is_online: boolean;
   last_game: string;
   last_vendor: string;
@@ -33,7 +57,6 @@ const CustomerAccessorPage: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const [rowData, setRowData] = useState<AccessorUser[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
@@ -59,8 +82,7 @@ const CustomerAccessorPage: React.FC = () => {
       console.log('userStatus 수신:', data);
       setRowData(data.users || []);
       setOnlineCount(data.online || 0);
-      setTotalCount(data.total || 0);
-      setLastUpdated(dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss'));
+      setLastUpdated(formatDate(data.timestamp));
     });
 
     // 에러 처리
@@ -81,7 +103,7 @@ const CustomerAccessorPage: React.FC = () => {
     };
   }, []);
 
-  const columnDefs: ColDef[] = [
+  const columnDefs: (ColDef | ColGroupDef)[] = [
     EtsColumnPreset.IdPreset({
       field: 'no',
       headerName: 'No',
@@ -128,38 +150,67 @@ const CustomerAccessorPage: React.FC = () => {
         decimalPlaces: 0,
       },
     }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_rolling_money',
-      headerName: '롤링금액',
-      width: 130,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
-      },
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'user_bonus_money',
-      headerName: '보너스금액',
-      width: 130,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
-      },
-    }),
-    EtsColumnPreset.TextPreset({
+    {
+      headerName: '카지노',
+      children: [
+        EtsColumnPreset.TextPreset({
+          field: 'casino_bet',
+          headerName: '베팅',
+          width: 120,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'casino_win',
+          headerName: '당첨',
+          width: 120,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
+        }),
+      ],
+    },
+    {
+      headerName: '슬롯',
+      children: [
+        EtsColumnPreset.TextPreset({
+          field: 'slot_bet',
+          headerName: '베팅',
+          width: 120,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
+        }),
+        EtsColumnPreset.TextPreset({
+          field: 'slot_win',
+          headerName: '당첨',
+          width: 120,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
+        }),
+      ],
+    },
+    {
       field: 'last_game_sort',
       headerName: '게임종류',
       width: 100,
-      valueFormatter: (params) => {
-        if (params.value === 'casino') return '카지노';
-        if (params.value === 'slot') return '슬롯';
-        return params.value || '-';
+      valueGetter: (params) => {
+        const value = params.data?.last_game_sort;
+        if (value === 'casino') return '카지노';
+        if (value === 'slot') return '슬롯';
+        return value || '-';
       },
-    }),
+    },
     EtsColumnPreset.TextPreset({
       field: 'last_vendor',
       headerName: '벤더',
-      width: 120,
+      width: 150,
     }),
     EtsColumnPreset.TextPreset({
       field: 'last_game',
@@ -173,7 +224,7 @@ const CustomerAccessorPage: React.FC = () => {
       width: 180,
       valueFormatter: (params) => {
         if (!params.value) return '-';
-        return dayjs(params.value).format('YYYY-MM-DD HH:mm:ss');
+        return formatDate(params.value);
       },
     }),
   ];
@@ -189,9 +240,6 @@ const CustomerAccessorPage: React.FC = () => {
           variant="outlined"
         />
       </Stack>
-      <Typography variant="body2" color="text.secondary">
-        총 회원: <strong>{totalCount}</strong>명
-      </Typography>
       <Typography variant="body2" color="text.secondary">
         접속중: <strong style={{ color: '#4CAF50' }}>{onlineCount}</strong>명
       </Typography>
