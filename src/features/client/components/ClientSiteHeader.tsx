@@ -654,11 +654,7 @@ const ClientSiteHeader = () => {
                     보유머니 {Number(balance?.money ?? 0).toLocaleString('ko-KR')}원
                   </div>
                 </>
-              ) : (
-                <div className="id" style={{ opacity: 0.65 }}>
-                  로그인 필요
-                </div>
-              )}
+              ) : null}
             </MobileUserInfo>
           </MobileQuickBar>
         </Inner>

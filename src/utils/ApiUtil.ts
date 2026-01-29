@@ -243,6 +243,20 @@ const getInstance = (
   // success / error 공통 처리
   instance.interceptors.response.use(
     (response: any): any => {
+      // HTML 응답인 경우 (로그인 안 된 상태에서 인증 필요한 API 호출 시)
+      const contentType = response.headers?.['content-type'] || '';
+      if (
+        contentType.includes('text/html') ||
+        (typeof response.data === 'string' && response.data.includes('<!doctype html>'))
+      ) {
+        return {
+          successOrNot: 'N',
+          statusCode: StatusCode.SESSION_EXPIRED,
+          data: {},
+          HeaderMsg: '인증이 필요합니다.',
+        } as CommonResponse;
+      }
+
       response.data = convertTimestampFields(response.data);
       const commonResponse: CommonResponse =
         response.status === 204
