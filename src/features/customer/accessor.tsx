@@ -93,6 +93,7 @@ const CustomerAccessorPage: React.FC = () => {
       headerName: '상태',
       width: 80,
       cellRenderer: (params: any) => {
+        console.log('is_online:', params.value);
         const isOnline = params.value;
         return (
           <Box

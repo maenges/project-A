@@ -7,6 +7,7 @@ import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
 import { StatusCode } from '@models/common/CommonResponse';
 import { useNotify } from '@/hooks/useNotify';
+import { connectUserSocket } from '@/utils/userConnectionSocket';
 
 import brandLogo from '@/assets/images/logo/brand/golden7.png';
 import loginVisual from '@/assets/images/logo/login.png';
@@ -323,6 +324,9 @@ const ClientLoginModal = ({ open, onClose, onLogin, onSuccess, showVisual = true
         alert(res.HeaderMsg);
         return;
       }
+
+      // 로그인 성공 시 회원 접속 WebSocket 연결
+      connectUserSocket();
 
       onSuccess?.();
       onClose();

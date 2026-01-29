@@ -19,6 +19,7 @@ import { Service } from '@/models/common/Service';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useClientBalanceStore, type ClientBalance } from '@/store/clientBalance';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
+import { disconnectUserSocket } from '@/utils/userConnectionSocket';
 
 type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox';
 type MobileMenuKey = MenuKey | 'login';
@@ -484,6 +485,8 @@ const ClientSiteHeader = () => {
         suppressAuthEvent: true,
       });
     } finally {
+      // 로그아웃 시 회원 접속 WebSocket 해제
+      disconnectUserSocket();
       void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
     }
