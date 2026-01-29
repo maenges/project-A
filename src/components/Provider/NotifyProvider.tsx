@@ -51,6 +51,7 @@ const NotifyProvider: React.FC<NotifyProviderProps> = ({ children, providerId })
         <EtsModal
           open={true}
           onClose={handleCancel}
+          disableScrollLock
           size={item.size === 'LG' ? 'md' : item.size === 'MD' ? 'sm' : 'xs'}
           PaperProps={{
             sx: {

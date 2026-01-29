@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Button, MenuItem, Paper, Stack, Switch, TextField, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { AccountKeyOptions } from '@/models/common/CommonSelectCodes';
+import { AccountKeyOptions, rollingFee } from '@/models/common/CommonSelectCodes';
 import { useNotify } from '@/hooks/useNotify';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
@@ -17,6 +17,8 @@ type PercentOptionsArgs = {
   step: number; // 예: 0.5
   current?: number; // 예: 1.5 (현재 값이 리스트에 없으면 포함)
 };
+
+const selectMenuProps = { disableScrollLock: true } as const;
 
 // 항상 소수점 1자리 고정 표기 (요구사항: 1 -> 1.0%)
 const formatPct = (n: number) => `${n.toFixed(2)}%`;
@@ -356,6 +358,8 @@ type CustomerInfoFormState = {
   losingSlotMaxPct: number;
   losingCasinoMaxPct: number;
 
+  rollingFee: number;
+
   phone: string;
   bankName: string;
   account: string;
@@ -377,6 +381,7 @@ const defaultFormState: CustomerInfoFormState = {
   losingCasinoPct: 0,
   losingSlotMaxPct: 0,
   losingCasinoMaxPct: 0,
+  rollingFee: 0,
   phone: '',
   bankName: '',
   account: '',
@@ -786,6 +791,7 @@ const PersonalInfoSettings = ({
           onChange={(e) => onChangeBankName(e.target.value)}
           label="은행명"
           fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
           sx={styles.outlinedField}
         >
           <MenuItem value="" sx={styles.menuItem}>
@@ -904,6 +910,7 @@ const RollingSettings = ({
           onChange={(e) => onChangeSlot(parsePctInput(e.target.value))}
           label={`롤링 % (슬롯) 최대 -${Number(slotMaxPct).toFixed(2)}%`}
           fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
           sx={styles.outlinedField}
         >
           {slotOptions.map((v) => (
@@ -921,6 +928,7 @@ const RollingSettings = ({
           onChange={(e) => onChangeCasino(parsePctInput(e.target.value))}
           label={`롤링 % (카지노) 최대 -${Number(casinoMaxPct).toFixed(2)}%`}
           fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
           sx={styles.outlinedField}
         >
           {casinoOptions.map((v) => (
@@ -1015,6 +1023,7 @@ const LosingSettings = ({
           onChange={(e) => onChangeSlot(parsePctInput(e.target.value))}
           label={`루징 % (슬롯) 최대 -${Number(slotMaxPct).toFixed(2)}%`}
           fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
           sx={styles.outlinedField}
         >
           {slotOptions.map((v) => (
@@ -1032,6 +1041,7 @@ const LosingSettings = ({
           onChange={(e) => onChangeCasino(parsePctInput(e.target.value))}
           label={`루징 % (카지노) 최대 -${Number(casinoMaxPct).toFixed(2)}%`}
           fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
           sx={styles.outlinedField}
         >
           {casinoOptions.map((v) => (
@@ -1041,6 +1051,82 @@ const LosingSettings = ({
           ))}
         </TextField>
       </Stack>
+    </SettingsSection>
+  );
+};
+
+const RollingFeeSettings = ({
+  userKey,
+  value,
+  onChange,
+}: {
+  userKey?: string;
+  value: number;
+  onChange: (next: number) => void;
+}) => {
+  const { toast, confirm } = useNotify();
+
+  const onSaveRollingFee = async () => {
+    if (!userKey) {
+      toast.error('회원 키(userKey)가 없어 롤링 수수료를 변경할 수 없습니다.');
+      return;
+    }
+
+    const ok = await confirm('저장하시겠습니까?');
+    if (!ok) return;
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/user',
+      method: Method.PATCH,
+      params: {
+        bodyParams: {
+          user_key: userKey,
+          user_rolling_fee: value,
+        },
+      },
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      toast.error(res.HeaderMsg);
+      return;
+    }
+
+    toast.success('롤링 수수료 설정이 변경되었습니다.');
+  };
+
+  return (
+    <SettingsSection
+      title="롤링 수수료 설정"
+      actions={
+        <>
+          <Button variant="contained" color="primary" disableElevation onClick={onSaveRollingFee}>
+            롤링 수수료 변경
+          </Button>
+        </>
+      }
+    >
+      <Box sx={{ minHeight: 54, display: 'flex', alignItems: 'center' }}>
+        <TextField
+          select
+          name="rollingFee"
+          id="customer-rolling-fee"
+          autoComplete="off"
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          label="롤링 수수료 %"
+          fullWidth
+          SelectProps={{ MenuProps: selectMenuProps }}
+          sx={styles.outlinedField}
+        >
+          {rollingFee.map((opt) => (
+            <MenuItem key={opt.value} value={opt.value} sx={styles.menuItem}>
+              {opt.label}%
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
     </SettingsSection>
   );
 };
@@ -1061,6 +1147,7 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
     const rollingCasinoMaxPct = toFiniteNumber(detail?.user_max_rolling_c, 0);
     const losingSlotMaxPct = toFiniteNumber(detail?.user_max_bonus_s, 0);
     const losingCasinoMaxPct = toFiniteNumber(detail?.user_max_bonus_c, 0);
+    const rollingFeeValue = toFiniteNumber(detail?.user_rolling_fee, 0);
     const nextGrantEgg = toBoolean(detail?.user_grant);
     const nextRevokeEgg = toBoolean(detail?.user_return);
     const nextPhone = (detail?.user_phone ?? '') as string;
@@ -1080,6 +1167,7 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
       losingCasinoPct,
       losingSlotMaxPct,
       losingCasinoMaxPct,
+      rollingFee: rollingFeeValue,
       grantEgg: nextGrantEgg,
       revokeEgg: nextRevokeEgg,
       phone: nextPhone,
@@ -1135,6 +1223,11 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
           casinoMaxPct={form.losingCasinoMaxPct}
           onChangeSlot={(next) => setForm((p) => ({ ...p, losingSlotPct: next }))}
           onChangeCasino={(next) => setForm((p) => ({ ...p, losingCasinoPct: next }))}
+        />
+        <RollingFeeSettings
+          userKey={detail?.user_key}
+          value={form.rollingFee}
+          onChange={(next) => setForm((p) => ({ ...p, rollingFee: next }))}
         />
         <PersonalInfoSettings
           userKey={detail?.user_key}

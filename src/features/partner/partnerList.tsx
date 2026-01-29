@@ -116,14 +116,14 @@ const PartnerList: React.FC = () => {
   ] as const;
 
   const casinoSlotFields = [
-    'period_betting_amount_s',
-    'period_betting_amount_c',
-    'period_winning_amount_s',
-    'period_winning_amount_c',
-    'period_rolling_amount_s',
-    'period_rolling_amount_c',
-    'period_bonus_amount_s',
-    'period_bonus_amount_c',
+    'casino_bet_amount',
+    'casino_win_amount',
+    'casino_rolling_amount',
+    'casino_bonus_amount',
+    'slot_bet_amount',
+    'slot_win_amount',
+    'slot_rolling_amount',
+    'slot_bonus_amount',
   ] as const;
 
   useEffect(() => {
@@ -271,28 +271,28 @@ const PartnerList: React.FC = () => {
       headerName: '카지노',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'period_betting_amount_c',
+          field: 'casino_bet_amount',
           headerName: '베팅금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_winning_amount_c',
+          field: 'casino_win_amount',
           headerName: '당첨금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_rolling_amount_c',
+          field: 'casino_rolling_amount',
           headerName: '롤링금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_bonus_amount_c',
+          field: 'casino_bonus_amount',
           headerName: '루징금액',
           width: 150,
           hide: true,
@@ -304,28 +304,28 @@ const PartnerList: React.FC = () => {
       headerName: '슬롯',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'period_betting_amount_s',
+          field: 'slot_bet_amount',
           headerName: '베팅금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_winning_amount_s',
+          field: 'slot_win_amount',
           headerName: '당첨금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_rolling_amount_s',
+          field: 'slot_rolling_amount',
           headerName: '롤링금액',
           width: 150,
           hide: true,
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
-          field: 'period_bonus_amount_s',
+          field: 'slot_bonus_amount',
           headerName: '루징금액',
           width: 150,
           hide: true,
@@ -355,6 +355,16 @@ const PartnerList: React.FC = () => {
       toast.info('좌측 트리를 선택해 주세요.');
       return;
     }
+
+    // 검색 시에도 기본 컬럼 뷰로 복원
+    setShowCasinoSlot(false);
+    const api = (gridRef.current as any)?.api;
+    if (api) {
+      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible([...casinoSlotFields], false);
+    }
+    saveUiState({ groupKey: selectedTreeId, firstRow: 0, showCasinoSlot: false });
+
     fetchPartnerListByGroupKey(selectedTreeId);
   };
 

@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => {
             Origin: apiOrigin || '',
           },
         },
+        '/socket.io': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: false,
+          ws: true, // WebSocket 프록시 활성화
+        },
       }
     : undefined;
 
