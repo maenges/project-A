@@ -46,7 +46,6 @@ const CustomerAccessorPage: React.FC = () => {
 
     const socket = io(`${apiBaseUrl}/user-status`, {
       withCredentials: !isLocal, // 로컬에서는 false, 운영에서는 true
-      path: '/socket.io',
     });
 
     socketRef.current = socket;
