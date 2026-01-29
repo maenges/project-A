@@ -24,6 +24,7 @@ import { Service } from '@/models/common/Service';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 import { ClientBalanceEventDispatch } from '@/utils/clientBalanceEventBus';
 import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
+import { useGameFrameStore } from '@/store/gameFrame';
 
 export type ProviderTab = 'casino' | 'slot';
 
@@ -430,8 +431,8 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
     try {
       if (!usePopup) {
-        // 모바일: 새창으로 열어서 기존 페이지 WebSocket 연결 유지
-        window.open(url, '_blank');
+        // 모바일: iframe으로 열어서 WebSocket 연결 유지 + 로그아웃 시 닫기 가능
+        useGameFrameStore.getState().openGame(url);
         return;
       }
 

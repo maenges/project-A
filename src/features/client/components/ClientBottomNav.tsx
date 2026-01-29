@@ -106,19 +106,35 @@ const ItemBtn = styled.button<{ $active?: boolean; $home?: boolean }>`
   }
 `;
 
-const DepositIcon = styled.img.attrs({ src: deposit, alt: '' })`
-  width: 24px;
-  height: 24px;
+const DepositIcon = styled.span`
+  width: 22px;
+  height: 22px;
   display: inline-block;
-  opacity: 0.92;
+  background-color: currentColor;
+  -webkit-mask-image: url(${deposit});
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: url(${deposit});
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
 `;
 
-const WithdrawIcon = styled.img.attrs({ src: withdraw, alt: '' })`
-  width: 24px;
-  height: 24px;
+const WithdrawIcon = styled.span`
+  width: 22px;
+  height: 22px;
   display: inline-block;
-  opacity: 0.92;
+  background-color: currentColor;
+  -webkit-mask-image: url(${withdraw});
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: url(${withdraw});
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
 `;
 

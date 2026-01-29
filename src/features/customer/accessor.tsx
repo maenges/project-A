@@ -67,6 +67,11 @@ const CustomerAccessorPage: React.FC = () => {
     const socket = io('/user-status', {
       withCredentials: true,
       transports: ['websocket'], // polling 대신 websocket만 사용
+      reconnection: true, // 자동 재연결 활성화
+      reconnectionAttempts: Infinity, // 무한 재시도
+      reconnectionDelay: 1000, // 1초 후 재연결 시도
+      reconnectionDelayMax: 5000, // 최대 5초까지 증가
+      timeout: 20000, // 연결 타임아웃 20초
     });
 
     socketRef.current = socket;
@@ -75,6 +80,22 @@ const CustomerAccessorPage: React.FC = () => {
     socket.on('connect', () => {
       console.log('소켓 연결됨');
       setIsConnected(true);
+    });
+
+    // 재연결 시도 중
+    socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`재연결 시도 중... (${attemptNumber}번째)`);
+    });
+
+    // 재연결 성공
+    socket.on('reconnect', (attemptNumber) => {
+      console.log(`재연결 성공 (${attemptNumber}번째 시도)`);
+      setIsConnected(true);
+    });
+
+    // 재연결 실패
+    socket.on('reconnect_error', (err) => {
+      console.error('재연결 에러:', err);
     });
 
     // 5초마다 데이터 수신
@@ -95,10 +116,20 @@ const CustomerAccessorPage: React.FC = () => {
       console.error('소켓 에러:', err);
     });
 
-    // 연결 해제
-    socket.on('disconnect', () => {
-      console.log('소켓 연결 해제');
+    // 연결 에러 (초기 연결 실패)
+    socket.on('connect_error', (err) => {
+      console.error('연결 에러:', err);
       setIsConnected(false);
+    });
+
+    // 연결 해제
+    socket.on('disconnect', (reason) => {
+      console.log('소켓 연결 해제:', reason);
+      setIsConnected(false);
+      // 서버에서 끊은 경우 수동 재연결
+      if (reason === 'io server disconnect') {
+        socket.connect();
+      }
     });
 
     // 컴포넌트 언마운트 시 소켓 정리

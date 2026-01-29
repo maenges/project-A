@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import { ClientBottomNav, ClientFooter, ClientSiteHeader } from '@/features/client/components';
+import { useGameFrameStore } from '@/store/gameFrame';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -26,7 +27,25 @@ const Main = styled.main`
   }
 `;
 
+const GameOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #000;
+`;
+
+const GameFrame = styled.iframe`
+  width: 100%;
+  height: 100%;
+  border: none;
+`;
+
 const ClientLayout: React.FC = () => {
+  const { gameUrl } = useGameFrameStore();
+
   return (
     <Container>
       <ClientSiteHeader />
@@ -35,6 +54,13 @@ const ClientLayout: React.FC = () => {
       </Main>
       <ClientBottomNav />
       <ClientFooter />
+
+      {/* 모바일 게임 iframe 오버레이 */}
+      {gameUrl && (
+        <GameOverlay>
+          <GameFrame src={gameUrl} allow="fullscreen" />
+        </GameOverlay>
+      )}
     </Container>
   );
 };

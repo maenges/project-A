@@ -15,6 +15,7 @@ import ClientLoginModal from './ClientLoginModal';
 import { ClientAuthAddEventListeners, ClientAuthEventDispatch } from '@/utils/clientAuthEventBus';
 import { ClientBalanceAddEventListeners } from '@/utils/clientBalanceEventBus';
 import { callApi, Method } from '@/utils/ApiUtil';
+import { useGameFrameStore } from '@/store/gameFrame';
 import { Service } from '@/models/common/Service';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useClientBalanceStore, type ClientBalance } from '@/store/clientBalance';
@@ -49,12 +50,8 @@ const Inner = styled.div`
     grid-template-columns: 1fr;
     justify-items: center;
     padding-top: 10px;
-    padding-bottom: 12px;
+    padding-bottom: 10px;
     gap: 10px;
-  }
-
-  @media (max-width: 520px) {
-    padding-right: calc(${CLIENT_SIDE_PADDING} + 10px);
   }
 `;
 
@@ -150,16 +147,16 @@ const NavItem = styled.button`
 `;
 
 const DepositIcon = styled.img.attrs({ src: deposit, alt: '' })`
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: inline-block;
   opacity: 0.95;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
 `;
 
 const WithdrawIcon = styled.img.attrs({ src: withdraw, alt: '' })`
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: inline-block;
   opacity: 0.95;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
@@ -218,12 +215,12 @@ const MobileQuickBar = styled.div`
   display: none;
   width: 100%;
   margin-top: 10px;
-  gap: 10px;
   align-items: center;
-  justify-content: center;
 
   @media (max-width: 980px) {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    gap: 10px;
   }
 `;
 
@@ -260,6 +257,13 @@ const MobileUserInfo = styled.div`
     font-size: 12px;
     letter-spacing: -0.2px;
     white-space: nowrap;
+  }
+
+  .login-required {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: -0.2px;
   }
 `;
 
@@ -487,6 +491,8 @@ const ClientSiteHeader = () => {
     } finally {
       // 로그아웃 시 회원 접속 WebSocket 해제
       disconnectUserSocket();
+      // 게임 iframe 닫기
+      useGameFrameStore.getState().closeGame();
       void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
     }
@@ -639,13 +645,11 @@ const ClientSiteHeader = () => {
             <Pill $tone="gold" onClick={() => openAuth(true)}>
               {isLoggedIn ? '로그아웃' : '로그인'}
             </Pill>
-
-            <MenuBtn aria-label="menu" onClick={() => setOpen(true)}>
-              <MenuIcon fontSize="small" />
-            </MenuBtn>
           </Right>
 
           <MobileQuickBar aria-label="mobile quick bar">
+            {/* 왼쪽 빈 영역 (오른쪽 메뉴 버튼과 같은 너비) */}
+            <div />
             <MobileUserInfo aria-label="user info">
               {isLoggedIn ? (
                 <>
@@ -654,8 +658,17 @@ const ClientSiteHeader = () => {
                     보유머니 {Number(balance?.money ?? 0).toLocaleString('ko-KR')}원
                   </div>
                 </>
-              ) : null}
+              ) : (
+                <div className="login-required">로그인이 필요합니다.</div>
+              )}
             </MobileUserInfo>
+            <MenuBtn
+              aria-label="menu"
+              onClick={() => setOpen(true)}
+              style={{ display: 'inline-flex' }}
+            >
+              <MenuIcon fontSize="small" />
+            </MenuBtn>
           </MobileQuickBar>
         </Inner>
       </Bar>
