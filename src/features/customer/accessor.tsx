@@ -80,7 +80,12 @@ const CustomerAccessorPage: React.FC = () => {
     // 5초마다 데이터 수신
     socket.on('userStatus', (data: UserStatusData) => {
       console.log('userStatus 수신:', data);
-      setRowData(data.users || []);
+      // last_activity 날짜 포맷 변환
+      const formattedUsers = (data.users || []).map((user) => ({
+        ...user,
+        last_activity: formatDate(user.last_activity),
+      }));
+      setRowData(formattedUsers);
       setOnlineCount(data.online || 0);
       setLastUpdated(formatDate(data.timestamp));
     });

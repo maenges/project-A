@@ -430,7 +430,8 @@ const ClientProviderGrid = ({ tab }: Props) => {
 
     try {
       if (!usePopup) {
-        window.location.href = url;
+        // 모바일: 새창으로 열어서 기존 페이지 WebSocket 연결 유지
+        window.open(url, '_blank');
         return;
       }
 
