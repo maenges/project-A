@@ -154,7 +154,7 @@ const CustomerAccessorPage: React.FC = () => {
       headerName: '카지노',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'casino_bet',
+          field: 'casino_bet_amount',
           headerName: '베팅',
           width: 120,
           context: {
@@ -163,7 +163,7 @@ const CustomerAccessorPage: React.FC = () => {
           },
         }),
         EtsColumnPreset.TextPreset({
-          field: 'casino_win',
+          field: 'casino_win_amount',
           headerName: '당첨',
           width: 120,
           context: {
@@ -177,7 +177,7 @@ const CustomerAccessorPage: React.FC = () => {
       headerName: '슬롯',
       children: [
         EtsColumnPreset.TextPreset({
-          field: 'slot_bet',
+          field: 'slot_bet_amount',
           headerName: '베팅',
           width: 120,
           context: {
@@ -186,7 +186,7 @@ const CustomerAccessorPage: React.FC = () => {
           },
         }),
         EtsColumnPreset.TextPreset({
-          field: 'slot_win',
+          field: 'slot_win_amount',
           headerName: '당첨',
           width: 120,
           context: {
