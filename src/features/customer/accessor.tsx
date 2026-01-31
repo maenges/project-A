@@ -66,11 +66,11 @@ const CustomerAccessorPage: React.FC = () => {
     // CloudFront에서 /socket.io/* 경로를 API Gateway로 프록시해야 함
     const socket = io('/user-status', {
       withCredentials: true,
-      transports: ['websocket', 'polling'], // WebSocket 우선, 실패 시 polling fallback
+      transports: ['polling', 'websocket'], // Polling 우선, WebSocket fallback
       reconnection: true, // 자동 재연결 활성화
       reconnectionAttempts: Infinity, // 무한 재시도
-      reconnectionDelay: 1000, // 1초 후 재연결 시도
-      reconnectionDelayMax: 5000, // 최대 5초까지 증가
+      reconnectionDelay: 500, // 0.5초 후 재연결 시도
+      reconnectionDelayMax: 3000, // 최대 3초까지 증가
       timeout: 20000, // 연결 타임아웃 20초
       forceNew: true, // 새로고침 시 새 연결 강제
     });
