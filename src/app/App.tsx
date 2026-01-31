@@ -40,8 +40,8 @@ import {
   CustomerDetailPage,
 } from '@features/customer';
 import { BetBetListPage, BetLosePage } from '@features/bet';
-import { GameRecordStatisticsPage } from '@/features/gameRecord';
-import { SettlementLoosingPage } from '@/features/settlement';
+import { GameRecordDailyPage } from '@/features/gameRecord';
+// import { SettlementLoosingPage } from '@/features/settlement';
 // import DashboardLoginPage from '@/features/DashboardLoginPage';
 import LoginPage from '@/features/LoginPage';
 import ClientLayout from '@layout/ClientLayout';
@@ -212,21 +212,21 @@ function App() {
                             }
                           />
                           <Route
-                            path="/gameRecord/statistics"
+                            path="/gameRecord/daily"
                             element={
                               <PrivateRoute>
-                                <GameRecordStatisticsPage />
+                                <GameRecordDailyPage />
                               </PrivateRoute>
                             }
                           />
-                          <Route
+                          {/* <Route
                             path="/settlement/loosing"
                             element={
                               <PrivateRoute>
                                 <SettlementLoosingPage />
                               </PrivateRoute>
                             }
-                          />
+                          /> */}
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                       </div>

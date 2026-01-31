@@ -46,7 +46,7 @@ export interface PageTemplateProps {
   rowSelection?: 'single' | 'multiple';
   rowMultiSelectWithClick?: boolean;
   suppressRowClickSelection?: boolean;
-  size?: 'sm' | 'two-search' | 'lg' | 'one-search' | 'no-search';
+  size?: 'sm' | 'two-search' | 'one-search-no-button' | 'one-search' | 'no-search';
   loading?: boolean;
   onGridReady?: (params: GridReadyEvent) => void;
   /** 행 선택 가능 여부 제어 (체크박스 비활성화에 사용) */
@@ -93,12 +93,12 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     switch (size) {
       case 'no-search':
         return 'calc(100vh - 265px)';
+      case 'one-search-no-button':
+        return 'calc(100vh - 380px)';
       case 'one-search':
         return 'calc(100vh - 400px)';
       case 'two-search':
         return 'calc(100vh - 450px)';
-      case 'lg':
-        return 'calc(100vh - 520px)';
       default:
         return 'calc(100vh - 430px)';
     }

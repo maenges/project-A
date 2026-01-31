@@ -1,1 +1,1 @@
-export { default as GameRecordStatisticsPage } from './statistics';
+export { default as GameRecordDailyPage } from './daily';
