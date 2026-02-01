@@ -62,17 +62,24 @@ const CustomerAccessorPage: React.FC = () => {
 
   // 소켓 연결
   useEffect(() => {
+    // 이미 연결된 소켓이 있으면 재사용
+    if (socketRef.current?.connected) {
+      setIsConnected(true);
+      return;
+    }
+
     // ApiUtil처럼 상대 경로 사용 → CloudFront를 통해 요청 → 쿠키 자동 전송
     // CloudFront에서 /socket.io/* 경로를 API Gateway로 프록시해야 함
     const socket = io('/user-status', {
       withCredentials: true,
-      transports: ['polling', 'websocket'], // Polling 우선, WebSocket fallback
+      transports: ['websocket', 'polling'], // WebSocket 우선, 실패 시 polling fallback
+      upgrade: true, // polling에서 websocket으로 업그레이드 허용
       reconnection: true, // 자동 재연결 활성화
       reconnectionAttempts: Infinity, // 무한 재시도
-      reconnectionDelay: 500, // 0.5초 후 재연결 시도
-      reconnectionDelayMax: 3000, // 최대 3초까지 증가
+      reconnectionDelay: 1000, // 1초 후 재연결 시도
+      reconnectionDelayMax: 5000, // 최대 5초까지 증가
       timeout: 20000, // 연결 타임아웃 20초
-      forceNew: true, // 새로고침 시 새 연결 강제
+      forceNew: false, // 기존 연결 재사용 허용
     });
 
     socketRef.current = socket;
