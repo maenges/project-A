@@ -2,6 +2,9 @@ import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
+import mainBanner1 from '@/assets/images/mainBanner/main_banner_2.png';
+import mainBanner2 from '@/assets/images/mainBanner/main_banner_12.png';
+import mainBanner3 from '@/assets/images/mainBanner/main_banner_17.png';
 
 const AUTOPLAY_MS = 5000;
 
@@ -33,47 +36,40 @@ const Track = styled.div<{ $dragging: boolean }>`
   transition: ${({ $dragging }) => ($dragging ? 'none' : 'transform 240ms ease')};
 `;
 
-const Slide = styled.div<{ $tone: 'blue' | 'gold' | 'teal' }>`
+const Slide = styled.div<{ $image?: string }>`
   height: clamp(280px, 28vw, 420px);
   position: relative;
   flex: 0 0 100%;
   display: grid;
   align-content: center;
   padding: clamp(22px, 2.4vw, 32px);
-  background:
-    radial-gradient(circle at 15% 35%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
-    linear-gradient(
-      120deg,
-      ${({ $tone }) =>
-        $tone === 'gold'
-          ? 'rgba(80, 58, 18, 0.95)'
-          : $tone === 'teal'
-            ? 'rgba(14, 48, 48, 0.95)'
-            : 'rgba(10, 28, 54, 0.95)'},
-      rgba(12, 12, 12, 0.88)
-    );
+  background: ${({ $image }) =>
+    $image
+      ? `linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%), url(${$image}) center/cover no-repeat`
+      : `radial-gradient(circle at 15% 35%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
+        linear-gradient(120deg, rgba(10, 28, 54, 0.95), rgba(12, 12, 12, 0.88))`};
 
   @media (max-width: 900px) {
     padding: 22px;
   }
 `;
 
-const Title = styled.div`
-  font-weight: 1000;
-  letter-spacing: -1px;
-  font-size: clamp(28px, 3.4vw, 48px);
-  color: rgba(255, 255, 255, 0.96);
-  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
-`;
+// const Title = styled.div`
+//   font-weight: 1000;
+//   letter-spacing: -1px;
+//   font-size: clamp(28px, 3.4vw, 48px);
+//   color: rgba(255, 255, 255, 0.96);
+//   text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+// `;
 
-const Sub = styled.div`
-  margin-top: 10px;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.72);
-  letter-spacing: -0.3px;
-  font-size: clamp(13px, 1.1vw, 15px);
-  max-width: 720px;
-`;
+// const Sub = styled.div`
+//   margin-top: 10px;
+//   font-weight: 900;
+//   color: rgba(255, 255, 255, 0.72);
+//   letter-spacing: -0.3px;
+//   font-size: clamp(13px, 1.1vw, 15px);
+//   max-width: 720px;
+// `;
 
 const Dots = styled.div`
   display: flex;
@@ -163,12 +159,20 @@ const ArrowIcon = ({ dir }: { dir: 'left' | 'right' }) => (
 
 const slides = [
   {
-    tone: 'blue' as const,
-    title: '출석 이벤트',
-    sub: '배너 영역(이미지 연결 전) · 텍스트/이미지는 API 또는 CMS 연결 가능',
+    image: mainBanner1,
+    // title: '출석 이벤트',
+    // sub: '배너 영역(이미지 연결 전) · 텍스트/이미지는 API 또는 CMS 연결 가능',
   },
-  { tone: 'gold' as const, title: '카지노 & 슬롯', sub: '상단 네비 아래, 배너는 고정 위치로 구성' },
-  { tone: 'teal' as const, title: '공지/이벤트', sub: '원하시면 버튼/도트/자동재생도 추가 가능' },
+  {
+    image: mainBanner2,
+    // title: '카지노 & 슬롯',
+    // sub: '상단 네비 아래, 배너는 고정 위치로 구성',
+  },
+  {
+    image: mainBanner3,
+    // title: '공지/이벤트',
+    // sub: '원하시면 버튼/도트/자동재생도 추가 가능',
+  },
 ];
 
 const ClientHeroBanner = () => {
@@ -284,9 +288,9 @@ const ClientHeroBanner = () => {
             style={{ transform: `translateX(calc(${-index * 100}% + ${dragOffsetPx}px))` }}
           >
             {slides.map((s, i) => (
-              <Slide key={i} $tone={s.tone} aria-label={`banner ${i + 1}`}>
-                <Title>{s.title}</Title>
-                <Sub>{s.sub}</Sub>
+              <Slide key={i} $image={s.image} aria-label={`banner ${i + 1}`}>
+                {/* <Title>{s.title}</Title>
+                <Sub>{s.sub}</Sub> */}
               </Slide>
             ))}
           </Track>
