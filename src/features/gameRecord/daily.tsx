@@ -168,7 +168,7 @@ const GameRecordDailyPage: React.FC = () => {
     const { startDate, endDate, userId } = getValues();
     callApi({
       service: Service.POSTMAN,
-      url: '/api/stat/daily',
+      url: '/api/game-stat/daily',
       method: Method.GET,
       params: {
         queryParams: {
