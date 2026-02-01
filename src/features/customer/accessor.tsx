@@ -74,10 +74,11 @@ const CustomerAccessorPage: React.FC = () => {
       withCredentials: true,
       transports: ['websocket', 'polling'], // WebSocket 우선, 실패 시 polling fallback
       upgrade: true, // polling에서 websocket으로 업그레이드 허용
-      reconnection: true, // 자동 재연결 활성화
-      reconnectionAttempts: Infinity, // 무한 재시도
+      // 재연결 설정 (백엔드 3초 Grace Period에 맞춤)
+      reconnection: true,
+      reconnectionAttempts: 5, // 5회 재시도
       reconnectionDelay: 1000, // 1초 후 재연결 시도
-      reconnectionDelayMax: 5000, // 최대 5초까지 증가
+      reconnectionDelayMax: 3000, // 최대 3초까지 증가
       timeout: 20000, // 연결 타임아웃 20초
       forceNew: false, // 기존 연결 재사용 허용
     });
@@ -101,9 +102,15 @@ const CustomerAccessorPage: React.FC = () => {
       setIsConnected(true);
     });
 
-    // 재연결 실패
+    // 재연결 에러
     socket.on('reconnect_error', (err) => {
       console.error('재연결 에러:', err);
+    });
+
+    // 모든 재연결 시도 실패
+    socket.on('reconnect_failed', () => {
+      console.error('재연결 실패 (모든 시도 소진)');
+      setIsConnected(false);
     });
 
     // 5초마다 데이터 수신
