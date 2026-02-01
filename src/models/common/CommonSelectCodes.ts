@@ -79,3 +79,35 @@ export const rollingFee = [
   { value: 90, label: '90' },
   { value: 100, label: '100' },
 ];
+
+export const hourOptions = [
+  { value: '00', label: '00시' },
+  { value: '01', label: '01시' },
+  { value: '02', label: '02시' },
+  { value: '03', label: '03시' },
+  { value: '04', label: '04시' },
+  { value: '05', label: '05시' },
+  { value: '06', label: '06시' },
+  { value: '07', label: '07시' },
+  { value: '08', label: '08시' },
+  { value: '09', label: '09시' },
+  { value: '10', label: '10시' },
+  { value: '11', label: '11시' },
+  { value: '12', label: '12시' },
+  { value: '13', label: '13시' },
+  { value: '14', label: '14시' },
+  { value: '15', label: '15시' },
+  { value: '16', label: '16시' },
+  { value: '17', label: '17시' },
+  { value: '18', label: '18시' },
+  { value: '19', label: '19시' },
+  { value: '20', label: '20시' },
+  { value: '21', label: '21시' },
+  { value: '22', label: '22시' },
+  { value: '23', label: '23시' },
+];
+
+export const gameSortOptions = [
+  { value: 'casino', label: '카지노' },
+  { value: 'slot', label: '슬롯' },
+];

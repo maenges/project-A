@@ -290,6 +290,10 @@ const CustomerList: React.FC = () => {
           headerName: '베팅금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
@@ -297,6 +301,10 @@ const CustomerList: React.FC = () => {
           headerName: '당첨금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
@@ -304,6 +312,10 @@ const CustomerList: React.FC = () => {
           headerName: '롤링금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
       ],
@@ -316,6 +328,10 @@ const CustomerList: React.FC = () => {
           headerName: '베팅금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
@@ -323,6 +339,10 @@ const CustomerList: React.FC = () => {
           headerName: '당첨금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
         EtsColumnPreset.TextPreset({
@@ -330,6 +350,10 @@ const CustomerList: React.FC = () => {
           headerName: '롤링금액',
           width: 150,
           hide: true,
+          context: {
+            formatType: 'number',
+            decimalPlaces: 0,
+          },
           flex: 1,
         }),
       ],
