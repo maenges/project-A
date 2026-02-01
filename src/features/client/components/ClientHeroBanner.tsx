@@ -5,6 +5,10 @@ import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
 import mainBanner1 from '@/assets/images/mainBanner/main_banner_2.png';
 import mainBanner2 from '@/assets/images/mainBanner/main_banner_12.png';
 import mainBanner3 from '@/assets/images/mainBanner/main_banner_17.png';
+// 모바일용 배너 이미지 (desktop과 동일한 파일을 사용하거나 별도 파일로 교체 가능)
+import mobileBanner1 from '@/assets/images/mainBanner/mobile/mobile_main_banner_2.png';
+import mobileBanner2 from '@/assets/images/mainBanner/mobile/mobile_main_banner_12.png';
+import mobileBanner3 from '@/assets/images/mainBanner/main_banner_15.png';
 
 const AUTOPLAY_MS = 5000;
 
@@ -36,7 +40,7 @@ const Track = styled.div<{ $dragging: boolean }>`
   transition: ${({ $dragging }) => ($dragging ? 'none' : 'transform 240ms ease')};
 `;
 
-const Slide = styled.div<{ $image?: string }>`
+const Slide = styled.div<{ $image?: string; $mobileImage?: string }>`
   height: clamp(280px, 28vw, 420px);
   position: relative;
   flex: 0 0 100%;
@@ -51,6 +55,13 @@ const Slide = styled.div<{ $image?: string }>`
 
   @media (max-width: 900px) {
     padding: 22px;
+    background: ${({ $mobileImage, $image }) =>
+      $mobileImage
+        ? `linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%), url(${$mobileImage}) center/cover no-repeat`
+        : $image
+          ? `linear-gradient(to right, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%), url(${$image}) center/cover no-repeat`
+          : `radial-gradient(circle at 15% 35%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
+            linear-gradient(120deg, rgba(10, 28, 54, 0.95), rgba(12, 12, 12, 0.88))`};
   }
 `;
 
@@ -160,16 +171,19 @@ const ArrowIcon = ({ dir }: { dir: 'left' | 'right' }) => (
 const slides = [
   {
     image: mainBanner1,
+    mobileImage: mobileBanner1,
     // title: '출석 이벤트',
     // sub: '배너 영역(이미지 연결 전) · 텍스트/이미지는 API 또는 CMS 연결 가능',
   },
   {
     image: mainBanner2,
+    mobileImage: mobileBanner2,
     // title: '카지노 & 슬롯',
     // sub: '상단 네비 아래, 배너는 고정 위치로 구성',
   },
   {
     image: mainBanner3,
+    mobileImage: mobileBanner3,
     // title: '공지/이벤트',
     // sub: '원하시면 버튼/도트/자동재생도 추가 가능',
   },
@@ -288,7 +302,12 @@ const ClientHeroBanner = () => {
             style={{ transform: `translateX(calc(${-index * 100}% + ${dragOffsetPx}px))` }}
           >
             {slides.map((s, i) => (
-              <Slide key={i} $image={s.image} aria-label={`banner ${i + 1}`}>
+              <Slide
+                key={i}
+                $image={s.image}
+                $mobileImage={s.mobileImage}
+                aria-label={`banner ${i + 1}`}
+              >
                 {/* <Title>{s.title}</Title>
                 <Sub>{s.sub}</Sub> */}
               </Slide>
