@@ -740,4 +740,66 @@ export const agGridStyles = css`
   /* ag-cell ag-cell-normal-height ag-cell-value ag-cell-focus center ag-cell-not-inline-editing {
     padding: 2px !important;
   } */
+
+  /* =============================================
+     Pinned Bottom Row (합계 행) 스타일
+     ============================================= */
+
+  /* 공통 스타일 */
+  .ag-theme-material .ag-row-pinned {
+    font-weight: 600 !important;
+    border-top: 1px solid rgba(145, 158, 171, 0.24) !important;
+  }
+
+  /* 라이트모드 기본 */
+  body[data-theme='light'] .ag-theme-material .ag-row-pinned {
+    background-color: #f1f5f9 !important;
+  }
+  body[data-theme='light'] .ag-theme-material .ag-row-pinned .ag-cell {
+    color: #1e293b !important;
+  }
+
+  /* 다크모드 기본 */
+  body[data-theme='dark'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(145, 158, 171, 0.16) !important;
+  }
+  body[data-theme='dark'] .ag-theme-material .ag-row-pinned .ag-cell {
+    color: #ffffff !important;
+  }
+
+  /* 라이트모드 + Green 브랜드 */
+  body[data-theme='light'][data-brand='green'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(0, 171, 85, 0.08) !important;
+    border-top-color: rgba(0, 171, 85, 0.24) !important;
+  }
+
+  /* 라이트모드 + Blue 브랜드 */
+  body[data-theme='light'][data-brand='blue'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(25, 118, 210, 0.08) !important;
+    border-top-color: rgba(25, 118, 210, 0.24) !important;
+  }
+
+  /* 라이트모드 + Purple 브랜드 */
+  body[data-theme='light'][data-brand='purple'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(124, 9, 206, 0.08) !important;
+    border-top-color: rgba(124, 9, 206, 0.24) !important;
+  }
+
+  /* 다크모드 + Green 브랜드 */
+  body[data-theme='dark'][data-brand='green'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(0, 171, 85, 0.16) !important;
+    border-top-color: rgba(0, 171, 85, 0.32) !important;
+  }
+
+  /* 다크모드 + Blue 브랜드 */
+  body[data-theme='dark'][data-brand='blue'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(25, 118, 210, 0.16) !important;
+    border-top-color: rgba(25, 118, 210, 0.32) !important;
+  }
+
+  /* 다크모드 + Purple 브랜드 */
+  body[data-theme='dark'][data-brand='purple'] .ag-theme-material .ag-row-pinned {
+    background-color: rgba(124, 9, 206, 0.16) !important;
+    border-top-color: rgba(124, 9, 206, 0.32) !important;
+  }
 `;

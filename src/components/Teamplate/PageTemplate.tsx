@@ -35,6 +35,8 @@ export interface PageTemplateProps {
   isInfiniteScroll?: boolean;
   suppressRowTransform?: boolean;
   showPinnedBottom?: boolean;
+  /** 커스텀 총합 행 데이터 (외부에서 직접 계산해서 전달) */
+  customTotalRowData?: Record<string, any>;
   subSelect?: React.ReactNode;
   totalCount?: number;
   dataSource?: IDatasource;
@@ -87,6 +89,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
   tree = false,
   leftTreeProps,
   isRowSelectable,
+  customTotalRowData,
 }) => {
   // --- size prop에 따라 그리드 높이를 결정하는 로직 ---
   const gridHeight = useMemo(() => {
@@ -104,8 +107,11 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     }
   }, [size]);
 
-  // Total row 데이터 계산
+  // Total row 데이터 계산 (customTotalRowData가 있으면 우선 사용)
   const totalRowData = useMemo(() => {
+    // customTotalRowData가 있으면 우선 사용
+    if (customTotalRowData) return customTotalRowData;
+
     if (!showPinnedBottom || !columnDefs || !rowData || rowData.length === 0) return null;
 
     // 재귀적으로 모든 컬럼(그룹 내 하위 컬럼 포함) 수집
@@ -149,7 +155,7 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
     });
 
     return totalRow;
-  }, [showPinnedBottom, rowData]);
+  }, [showPinnedBottom, rowData, customTotalRowData]);
 
   // 스크롤 감지 상태
   const [hasScroll, setHasScroll] = useState(false);
@@ -196,15 +202,19 @@ const PageTemplate: React.FC<PageTemplateProps> = ({
 
   // pinnedBottom 또는 일반 rowData에 추가할지 결정
   const pinnedBottomRowData = useMemo(() => {
+    // customTotalRowData가 있으면 항상 하단 고정 사용
+    if (customTotalRowData) return [customTotalRowData];
     return totalRowData && hasScroll ? [totalRowData] : [];
-  }, [totalRowData, hasScroll]);
+  }, [totalRowData, hasScroll, customTotalRowData]);
 
   const enhancedRowData = useMemo(() => {
+    // customTotalRowData가 있으면 rowData에 추가하지 않음 (항상 pinnedBottom 사용)
+    if (customTotalRowData) return rowData;
     if (!totalRowData || hasScroll || !rowData) return rowData;
 
     // 스크롤이 없을 때는 rowData에 Total을 추가
     return [...rowData, { ...totalRowData, isTotal: true }];
-  }, [rowData, totalRowData, hasScroll]);
+  }, [rowData, totalRowData, hasScroll, customTotalRowData]);
 
   // 편집 가능한 컬럼에 대해 헤더 스타일 적용
   const editColumnDefs = columnDefs?.map((col) => col);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
@@ -77,7 +77,11 @@ const GameRecordDailyPage: React.FC = () => {
       field: 'no',
       headerName: 'No',
       width: 60,
-      valueGetter: (params) => (params.node?.rowIndex ?? 0) + 1,
+      valueGetter: (params) => {
+        // pinnedBottomRow (합계 행)인 경우 '합계' 표시
+        if (params.node?.rowPinned === 'bottom') return '합계';
+        return (params.node?.rowIndex ?? 0) + 1;
+      },
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_id',
@@ -144,6 +148,38 @@ const GameRecordDailyPage: React.FC = () => {
       },
     }),
   ];
+
+  // 총합 행 데이터 계산
+  const customTotalRowData = useMemo(() => {
+    if (!rowData || rowData.length === 0) return undefined;
+
+    const totals = {
+      no: '합계',
+      user_id: '',
+      bet_amount: 0,
+      bet_count: 0,
+      win_amount: 0,
+      win_count: 0,
+      net_amount: 0,
+      rtp: '-',
+    };
+
+    // 숫자 필드 합계 계산
+    for (const row of rowData) {
+      totals.bet_amount += Number(row.bet_amount) || 0;
+      totals.bet_count += Number(row.bet_count) || 0;
+      totals.win_amount += Number(row.win_amount) || 0;
+      totals.win_count += Number(row.win_count) || 0;
+      totals.net_amount += Number(row.net_amount) || 0;
+    }
+
+    // RTP 계산: 총 당첨 / 총 베팅 * 100
+    if (totals.bet_amount > 0) {
+      totals.rtp = ((totals.win_amount / totals.bet_amount) * 100).toFixed(2) + '%';
+    }
+
+    return totals;
+  }, [rowData]);
 
   const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {
@@ -291,7 +327,7 @@ const GameRecordDailyPage: React.FC = () => {
 
   return (
     <PageTemplate
-      title="일별 집계"
+      title="날짜별 기록"
       columnDefs={columnDefs}
       rowData={rowData}
       searchComponent={searchComponent}
@@ -309,6 +345,7 @@ const GameRecordDailyPage: React.FC = () => {
       }}
       rowSelection="single"
       size="one-search-no-button"
+      customTotalRowData={customTotalRowData}
     />
   );
 };
