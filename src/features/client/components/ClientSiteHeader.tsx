@@ -20,7 +20,7 @@ import { Service } from '@/models/common/Service';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useClientBalanceStore, type ClientBalance } from '@/store/clientBalance';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
-import { disconnectUserSocket } from '@/utils/userConnectionSocket';
+import { disconnectUserSocket, connectUserSocket } from '@/utils/userConnectionSocket';
 
 type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox';
 type MobileMenuKey = MenuKey | 'login';
@@ -469,6 +469,9 @@ const ClientSiteHeader = () => {
       const payload = res.data;
       const next = parseBalance(payload);
       setBalance(next);
+
+      // 로그인 상태면 회원 접속 WebSocket 연결 (새로고침 대응)
+      connectUserSocket();
     } finally {
       setBalanceLoading(false);
     }
