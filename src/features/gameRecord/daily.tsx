@@ -56,7 +56,7 @@ const GameRecordDailyPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowData, setRowData] = useState<GameStatDaily[]>([]);
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(() => getInitialGroupKey());
-  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(7, 'day'));
+  const [startRangeDate, setStartRangeDate] = useState<Dayjs | null>(dayjs().subtract(3, 'day'));
   const [endRangeDate, setEndRangeDate] = useState<Dayjs | null>(dayjs());
 
   // 복원할 스크롤 위치(첫 표시 row index)
@@ -82,6 +82,11 @@ const GameRecordDailyPage: React.FC = () => {
         if (params.node?.rowPinned === 'bottom') return '합계';
         return (params.node?.rowIndex ?? 0) + 1;
       },
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'stat_date',
+      headerName: '날짜',
+      width: 150,
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_id',
@@ -141,10 +146,9 @@ const GameRecordDailyPage: React.FC = () => {
       headerName: 'RTP',
       width: 100,
       valueGetter: (params) => {
-        const bet = Number(params.data?.bet_amount) || 0;
-        const win = Number(params.data?.win_amount) || 0;
-        if (bet === 0) return '-';
-        return ((win / bet) * 100).toFixed(2) + '%';
+        const rtp = params.data?.rtp;
+        if (!rtp || rtp === '-') return '-';
+        return String(rtp).includes('%') ? rtp : rtp + '%';
       },
     }),
   ];
@@ -155,6 +159,7 @@ const GameRecordDailyPage: React.FC = () => {
 
     const totals = {
       no: '합계',
+      stat_date: '',
       user_id: '',
       bet_amount: 0,
       bet_count: 0,
@@ -183,7 +188,7 @@ const GameRecordDailyPage: React.FC = () => {
 
   const { control, handleSubmit, getValues } = useForm<FormValues>({
     defaultValues: {
-      startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
+      startDate: dayjs().subtract(3, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
       userId: '',
     },

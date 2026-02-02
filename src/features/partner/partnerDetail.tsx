@@ -300,7 +300,7 @@ const PartnerDetail: React.FC = () => {
         <DepositWithdrawTab userId={detail?.user_id} groupKey={detail?.group_key} />
       </TabPanel>
       <TabPanel value={tabIndex} index={5}>
-        <GameHistoryTab />
+        <GameHistoryTab groupKey={detail?.group_key} />
       </TabPanel>
     </Box>
   );

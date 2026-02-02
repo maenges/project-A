@@ -44,6 +44,7 @@ const AlTransfer: React.FC = () => {
   ): string => {
     if (value === null || value === undefined) return '';
     const stringValue = String(value);
+    console.log('getLabelByValue', value, stringValue);
 
     const exact = options.find((o) => String(o.value) === stringValue);
     if (exact) return exact.label;
@@ -66,7 +67,7 @@ const AlTransfer: React.FC = () => {
           trans_permission: permission,
           trans_key: row?.trans_key,
           user_key: row?.user_key,
-          trans_type: row?.trans_type,
+          trans_type: row?.trans_type_original || row?.trans_type,
           trans_amount: row?.trans_amount,
           trans_before_amount: row?.trans_before_amount,
         },
@@ -222,7 +223,7 @@ const AlTransfer: React.FC = () => {
                 color: 'success.main',
               }}
             >
-              완료
+              승인
             </Box>
           );
         }
@@ -321,6 +322,7 @@ const AlTransfer: React.FC = () => {
       const data = Array.isArray(res.data) ? res.data : [];
       const mapped = data.map((row: any) => ({
         ...row,
+        trans_type_original: row?.trans_type, // 원본 값 보존
         trans_type: getLabelByValue(transStatusOptions, row?.trans_type),
       }));
 
@@ -381,7 +383,7 @@ const AlTransfer: React.FC = () => {
   return (
     <>
       <PageTemplate
-        title="알 이동"
+        title="충전/환전"
         columnDefs={columnDefs}
         rowData={rowData}
         searchComponent={searchComponent}

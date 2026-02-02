@@ -18,17 +18,63 @@ import dream_c from '@/assets/images/logo/casino/dream.png';
 import sa_c from '@/assets/images/logo/casino/sa.png';
 // import oriental_c from '@/assets/images/logo/casino/oriental.png';
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+// 슬롯 이미지
+import slot_1x2 from '@/assets/images/slot/slot_1x2.png';
+import slot_belatra from '@/assets/images/slot/slot_belatra.png';
+import slot_bfgames from '@/assets/images/slot/slot_bfgames.png';
+import slot_booongo from '@/assets/images/slot/slot_booongo.png';
+import slot_btg from '@/assets/images/slot/slot_btg.png';
+import slot_conceptgaming from '@/assets/images/slot/slot_conceptgaming.png';
+import slot_cq9 from '@/assets/images/slot/slot_cq9.png';
+import slot_egp from '@/assets/images/slot/slot_egp.png';
+import slot_gameart from '@/assets/images/slot/slot_gameart.png';
+import slot_gamefishglobal from '@/assets/images/slot/slot_gamefishglobal.png';
+import slot_habanero from '@/assets/images/slot/slot_habanero.png';
+import slot_hacksaw from '@/assets/images/slot/slot_hacksaw_slot.png';
+import slot_kagaming from '@/assets/images/slot/slot_kagaming.png';
+import slot_legaplay from '@/assets/images/slot/slot_legaplay.png';
+import slot_macaw from '@/assets/images/slot/slot_macaw.png';
+import slot_micro from '@/assets/images/slot/slot_MICRO_Slot.png';
+import slot_mplay from '@/assets/images/slot/slot_mplay.png';
+import slot_netent from '@/assets/images/slot/slot_netent.png';
+import slot_nlc from '@/assets/images/slot/slot_nlc.png';
+import slot_onetouch from '@/assets/images/slot/slot_onetouch.png';
+import slot_patagonia from '@/assets/images/slot/slot_patagonia.png';
+import slot_playngo from '@/assets/images/slot/slot_PLAYNGO.png';
+import slot_playpearls from '@/assets/images/slot/slot_playpearls.png';
+import slot_playson from '@/assets/images/slot/slot_playson.png';
+import slot_pragmatic from '@/assets/images/slot/slot_pragmatic_slot.png';
+import slot_redrake from '@/assets/images/slot/slot_redrake.png';
+import slot_redtiger from '@/assets/images/slot/slot_redtiger.png';
+import slot_tomhorn from '@/assets/images/slot/slot_TOMHORN_SLOT.png';
+import slot_vibragaming from '@/assets/images/slot/slot_vibragaming.png';
+import slot_wazdan from '@/assets/images/slot/slot_wazdan.png';
+
+import { useEffect, useRef, useState, type CSSProperties, useMemo } from 'react';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 import { ClientBalanceEventDispatch } from '@/utils/clientBalanceEventBus';
 import { ClientAuthAddEventListeners } from '@/utils/clientAuthEventBus';
 import { useGameFrameStore } from '@/store/gameFrame';
+import gameCodeData from '@/utils/gameCodeV2.json';
+
+// 게임 코드 데이터 타입
+type GameCodeMap = Record<string, Record<string, string[]>>;
 
 export type ProviderTab = 'casino' | 'slot';
 
 type Platform = 'WEB' | 'MOBILE';
+
+// 게임 아이템 타입
+type GameItem = {
+  gameCode: string;
+  provider: string;
+  category: string;
+  nameEn: string;
+  nameKo: string;
+  imageUrl: string;
+};
 
 // 개발 중 sub(한글 라벨) 스타일을 한 곳에서 빠르게 조절하기 위한 기본값
 const SUB_DEV_STYLE = {
@@ -65,6 +111,244 @@ const Grid = styled.div`
   @media (max-width: 420px) {
     gap: 8px;
   }
+`;
+
+// 슬롯용 그리드 (이미지가 작으므로 더 많은 열로 배치)
+const SlotGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 420px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+`;
+
+// 슬롯용 카드 (이미지 꽉 채우기)
+const SlotCard = styled.button`
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(40, 40, 40, 0.92), rgba(10, 10, 10, 0.92));
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  padding: 0;
+  cursor: pointer;
+  transform: translateZ(0);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+  will-change: transform;
+
+  .slotImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .slotLabel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 24px 8px 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 205, 120, 0.95);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    border-color: rgba(255, 205, 120, 0.35);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.01);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 205, 120, 0.65);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  @media (max-width: 700px) {
+    border-radius: 10px;
+
+    .slotLabel {
+      font-size: 12px;
+      padding: 20px 6px 8px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .slotLabel {
+      font-size: 11px;
+    }
+  }
+`;
+
+// 게임 목록 모달 스타일
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+`;
+
+const ModalContent = styled.div`
+  background: linear-gradient(180deg, #1a1a1f, #0f0f13);
+  border: 1px solid rgba(255, 205, 120, 0.2);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255, 205, 120, 0.95);
+  }
+`;
+
+const ModalCloseBtn = styled.button`
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 28px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 150ms;
+
+  &:hover {
+    color: rgba(255, 205, 120, 0.95);
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+`;
+
+const GameGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  @media (max-width: 1000px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  @media (max-width: 800px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+`;
+
+const GameCard = styled.button`
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0;
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  transition:
+    transform 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gameLabel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 20px 6px 8px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    border-color: rgba(255, 205, 120, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+`;
+
+const EmptyMessage = styled.div`
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
 `;
 
 const Card = styled.button<{ $bg?: string }>`
@@ -287,6 +571,28 @@ const useIsMobile = () => {
 const ClientProviderGrid = ({ tab }: Props) => {
   const isMobile = useIsMobile();
 
+  // 슬롯 게임 목록 모달 상태
+  const [selectedSlotProvider, setSelectedSlotProvider] = useState<string | null>(null);
+  const [selectedSlotName, setSelectedSlotName] = useState<string>('');
+
+  // 선택된 슬롯 provider의 게임 목록
+  const slotGameList = useMemo<GameItem[]>(() => {
+    if (!selectedSlotProvider) return [];
+
+    const gameMap = gameCodeData as GameCodeMap;
+    const providerData = gameMap[selectedSlotProvider];
+    if (!providerData) return [];
+
+    return Object.entries(providerData).map(([gameCode, arr]) => ({
+      gameCode,
+      provider: arr[0] ?? '',
+      category: arr[1] ?? '',
+      nameEn: arr[2] ?? '',
+      nameKo: arr[3] ?? '',
+      imageUrl: arr[4] ?? '',
+    }));
+  }, [selectedSlotProvider]);
+
   const platform: Platform = isMobile ? 'MOBILE' : 'WEB';
 
   const popupClosePollerRef = useRef<number | null>(null);
@@ -365,7 +671,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
     return popup;
   };
 
-  const launchGame = async (name: string) => {
+  const launchGame = async (name: string, game: string = '') => {
     // 모바일 브라우저는 팝업(크기/위치 제어)이 불안정하거나 새 탭으로 열리는 경우가 많아서
     // 모바일에서는 팝업 대신 현재 페이지에서 게임 URL로 이동합니다.
     const usePopup = platform === 'WEB';
@@ -395,6 +701,8 @@ const ClientProviderGrid = ({ tab }: Props) => {
         queryParams: {
           name,
           platform,
+          game,
+          method: name === 'netent' ? 'transfer' : '',
         },
       },
     });
@@ -586,10 +894,47 @@ const ClientProviderGrid = ({ tab }: Props) => {
     },
   ];
 
-  // 슬롯은 아직 미등록 상태: 추후 slotCards를 채우면 됩니다.
-  const slotCards: typeof casinoCards = [];
+  // 슬롯 카드 목록 (gameKey: gameCodeV2.json의 키, name: API 게임 런칭용)
+  const slotCards: Array<(typeof casinoCards)[number] & { gameKey?: string }> = [
+    { name: 'netent', gameKey: 'netent', sub: '넷엔트', labelImage: slot_netent },
+    { name: 'redtiger', gameKey: 'redtiger', sub: '레드타이거', labelImage: slot_redtiger },
+    {
+      name: 'pragmatic_slot',
+      gameKey: 'pragmatic_slot',
+      sub: '프라그마틱 슬롯',
+      labelImage: slot_pragmatic,
+    },
+    { name: 'cq9_slot', gameKey: 'cq9', sub: 'CQ9 슬롯', labelImage: slot_cq9 },
+    { name: 'TOMHORN_SLOT', gameKey: 'TOMHORN_SLOT', sub: '탐혼 슬롯', labelImage: slot_tomhorn },
+    { name: 'booongo', gameKey: 'booongo', sub: '부옹고', labelImage: slot_booongo },
+    { name: 'playson', sub: '플레이손', labelImage: slot_playson },
+    { name: 'habanero', gameKey: 'habanero', sub: '하바네로', labelImage: slot_habanero },
+    { name: '1x2gaming', sub: '1x2 게이밍', labelImage: slot_1x2 },
+    { name: 'belatra', sub: '벨라트라', labelImage: slot_belatra },
+    { name: 'bfgames', sub: 'BF 게임즈', labelImage: slot_bfgames },
+    { name: 'conceptgaming', sub: '컨셉 게이밍', labelImage: slot_conceptgaming },
+    { name: 'egp', sub: 'EGP 슬롯', labelImage: slot_egp },
+    { name: 'gameart', sub: '게임아트', labelImage: slot_gameart },
+    { name: 'gamefishglobal', sub: '게임피쉬 글로벌', labelImage: slot_gamefishglobal },
+    { name: 'kagaming', sub: 'KA 게이밍', labelImage: slot_kagaming },
+    { name: 'legaplay', sub: '레가플레이', labelImage: slot_legaplay },
+    { name: 'macaw', sub: '마카우', labelImage: slot_macaw },
+    { name: 'mplay', sub: '엠플레이', labelImage: slot_mplay },
+    { name: 'onetouch', sub: '원터치', labelImage: slot_onetouch },
+    { name: 'patagonia', sub: '파타고니아', labelImage: slot_patagonia },
+    { name: 'playpearls', sub: '플레이펄스', labelImage: slot_playpearls },
+    { name: 'redrake', sub: '레드레이크', labelImage: slot_redrake },
+    { name: 'vibragaming', sub: '비브라 게이밍', labelImage: slot_vibragaming },
+    { name: 'wazdan', sub: '와즈단', labelImage: slot_wazdan },
+    { name: 'PLAYNGO', gameKey: 'PLAYNGO', sub: '플레이앤고', labelImage: slot_playngo },
+    { name: 'MICRO_Slot', gameKey: 'MICRO_Slot', sub: '마이크로 슬롯', labelImage: slot_micro },
+    { name: 'btg', gameKey: 'btg', sub: '빅타임 게이밍', labelImage: slot_btg },
+    { name: 'nlc', gameKey: 'nlc', sub: '노리밋시티', labelImage: slot_nlc },
+    { name: 'hacksaw', gameKey: 'hacksaw_slot', sub: '핵쏘 게이밍', labelImage: slot_hacksaw },
+  ];
 
   const cards = tab === 'slot' ? slotCards : casinoCards;
+  const isSlot = tab === 'slot';
 
   return (
     <Wrap aria-label="provider grid">
@@ -607,6 +952,27 @@ const ClientProviderGrid = ({ tab }: Props) => {
         >
           슬롯 목록은 아직 준비 중입니다.
         </div>
+      ) : isSlot ? (
+        <SlotGrid>
+          {slotCards.map((c) => (
+            <SlotCard
+              key={c.name}
+              type="button"
+              onClick={() => {
+                // gameKey가 있으면 모달로 게임 목록 표시, 없으면 바로 게임 런칭
+                if (c.gameKey) {
+                  setSelectedSlotProvider(c.gameKey);
+                  setSelectedSlotName(c.sub);
+                } else {
+                  void launchGame(c.name, '');
+                }
+              }}
+            >
+              <img className="slotImage" src={c.labelImage} alt={`${c.name} logo`} />
+              <span className="slotLabel">{c.sub}</span>
+            </SlotCard>
+          ))}
+        </SlotGrid>
       ) : (
         <Grid>
           {cards.map((c, idx) => (
@@ -618,7 +984,7 @@ const ClientProviderGrid = ({ tab }: Props) => {
                   ? (mobileCardBgs[idx] ?? mobileCardBgs[0])
                   : desktopCardBgs[idx % desktopCardBgs.length]
               }
-              onClick={() => void launchGame(c.name)}
+              onClick={() => void launchGame(c.name, '')}
             >
               <div className="label">
                 <img
@@ -681,6 +1047,46 @@ const ClientProviderGrid = ({ tab }: Props) => {
             </Card>
           ))}
         </Grid>
+      )}
+
+      {/* 슬롯 게임 목록 모달 */}
+      {selectedSlotProvider && (
+        <ModalOverlay onClick={() => setSelectedSlotProvider(null)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <h2>{selectedSlotName} 게임 목록</h2>
+              <ModalCloseBtn onClick={() => setSelectedSlotProvider(null)}>×</ModalCloseBtn>
+            </ModalHeader>
+            <ModalBody>
+              {slotGameList.length === 0 ? (
+                <EmptyMessage>게임 목록이 없습니다.</EmptyMessage>
+              ) : (
+                <GameGrid>
+                  {slotGameList.map((game) => (
+                    <GameCard
+                      key={game.gameCode}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSlotProvider(null);
+                        void launchGame(selectedSlotProvider!, game.gameCode);
+                      }}
+                    >
+                      <img
+                        src={game.imageUrl}
+                        alt={game.nameKo || game.nameEn}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="55" text-anchor="middle" fill="%23666" font-size="12">No Image</text></svg>';
+                        }}
+                      />
+                      <span className="gameLabel">{game.nameKo || game.nameEn}</span>
+                    </GameCard>
+                  ))}
+                </GameGrid>
+              )}
+            </ModalBody>
+          </ModalContent>
+        </ModalOverlay>
       )}
     </Wrap>
   );
