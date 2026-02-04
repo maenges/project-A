@@ -1,46 +1,126 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { MenuInfo, MenuKey, NoticeItem } from '../ClientMenu.types';
+import styled from 'styled-components';
+import type { MenuInfo, MenuKey } from '../ClientMenu.types';
+import { callApi, Method } from '@/utils/ApiUtil';
+import { Service } from '@/models/common/Service';
 import {
   NoticeCell,
   NoticeCellTitle,
   NoticeHead,
   NoticeInner,
   NoticePanel,
-  NoticeRow,
   NoticeTable,
   NoticeTitle,
   Wrap,
 } from '../ClientMenu.styles';
+
+const NoticeRowWrapper = styled.div<{ $active?: boolean }>`
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: ${({ $active }) => ($active ? 'rgba(255, 205, 120, 0.10)' : 'transparent')};
+
+  &:hover {
+    background: ${({ $active }) =>
+      $active ? 'rgba(255, 205, 120, 0.10)' : 'rgba(255, 255, 255, 0.03)'};
+  }
+`;
+
+const NoticeRowHeader = styled.button`
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 1fr 160px 170px;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr 88px;
+    .author {
+      display: none;
+    }
+  }
+`;
+
+const NoticeContent = styled.div<{ $expanded: boolean }>`
+  max-height: ${({ $expanded }) => ($expanded ? '500px' : '0')};
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  background: rgba(0, 0, 0, 0.25);
+`;
+
+const NoticeContentInner = styled.div`
+  padding: 16px 20px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.6;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
+const stripHtmlTags = (html: string): string => {
+  return html.replace(/<[^>]*>/g, '').trim();
+};
 
 type Props = {
   menuKey: MenuKey;
   menu: MenuInfo;
 };
 
+type NoticeItem = {
+  notice_key: string;
+  notice_title: string;
+  notice_content: string;
+  notice_target_type: string;
+  notice_order: string;
+  created: string;
+  author?: string;
+};
+
+const isToday = (dateString: string): boolean => {
+  const date = new Date(dateString);
+  const today = new Date();
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+};
+
 const ClientNoticePage = ({ menu }: Props) => {
   const location = useLocation();
   const selectedTitle = (location.state as { title?: string } | null)?.title;
 
-  const noticeItems: NoticeItem[] = useMemo(
-    () => [
-      {
-        title: '롤링비 미지급 게임 안내',
-        author: '관리자',
-        date: '2025-06-29 19:29:40',
-        isNew: true,
-      },
-      {
-        title: '비정상적인 이용에 대한 제재 안내',
-        author: '관리자',
-        date: '2024-11-29 12:00:53',
-        isNew: true,
-      },
-      { title: '충전 및 환전 규정', author: '관리자', date: '2023-04-27 12:10:34', isNew: true },
-      { title: '라이브 카지노 및 슬롯 규정', author: '관리자', date: '2023-04-27 12:08:54' },
-    ],
-    []
-  );
+  const [noticeItems, setNoticeItems] = useState<NoticeItem[]>([]);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+
+  const handleRowClick = (noticeKey: string) => {
+    setExpandedKey((prev) => (prev === noticeKey ? null : noticeKey));
+  };
+
+  const fetchNoticeList = async () => {
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/noticeList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      return;
+    }
+
+    setNoticeItems(res.data ?? []);
+  };
+
+  useEffect(() => {
+    fetchNoticeList();
+  }, []);
 
   return (
     <>
@@ -56,22 +136,33 @@ const ClientNoticePage = ({ menu }: Props) => {
                 </div>
                 <div style={{ textAlign: 'right' }}>날짜</div>
               </NoticeHead>
-              {noticeItems.map((x) => (
-                <NoticeRow
-                  key={x.title}
-                  type="button"
-                  $active={Boolean(selectedTitle && x.title.includes(selectedTitle))}
-                  onClick={() => window.alert(`공지 상세(데모): ${x.title}`)}
-                >
-                  <NoticeCellTitle>
-                    <span className="text">
-                      {x.title} {x.isNew ? <span className="new">NEW</span> : null}
-                    </span>
-                  </NoticeCellTitle>
-                  <NoticeCell className="author">{x.author}</NoticeCell>
-                  <NoticeCell>{x.date}</NoticeCell>
-                </NoticeRow>
-              ))}
+              {noticeItems.map((x) => {
+                const isExpanded = expandedKey === x.notice_key;
+                return (
+                  <NoticeRowWrapper
+                    key={x.notice_key}
+                    $active={
+                      Boolean(selectedTitle && x.notice_title.includes(selectedTitle)) || isExpanded
+                    }
+                  >
+                    <NoticeRowHeader type="button" onClick={() => handleRowClick(x.notice_key)}>
+                      <NoticeCellTitle>
+                        <span className="text">
+                          {x.notice_title}{' '}
+                          {isToday(x.created) ? <span className="new">NEW</span> : null}
+                        </span>
+                      </NoticeCellTitle>
+                      <NoticeCell className="author">{x.author ?? '관리자'}</NoticeCell>
+                      <NoticeCell>{x.created}</NoticeCell>
+                    </NoticeRowHeader>
+                    <NoticeContent $expanded={isExpanded}>
+                      <NoticeContentInner>
+                        {stripHtmlTags(x.notice_content) || '내용이 없습니다.'}
+                      </NoticeContentInner>
+                    </NoticeContent>
+                  </NoticeRowWrapper>
+                );
+              })}
             </NoticeTable>
           </NoticeInner>
         </NoticePanel>

@@ -1,7 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { MenuInfo, MenuKey, WithdrawHistoryItem } from '../ClientMenu.types';
-import { formatWon, normalizeAmount, parseAmountText } from '../ClientMenu.utils';
+import { normalizeAmount, parseAmountText } from '../ClientMenu.utils';
+import { useClientBalanceStore } from '@/store/clientBalance';
+import { callApi, Method } from '@utils/ApiUtil';
+import { Service } from '@models/common/Service';
+import { AccountKeyOptions } from '@models/common/CommonSelectCodes';
 import {
+  AlertBtn,
+  AlertContainer,
+  AlertIcon,
+  AlertMessage,
+  AlertOverlay,
   AmountGrid,
   Badge,
   DepositInner,
@@ -19,6 +28,7 @@ import {
   HistoryTable,
   HistoryTitle,
   MiniBtn,
+  SelectField,
   SubmitBtn,
   SubmitWrap,
   ValueText,
@@ -30,34 +40,81 @@ type Props = {
   menu: MenuInfo;
 };
 
-const INITIAL_WITHDRAW_HISTORY: WithdrawHistoryItem[] = [
-  {
-    withdrawer: 'mmpuu02',
-    amount: 870_000,
-    requestedAt: '2026-01-22 05:22:41',
-    processedAt: '2026-01-22 05:27:32',
-    result: '처리완료',
-  },
-  {
-    withdrawer: 'mmpuu02',
-    amount: 500_000,
-    requestedAt: '2026-01-16 03:06:07',
-    processedAt: '2026-01-16 03:10:24',
-    result: '처리완료',
-  },
-];
+type AlertState = {
+  open: boolean;
+  type: 'success' | 'error' | 'info';
+  message: string;
+};
 
 const ClientWithdrawPage = (_props: Props) => {
-  const balance = 2346;
+  const { balance: clientBalance } = useClientBalanceStore();
+  const balance = clientBalance?.money ?? 0;
   const quickAmounts = [10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000];
 
-  const [withdrawHistory, setWithdrawHistory] =
-    useState<WithdrawHistoryItem[]>(INITIAL_WITHDRAW_HISTORY);
-  const [withdrawPassword, setWithdrawPassword] = useState('');
   const [amountText, setAmountText] = useState('0');
   const [bankName, setBankName] = useState('');
   const [accountHolder, setAccountHolder] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [withdrawHistory, setWithdrawHistory] = useState<WithdrawHistoryItem[]>([]);
+  const [alert, setAlert] = useState<AlertState>({ open: false, type: 'info', message: '' });
+
+  const showAlert = (type: AlertState['type'], message: string) => {
+    setAlert({ open: true, type, message });
+  };
+
+  const closeAlert = () => {
+    setAlert((prev) => ({ ...prev, open: false }));
+  };
+
+  const fetchExchangeList = async () => {
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/exchangeList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      showAlert('error', res.HeaderMsg || '조회에 실패했습니다.');
+      return;
+    }
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const data = res.data ?? [];
+    const mappedData = (Array.isArray(data) ? data : []).map((item: any) => {
+      const bankOption = AccountKeyOptions.find((opt) => opt.value === item.trans_bank_key);
+      return {
+        bankName: bankOption ? bankOption.label : item.trans_bank_key || '-',
+        accountHolder: item.trans_bank_won || '-',
+        amount: Number(item.trans_amount) || 0,
+        requestedAt: item.created ? formatDate(item.created) : '-',
+        processedAt:
+          item.trans_permission !== null && item.updated ? formatDate(item.updated) : undefined,
+        result:
+          item.trans_permission === null
+            ? '처리중'
+            : item.trans_permission === true
+              ? '처리완료'
+              : '승인거절',
+      };
+    });
+    setWithdrawHistory(mappedData);
+  };
+
+  useEffect(() => {
+    fetchExchangeList();
+  }, []);
 
   return (
     <>
@@ -101,25 +158,15 @@ const ClientWithdrawPage = (_props: Props) => {
               </FormRow>
 
               <FormRow>
-                <FormLabel>환전 비밀번호</FormLabel>
-                <FieldShort
-                  value={withdrawPassword}
-                  onChange={(e) => setWithdrawPassword(e.target.value)}
-                  placeholder=""
-                  type="password"
-                  inputMode="numeric"
-                  autoComplete="off"
-                />
-              </FormRow>
-
-              <FormRow>
                 <FormLabel>은행명</FormLabel>
-                <FieldShort
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
-                  placeholder=""
-                  autoComplete="off"
-                />
+                <SelectField value={bankName} onChange={(e) => setBankName(e.target.value)}>
+                  <option value="">선택</option>
+                  {AccountKeyOptions.filter((opt) => opt.value !== 'ALL').map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </SelectField>
               </FormRow>
 
               <FormRow>
@@ -147,77 +194,82 @@ const ClientWithdrawPage = (_props: Props) => {
             <SubmitWrap>
               <SubmitBtn
                 type="button"
-                onClick={() => {
+                $tone="gold"
+                onClick={async () => {
                   const amountValue = parseAmountText(amountText);
                   if (!amountValue) {
-                    window.alert('출금금액을 입력해주세요.');
+                    showAlert('error', '출금금액을 입력해주세요.');
                     return;
                   }
-                  if (!withdrawPassword.trim()) {
-                    window.alert('환전 비밀번호를 입력해주세요.');
+                  if (amountValue > balance) {
+                    showAlert('error', '출금가능금액을 초과했습니다.');
                     return;
                   }
                   if (!bankName.trim()) {
-                    window.alert('은행명을 입력해주세요.');
+                    showAlert('error', '은행명을 입력해주세요.');
                     return;
                   }
                   if (!accountHolder.trim()) {
-                    window.alert('예금주를 입력해주세요.');
+                    showAlert('error', '예금주를 입력해주세요.');
                     return;
                   }
                   if (!accountNumber.trim()) {
-                    window.alert('계좌번호를 입력해주세요.');
+                    showAlert('error', '계좌번호를 입력해주세요.');
                     return;
                   }
 
-                  window.alert(
-                    `환전신청(데모)\n- 환전금액: ${formatWon(amountValue)}\n- 은행: ${bankName}\n- 예금주: ${accountHolder}`
-                  );
+                  const res = await callApi({
+                    service: Service.POSTMAN,
+                    url: '/api/client/exchange',
+                    method: Method.POST,
+                    params: {
+                      bodyParams: {
+                        amount: amountValue,
+                        bankName: bankName,
+                        accountHolder: accountHolder,
+                        accountNumber: accountNumber,
+                      },
+                    },
+                    config: { isLoading: true },
+                  });
+
+                  if (res.successOrNot !== 'Y') {
+                    showAlert('error', res.HeaderMsg || '환전신청에 실패했습니다.');
+                    return;
+                  }
+
+                  showAlert('success', '환전신청이 완료되었습니다.');
+                  setAmountText('0');
+                  setBankName('');
+                  setAccountHolder('');
+                  setAccountNumber('');
+                  fetchExchangeList();
                 }}
               >
                 환전신청
               </SubmitBtn>
             </SubmitWrap>
 
-            <HistoryTitle>출금내역</HistoryTitle>
+            <HistoryTitle>환전내역</HistoryTitle>
             <HistoryTable aria-label="withdraw history">
               <HistoryScroll data-scroll={withdrawHistory.length > 5 ? 'true' : 'false'}>
                 <HistoryHead>
-                  <div>출금자명</div>
-                  <div style={{ textAlign: 'center' }}>신청금액</div>
+                  <div>은행명</div>
+                  <div>예금주</div>
+                  <div style={{ textAlign: 'center' }}>환전금액</div>
                   <div className="requested">신청일자</div>
                   <div className="processed">처리일자</div>
                   <div style={{ textAlign: 'center' }}>진행결과</div>
-                  <div style={{ textAlign: 'center' }}>삭제</div>
                 </HistoryHead>
                 <HistoryBody>
-                  {withdrawHistory.map((x) => (
-                    <HistoryRow key={`${x.withdrawer}-${x.requestedAt}-${x.amount}`}>
-                      <div>{x.withdrawer}</div>
+                  {withdrawHistory.map((x, index) => (
+                    <HistoryRow key={`${x.accountHolder}-${x.requestedAt}-${x.amount}-${index}`}>
+                      <div>{x.bankName}</div>
+                      <div>{x.accountHolder}</div>
                       <div className="amount">{x.amount.toLocaleString('ko-KR')} 원</div>
                       <div className="requested">{x.requestedAt}</div>
                       <div className="processed">{x.processedAt ?? '-'}</div>
                       <Badge>{x.result}</Badge>
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <MiniBtn
-                          type="button"
-                          $tone="gray"
-                          onClick={() =>
-                            setWithdrawHistory((prev) =>
-                              prev.filter(
-                                (row) =>
-                                  !(
-                                    row.withdrawer === x.withdrawer &&
-                                    row.requestedAt === x.requestedAt &&
-                                    row.amount === x.amount
-                                  )
-                              )
-                            )
-                          }
-                        >
-                          삭제
-                        </MiniBtn>
-                      </div>
                     </HistoryRow>
                   ))}
                 </HistoryBody>
@@ -226,6 +278,20 @@ const ClientWithdrawPage = (_props: Props) => {
           </DepositInner>
         </DepositPanel>
       </Wrap>
+
+      {alert.open && (
+        <AlertOverlay onClick={closeAlert}>
+          <AlertContainer $type={alert.type} onClick={(e) => e.stopPropagation()}>
+            <AlertIcon $type={alert.type}>
+              {alert.type === 'success' ? '✓' : alert.type === 'error' ? '!' : 'i'}
+            </AlertIcon>
+            <AlertMessage>{alert.message}</AlertMessage>
+            <AlertBtn $type={alert.type} onClick={closeAlert}>
+              확인
+            </AlertBtn>
+          </AlertContainer>
+        </AlertOverlay>
+      )}
     </>
   );
 };

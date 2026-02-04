@@ -22,7 +22,8 @@ export type DepositHistoryItem = {
 };
 
 export type WithdrawHistoryItem = {
-  withdrawer: string;
+  bankName: string;
+  accountHolder: string;
   amount: number;
   requestedAt: string;
   processedAt?: string;

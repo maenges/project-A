@@ -33,6 +33,17 @@ type FormValues = {
   macro_title: string;
 };
 
+// HTML 엔티티 디코딩 및 줄바꿈을 HTML로 변환
+const decodeHtmlEntities = (html: string): string => {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  const decoded = textarea.value;
+
+  // 줄바꿈을 <p> 태그로 변환
+  const paragraphs = decoded.split('\n').filter((line) => line.trim());
+  return paragraphs.map((p) => `<p>${p}</p>`).join('');
+};
+
 const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
   const theme = useTheme();
   const [content, setContent] = useState('');
@@ -72,15 +83,18 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
       notice_content: data.content || '',
       macro_title: (macroOptions[0]?.value as string) ?? '',
     }));
-    const initialMacroContent = macroOptions[0]?.content ?? '';
-    setContent(initialMacroContent || '');
+    // CKEditor 초기값을 문의 내용으로 설정 (HTML 디코딩)
+    const decoded = decodeHtmlEntities(data.content || '');
+    setContent(decoded);
   }, [data]);
 
   useEffect(() => {
     if (!selectedMacroValue) return;
+    // 직접 입력이면 기존 내용 유지, 매크로 선택시에만 덧씀움
+    if (selectedMacroValue === 'CUSTOM') return;
     const found = macroOptions.find((opt) => opt.value === selectedMacroValue);
     if (found) {
-      setContent(found.content || '');
+      setContent(decodeHtmlEntities(found.content || ''));
     }
   }, [selectedMacroValue, macroOptions]);
 
@@ -98,17 +112,6 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
             control={control}
             name="notice_title"
             label="제목"
-            width={480}
-            readOnly
-          />
-        </searchForm.Col>
-      </searchForm.Row>
-      <searchForm.Row>
-        <searchForm.Col>
-          <EtsInputComponent
-            control={control}
-            name="notice_content"
-            label="내용"
             width={480}
             readOnly
           />

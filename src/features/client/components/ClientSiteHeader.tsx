@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -11,6 +11,8 @@ import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
 import goldenLogoGif from '@/assets/images/logo/brand/golden7.png';
 import deposit from '@/assets/images/icon/deposit.svg';
 import withdraw from '@/assets/images/icon/withdraw.svg';
+import popup1 from '@/assets/images/popup/popup_1.png';
+import popup2 from '@/assets/images/popup/popup_2.png';
 import ClientLoginModal from './ClientLoginModal';
 import { ClientAuthAddEventListeners, ClientAuthEventDispatch } from '@/utils/clientAuthEventBus';
 import { ClientBalanceAddEventListeners } from '@/utils/clientBalanceEventBus';
@@ -18,9 +20,16 @@ import { callApi, Method } from '@/utils/ApiUtil';
 import { useGameFrameStore } from '@/store/gameFrame';
 import { Service } from '@/models/common/Service';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useClientBalanceStore, type ClientBalance } from '@/store/clientBalance';
+import {
+  useClientBalanceStore,
+  type ClientBalance,
+  isNoticeRead,
+  markNoticeRead,
+  clearExpiredNoticeReads,
+} from '@/store/clientBalance';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 import { disconnectUserSocket, connectUserSocket } from '@/utils/userConnectionSocket';
+import { useUnreadSupportStore } from '@/store/unreadSupport';
 
 type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox';
 type MobileMenuKey = MenuKey | 'login';
@@ -114,7 +123,20 @@ const Nav = styled.nav`
   }
 `;
 
-const NavItem = styled.button`
+const pulseAnimation = `
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 4px rgba(255, 205, 120, 0.4);
+      border-color: rgba(255, 205, 120, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 12px rgba(255, 205, 120, 0.8), 0 0 20px rgba(255, 205, 120, 0.4);
+      border-color: rgba(255, 205, 120, 0.9);
+    }
+  }
+`;
+
+const NavItem = styled.button<{ $pulse?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -128,6 +150,14 @@ const NavItem = styled.button`
   font-size: 14px;
   letter-spacing: -0.2px;
   cursor: pointer;
+
+  ${pulseAnimation}
+  ${({ $pulse }) =>
+    $pulse &&
+    `
+    animation: pulse-glow 1.5s ease-in-out infinite;
+    background: rgba(255, 205, 120, 0.12);
+  `}
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -417,18 +447,250 @@ const MobileCell = styled.button`
   }
 `;
 
+// 공지사항 팝업 스타일
+const NoticePopupOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 20px;
+  overflow-y: auto;
+
+  @media (max-width: 980px) {
+    align-items: center;
+    padding: 20px;
+  }
+
+  @media (min-width: 981px) {
+    /* PC에서 absolute 자식 요소의 기준점 */
+    position: fixed;
+  }
+`;
+
+// PC에서 각 팝업의 위치를 지정하는 wrapper
+const NoticePopupWrapper = styled.div<{ $index: number; $total: number }>`
+  display: flex;
+  align-items: flex-start;
+
+  /* PC: 각 팝업의 고정 위치 */
+  @media (min-width: 981px) {
+    position: absolute;
+    top: ${({ $index }) => {
+      // 각 팝업의 세로 위치를 다르게
+      if ($index % 3 === 0) return '150px';
+      if ($index % 3 === 1) return '180px';
+      return '40px';
+    }};
+    left: ${({ $index, $total }) => {
+      // 전체 팝업들을 중앙 정렬하기 위한 계산
+      const popupWidth = 320;
+      const gap = 20;
+      const totalWidth = $total * popupWidth + ($total - 1) * gap;
+      const startX = `calc(50% - ${totalWidth / 2}px)`;
+      return `calc(${startX} + ${$index * (popupWidth + gap)}px)`;
+    }};
+  }
+
+  @media (max-width: 980px) {
+    position: static;
+    margin-top: 0;
+  }
+`;
+
+const popupBackgrounds = [popup1, popup2];
+
+const NoticePopupContainer = styled.div<{ $bgIndex: number }>`
+  width: 320px;
+  aspect-ratio: 9 / 16;
+  max-height: 75vh;
+  background-image: url(${({ $bgIndex }) => popupBackgrounds[$bgIndex % 2]});
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 3px solid rgba(255, 205, 120, 0.8);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(255, 205, 120, 0.3),
+    0 20px 60px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+
+  /* 배경 이미지 위에 반투명 오버레이 */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 0;
+  }
+
+  /* 모든 자식 요소가 오버레이 위에 표시되도록 */
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 980px) {
+    width: 100%;
+    max-width: 400px;
+    max-height: 85vh;
+  }
+`;
+
+const NoticePopupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(255, 205, 120, 0.6);
+
+  h3 {
+    margin: 0;
+    color: #ffcd78;
+    font-size: 20px;
+    font-weight: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  }
+`;
+
+const NoticePopupCloseBtn = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+`;
+
+const NoticePopupBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+
+  .content {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.2px;
+  }
+`;
+
+const NoticePopupFooter = styled.div`
+  padding: 18px 24px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid rgba(255, 205, 120, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .date {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  }
+`;
+
+const NoticePopupBtn = styled.button`
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 205, 120, 0.9);
+  color: #121212;
+  font-size: 14px;
+  font-weight: 1000;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 205, 120, 1);
+  }
+`;
+
+type NoticeItem = {
+  notice_key: string;
+  notice_title: string;
+  notice_content: string;
+  notice_target_type: string;
+  notice_order: string;
+  created: string;
+};
+
+// HTML 태그 제거 유틸
+const stripHtmlTags = (html: string): string => {
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
 const ClientSiteHeader = () => {
   const [open, setOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginShowVisual, setLoginShowVisual] = useState(true);
   const [balanceLoading, setBalanceLoading] = useState(false);
+  const [noticePopupOpen, setNoticePopupOpen] = useState(false);
+  const [unreadNotices, setUnreadNotices] = useState<NoticeItem[]>([]);
+  const [currentNoticeIndex, setCurrentNoticeIndex] = useState(0);
+  const [closedNoticeKeys, setClosedNoticeKeys] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   const balance = useClientBalanceStore((s) => s.balance);
   const setBalance = useClientBalanceStore((s) => s.setBalance);
   const clearBalance = useClientBalanceStore((s) => s.clearBalance);
 
+  // 문의 미읽음 카운트 (깜빡임 용도)
+  const supportUnreadCount = useUnreadSupportStore((s) => s.unreadCount);
+
   const isLoggedIn = !!balance?.userId;
+
+  // 공지사항 조회 및 팝업 표시
+  const fetchAndShowNotices = useCallback(async () => {
+    // 만료된 읽음 처리 정리
+    clearExpiredNoticeReads();
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/noticeList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: false },
+    });
+
+    if (res.successOrNot !== 'Y') return;
+
+    const notices: NoticeItem[] = res.data ?? [];
+    // 읽지 않은 공지만 필터링
+    const unread = notices.filter((n) => !isNoticeRead(n.notice_key));
+
+    if (unread.length > 0) {
+      setUnreadNotices(unread);
+      setNoticePopupOpen(true);
+    }
+  }, []);
 
   const parseBalance = (raw: any): ClientBalance | null => {
     if (!raw || typeof raw !== 'object') return null;
@@ -472,6 +734,9 @@ const ClientSiteHeader = () => {
 
       // 로그인 상태면 회원 접속 WebSocket 연결 (새로고침 대응)
       connectUserSocket();
+
+      // balance 조회 성공 시 공지사항 체크 (시간 만료된 것도 다시 표시)
+      void fetchAndShowNotices();
     } finally {
       setBalanceLoading(false);
     }
@@ -628,7 +893,15 @@ const ClientSiteHeader = () => {
 
           <Nav aria-label="main navigation">
             {navItems.map((x) => (
-              <NavItem key={x.key} type="button" onClick={() => void goMenu(x.key)}>
+              <NavItem
+                key={x.key}
+                type="button"
+                onClick={() => void goMenu(x.key)}
+                $pulse={
+                  (x.key === 'support' && supportUnreadCount > 0) ||
+                  (x.key === 'inbox' && balance?.inbox_alarm)
+                }
+              >
                 {getMenuIcon(x.key)}
                 {x.label}
               </NavItem>
@@ -704,12 +977,125 @@ const ClientSiteHeader = () => {
         showVisual={loginShowVisual}
         onSuccess={() => {
           void fetchBalance({ suppressAuthEvent: true });
+          // 로그인 성공 시 공지사항 팝업 표시
+          void fetchAndShowNotices();
         }}
         onClose={() => {
           setLoginOpen(false);
           setLoginShowVisual(true);
         }}
       />
+
+      {noticePopupOpen && unreadNotices.length > 0 && (
+        <NoticePopupOverlay>
+          {/* PC: 모든 공지 동시 표시 (위치 고정) */}
+          {typeof window !== 'undefined' && window.innerWidth > 980
+            ? unreadNotices.map((notice, idx) => {
+                // 이미 닫은 공지는 렌더링하지 않음
+                if (closedNoticeKeys.has(notice.notice_key)) return null;
+
+                const handleClose = () => {
+                  markNoticeRead(notice.notice_key);
+                  const newClosed = new Set(closedNoticeKeys);
+                  newClosed.add(notice.notice_key);
+                  setClosedNoticeKeys(newClosed);
+
+                  // 모든 공지가 닫혔는지 확인
+                  const remainingCount = unreadNotices.filter(
+                    (n) => !newClosed.has(n.notice_key)
+                  ).length;
+                  if (remainingCount === 0) {
+                    setNoticePopupOpen(false);
+                    setUnreadNotices([]);
+                    setClosedNoticeKeys(new Set());
+                    setCurrentNoticeIndex(0);
+                  }
+                };
+
+                return (
+                  <NoticePopupWrapper
+                    key={notice.notice_key}
+                    $index={idx}
+                    $total={unreadNotices.length}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <NoticePopupContainer $bgIndex={idx}>
+                      <NoticePopupHeader>
+                        <h3>
+                          <NotificationsNoneIcon fontSize="small" />
+                          {notice.notice_title}
+                        </h3>
+                        <NoticePopupCloseBtn type="button" onClick={handleClose}>
+                          <CloseIcon fontSize="small" />
+                        </NoticePopupCloseBtn>
+                      </NoticePopupHeader>
+                      <NoticePopupBody>
+                        <div className="content">{stripHtmlTags(notice.notice_content)}</div>
+                      </NoticePopupBody>
+                      <NoticePopupFooter>
+                        <div className="date">{notice.created}</div>
+                        <NoticePopupBtn type="button" onClick={handleClose}>
+                          확인
+                        </NoticePopupBtn>
+                      </NoticePopupFooter>
+                    </NoticePopupContainer>
+                  </NoticePopupWrapper>
+                );
+              })
+            : /* 모바일: 현재 공지 하나만 가운데에 표시 */
+              unreadNotices[currentNoticeIndex] && (
+                <NoticePopupContainer
+                  $bgIndex={currentNoticeIndex}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <NoticePopupHeader>
+                    <h3>
+                      <NotificationsNoneIcon fontSize="small" />
+                      {unreadNotices[currentNoticeIndex].notice_title}
+                    </h3>
+                    <NoticePopupCloseBtn
+                      type="button"
+                      onClick={() => {
+                        markNoticeRead(unreadNotices[currentNoticeIndex].notice_key);
+                        if (currentNoticeIndex < unreadNotices.length - 1) {
+                          setCurrentNoticeIndex((prev) => prev + 1);
+                        } else {
+                          setNoticePopupOpen(false);
+                          setUnreadNotices([]);
+                          setCurrentNoticeIndex(0);
+                        }
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </NoticePopupCloseBtn>
+                  </NoticePopupHeader>
+                  <NoticePopupBody>
+                    <div className="content">
+                      {stripHtmlTags(unreadNotices[currentNoticeIndex].notice_content)}
+                    </div>
+                  </NoticePopupBody>
+                  <NoticePopupFooter>
+                    <div className="date">{unreadNotices[currentNoticeIndex].created}</div>
+                    <NoticePopupBtn
+                      type="button"
+                      onClick={() => {
+                        markNoticeRead(unreadNotices[currentNoticeIndex].notice_key);
+                        if (currentNoticeIndex < unreadNotices.length - 1) {
+                          setCurrentNoticeIndex((prev) => prev + 1);
+                        } else {
+                          setNoticePopupOpen(false);
+                          setUnreadNotices([]);
+                          setCurrentNoticeIndex(0);
+                        }
+                      }}
+                    >
+                      확인
+                    </NoticePopupBtn>
+                  </NoticePopupFooter>
+                </NoticePopupContainer>
+              )}
+        </NoticePopupOverlay>
+      )}
     </>
   );
 };

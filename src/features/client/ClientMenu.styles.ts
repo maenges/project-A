@@ -100,6 +100,33 @@ export const NoticeRow = styled.button<{ $active?: boolean }>`
   }
 `;
 
+// 읽음/안읽음 표시가 가능한 Row (문의, 쪽지함용)
+export const MessageRow = styled.button<{ $active?: boolean; $unread?: boolean }>`
+  width: 100%;
+  border: none;
+  background: ${({ $active }) => ($active ? 'rgba(255, 205, 120, 0.10)' : 'transparent')};
+  color: inherit;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 1fr 160px 170px;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: ${({ $unread }) => ($unread ? '1000' : '500')};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr 88px;
+    .author {
+      display: none;
+    }
+  }
+`;
+
 export const NoticeCellTitle = styled.div`
   display: inline-flex;
   align-items: center;
@@ -217,6 +244,44 @@ export const FieldShort = styled(Field)`
   }
 `;
 
+export const PasswordField = styled(FieldShort)`
+  -webkit-text-security: disc;
+`;
+
+export const SelectField = styled.select`
+  max-width: 280px;
+  width: 100%;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0 12px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 205, 120, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 205, 120, 0.14);
+  }
+
+  option {
+    background: #1a1a1a;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  @media (max-width: 720px) {
+    max-width: 100%;
+  }
+`;
+
 export const FieldAmount = styled(Field)`
   max-width: 360px;
 
@@ -286,19 +351,22 @@ export const SubmitWrap = styled.div`
   padding: 18px 0 4px;
 `;
 
-export const SubmitBtn = styled.button`
+export const SubmitBtn = styled.button<{ $tone?: 'gold' }>`
   width: min(520px, 100%);
   height: 52px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.86);
-  color: rgba(0, 0, 0, 0.78);
-  font-weight: 1100;
+  border: 1px solid
+    ${({ $tone }) => ($tone === 'gold' ? 'rgba(255, 205, 120, 0.75)' : 'rgba(255, 255, 255, 0.14)')};
+  background: ${({ $tone }) =>
+    $tone === 'gold' ? 'rgba(255, 205, 120, 0.92)' : 'rgba(255, 255, 255, 0.86)'};
+  color: ${({ $tone }) => ($tone === 'gold' ? '#141414' : 'rgba(0, 0, 0, 0.78)')};
+  font-weight: 1000;
   letter-spacing: -0.2px;
   cursor: pointer;
 
   &:hover {
-    filter: brightness(1.02);
+    filter: brightness(${({ $tone }) => ($tone === 'gold' ? '1.03' : '1.02')});
+    background: ${({ $tone }) => ($tone === 'gold' ? 'rgba(255, 205, 120, 0.98)' : undefined)};
   }
 
   &:focus-visible {
@@ -309,7 +377,7 @@ export const SubmitBtn = styled.button`
 
 export const HistoryTitle = styled.h2`
   margin: 18px 0 12px;
-  font-weight: 1100;
+  font-weight: 700;
   letter-spacing: -0.8px;
   font-size: 26px;
   color: rgba(255, 255, 255, 0.92);
@@ -624,5 +692,304 @@ export const Tile = styled.button<{ $bg?: string }>`
   &:hover {
     background: rgba(0, 0, 0, 0.46);
     border-color: rgba(255, 205, 120, 0.35);
+  }
+`;
+
+// 모달 스타일
+export const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+export const ModalContainer = styled.div`
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgb(24, 24, 24);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+`;
+
+export const ModalTitle = styled.h3`
+  margin: 0;
+  font-weight: 1000;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.4px;
+`;
+
+export const ModalCloseBtn = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+`;
+
+export const ModalBody = styled.div`
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const ModalLabel = styled.label`
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: -0.2px;
+`;
+
+export const ModalInput = styled.input`
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0 14px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 205, 120, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 205, 120, 0.14);
+  }
+`;
+
+export const ModalTextarea = styled.textarea`
+  width: 100%;
+  min-height: 160px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 12px 14px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 205, 120, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 205, 120, 0.14);
+  }
+`;
+
+export const ModalFooter = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+`;
+
+export const ModalBtn = styled.button<{ $primary?: boolean }>`
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: 1px solid
+    ${({ $primary }) => ($primary ? 'rgba(255, 205, 120, 0.75)' : 'rgba(255, 255, 255, 0.14)')};
+  background: ${({ $primary }) =>
+    $primary ? 'rgba(255, 205, 120, 0.92)' : 'rgba(255, 255, 255, 0.08)'};
+  color: ${({ $primary }) => ($primary ? '#141414' : 'rgba(255, 255, 255, 0.88)')};
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 205, 120, 0.65);
+    outline-offset: 2px;
+  }
+`;
+
+export const TemplateBtn = styled.button`
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: 1px solid rgba(100, 180, 255, 0.4);
+  background: rgba(100, 180, 255, 0.15);
+  color: rgba(180, 220, 255, 0.95);
+
+  &:hover {
+    background: rgba(100, 180, 255, 0.25);
+  }
+`;
+
+export const AddBtn = styled.button`
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 205, 120, 0.6);
+  background: rgba(255, 205, 120, 0.18);
+  color: rgba(255, 235, 205, 0.95);
+
+  &:hover {
+    background: rgba(255, 205, 120, 0.28);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 205, 120, 0.65);
+    outline-offset: 2px;
+  }
+`;
+
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+`;
+
+// Alert 모달 스타일
+export const AlertOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+`;
+
+export const AlertContainer = styled.div<{ $type?: 'success' | 'error' | 'info' }>`
+  width: 100%;
+  max-width: 360px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid
+    ${({ $type }) =>
+      $type === 'success'
+        ? 'rgba(120, 220, 150, 0.3)'
+        : $type === 'error'
+          ? 'rgba(255, 120, 120, 0.3)'
+          : 'rgba(255, 205, 120, 0.3)'};
+  background: rgb(28, 28, 28);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  padding: 28px 24px 24px;
+`;
+
+export const AlertIcon = styled.div<{ $type?: 'success' | 'error' | 'info' }>`
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: ${({ $type }) =>
+    $type === 'success'
+      ? 'rgba(120, 220, 150, 0.15)'
+      : $type === 'error'
+        ? 'rgba(255, 120, 120, 0.15)'
+        : 'rgba(255, 205, 120, 0.15)'};
+  border: 1px solid
+    ${({ $type }) =>
+      $type === 'success'
+        ? 'rgba(120, 220, 150, 0.25)'
+        : $type === 'error'
+          ? 'rgba(255, 120, 120, 0.25)'
+          : 'rgba(255, 205, 120, 0.25)'};
+`;
+
+export const AlertMessage = styled.p`
+  margin: 0 0 20px;
+  font-weight: 900;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+`;
+
+export const AlertBtn = styled.button<{ $type?: 'success' | 'error' | 'info' }>`
+  height: 42px;
+  padding: 0 32px;
+  border-radius: 10px;
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: 1px solid
+    ${({ $type }) =>
+      $type === 'success'
+        ? 'rgba(120, 220, 150, 0.5)'
+        : $type === 'error'
+          ? 'rgba(255, 120, 120, 0.5)'
+          : 'rgba(255, 205, 120, 0.5)'};
+  background: ${({ $type }) =>
+    $type === 'success'
+      ? 'rgba(120, 220, 150, 0.2)'
+      : $type === 'error'
+        ? 'rgba(255, 120, 120, 0.2)'
+        : 'rgba(255, 205, 120, 0.2)'};
+  color: ${({ $type }) =>
+    $type === 'success'
+      ? 'rgba(180, 255, 200, 0.95)'
+      : $type === 'error'
+        ? 'rgba(255, 200, 200, 0.95)'
+        : 'rgba(255, 235, 205, 0.95)'};
+
+  &:hover {
+    filter: brightness(1.1);
   }
 `;

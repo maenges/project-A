@@ -1,4 +1,7 @@
 import { io, Socket } from 'socket.io-client';
+import { useClientBalanceStore } from '@/store/clientBalance';
+import { useUnreadSupportStore } from '@/store/unreadSupport';
+import { SupportAnswerEventDispatch } from './supportAnswerEventBus';
 
 let userSocket: Socket | null = null;
 
@@ -61,6 +64,28 @@ export function connectUserSocket(): void {
     if (reason === 'io server disconnect' && userSocket) {
       userSocket.connect();
     }
+  });
+
+  // 잔액 업데이트 이벤트 수신
+  userSocket.on('balance_update', (data: { money: number }) => {
+    console.log('💰 잔액 업데이트 수신:', data);
+    const { setBalance, balance } = useClientBalanceStore.getState();
+    if (balance) {
+      setBalance({
+        ...balance,
+        money: data.money,
+      });
+    }
+  });
+
+  // 답변완료 알림 수신
+  userSocket.on('answer_completed', () => {
+    console.log('📬 답변완료 알림 수신');
+    const { incrementUnreadCount } = useUnreadSupportStore.getState();
+    incrementUnreadCount();
+
+    // EventBus로 이벤트 전파 (ClientSupportPage 등에서 구독 가능)
+    SupportAnswerEventDispatch('answer_completed', undefined);
   });
 }
 

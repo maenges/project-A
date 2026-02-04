@@ -13,13 +13,6 @@ import { buttonForm } from '@/assets/style';
 import NoticeNewModal from './noticeNewModal';
 
 type Notices = {
-  no: string;
-  notice_key: string;
-  notice_target_type: string;
-  notice_title: string;
-  notice_content?: string;
-  created: string;
-  notice_active: boolean;
   [key: string]: any;
 };
 
@@ -52,7 +45,6 @@ const Notice: React.FC = () => {
       field: 'notice_target_type',
       headerName: '공지대상',
       width: 200,
-      flex: 1,
     }),
     EtsColumnPreset.TextPreset({
       field: 'notice_title',
@@ -64,10 +56,14 @@ const Notice: React.FC = () => {
       },
     }),
     EtsColumnPreset.TextPreset({
+      field: 'notice_order',
+      headerName: '순번',
+      width: 100,
+    }),
+    EtsColumnPreset.TextPreset({
       field: 'created',
       headerName: '등록일시',
       width: 200,
-      flex: 1,
     }),
     EtsColumnPreset.CheckBoxPreset({
       field: 'notice_active',
@@ -77,19 +73,9 @@ const Notice: React.FC = () => {
     }),
   ];
 
-  // const [_, setSaveOpen] = useState(false);
-  // const [__, setDeleteOpen] = useState(false);
-
   useEffect(() => {
     onSearch();
   }, []);
-
-  // useActivate(() => {
-  //   // 데이터가 있으면 재조회 실행
-  //   if (rowData && rowData.length > 0) {
-  //     onSearch();
-  //   }
-  // });
 
   const onSearch = () => {
     callApi({
@@ -283,6 +269,7 @@ const Notice: React.FC = () => {
           initialValues={{
             notice_target_type: selectedRow.notice_target_type,
             notice_title: selectedRow.notice_title,
+            notice_order: selectedRow.notice_order,
           }}
           initialContent={selectedRow.notice_content ?? ''}
         />

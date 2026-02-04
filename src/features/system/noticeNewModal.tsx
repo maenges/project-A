@@ -16,6 +16,7 @@ type FormValues = {
   notice_target_type: string;
   notice_title: string;
   notice_type: string;
+  notice_order: string;
 };
 
 export type NoticeNewModalProps = {
@@ -46,6 +47,7 @@ const NoticeNewModal = ({
       notice_target_type: initialValues?.notice_target_type ?? 'ALL',
       notice_title: initialValues?.notice_title ?? '',
       notice_type: 'NOTICE',
+      notice_order: initialValues?.notice_order ?? '',
     },
     mode: 'onChange',
   });
@@ -56,9 +58,17 @@ const NoticeNewModal = ({
       notice_target_type: initialValues?.notice_target_type ?? 'ALL',
       notice_title: initialValues?.notice_title ?? '',
       notice_type: 'NOTICE',
+      notice_order: initialValues?.notice_order ?? '',
     });
-    setContent(initialContent ?? '<p>내용입력</p>');
-  }, [open, reset, initialValues?.notice_target_type, initialValues?.notice_title, initialContent]);
+    setContent(initialContent ?? '');
+  }, [
+    open,
+    reset,
+    initialValues?.notice_target_type,
+    initialValues?.notice_title,
+    initialValues?.notice_order,
+    initialContent,
+  ]);
 
   const onInvalid = (errors: FieldErrors<FormValues>) => {
     const errorKeys = Object.keys(errors) as Array<keyof FormValues>;
@@ -73,6 +83,23 @@ const NoticeNewModal = ({
     const isEditMode = mode === 'edit';
     if (isEditMode && (noticeKey === undefined || noticeKey === null)) {
       toast.error('수정할 공지 ID가 없습니다.');
+      return false;
+    }
+
+    if (!values.notice_title || !values.notice_title.trim()) {
+      toast.error('제목을 입력해주세요.');
+      setFocus('notice_title');
+      return false;
+    }
+
+    if (!values.notice_order) {
+      toast.error('순번을 입력해주세요.');
+      setFocus('notice_order');
+      return false;
+    }
+
+    if (!content || content.trim() === '') {
+      toast.error('내용을 입력해주세요.');
       return false;
     }
 
@@ -111,9 +138,10 @@ const NoticeNewModal = ({
           <EtsInputComponent
             control={control}
             name="notice_title"
-            label="제목"
+            label="공지 제목"
             placeholder="제목을 입력해주세요."
             width={250}
+            autoComplete="off"
             required={true}
           />
           <EtsSelectComponent
@@ -121,6 +149,16 @@ const NoticeNewModal = ({
             name="notice_target_type"
             label="공지 대상"
             options={PartnerOptions}
+          />
+          <EtsInputComponent
+            control={control}
+            name="notice_order"
+            label="공지 순번"
+            placeholder="순번"
+            width={100}
+            autoComplete="off"
+            required={true}
+            onlyNumber={true}
           />
         </searchForm.Col>
       </searchForm.Row>

@@ -50,6 +50,20 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* CKEditor 잔여 요소 레이아웃 영향 제거 */
+  .cke_screen_reader_only,
+  .cke_copyformatting_notification {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
   /* Text selection highlight (theme-friendly) */
   input::selection,
   textarea::selection,

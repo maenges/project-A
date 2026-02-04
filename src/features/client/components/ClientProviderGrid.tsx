@@ -7,7 +7,7 @@ import pragmatic_c from '@/assets/images/logo/casino/pragmatic.png';
 import evolution_c from '@/assets/images/logo/casino/evolution.png';
 import cq9_c from '@/assets/images/logo/casino/cq9.png';
 import sexy_c from '@/assets/images/logo/casino/sexy.png';
-import vota_c from '@/assets/images/logo/casino/vota.png';
+// import vota_c from '@/assets/images/logo/casino/vota.png';
 import dowinn_c from '@/assets/images/logo/casino/dowinn.png';
 import vivo_c from '@/assets/images/logo/casino/vivo.png';
 import ag_c from '@/assets/images/logo/casino/ag.png';
@@ -16,7 +16,7 @@ import tomhornAbsolute_c from '@/assets/images/logo/casino/tomhron-absolute.png'
 import micro_c from '@/assets/images/logo/casino/micro.png';
 import dream_c from '@/assets/images/logo/casino/dream.png';
 import sa_c from '@/assets/images/logo/casino/sa.png';
-// import oriental_c from '@/assets/images/logo/casino/oriental.png';
+import oriental_c from '@/assets/images/logo/casino/oriental.png';
 
 // 슬롯 이미지
 import slot_booongo from '@/assets/images/slot/slot_booongo.png';
@@ -24,29 +24,30 @@ import slot_cq9 from '@/assets/images/slot/slot_cq9.png';
 import slot_redtiger from '@/assets/images/slot/slot_redtiger.png';
 import slot_pragmatic from '@/assets/images/slot/slot_pragmatic_slot.png';
 import slot_netent from '@/assets/images/slot/slot_netent.png';
+import slot_btg from '@/assets/images/slot/slot_btg.png';
+import slot_habanero from '@/assets/images/slot/slot_habanero.png';
+import slot_hacksaw from '@/assets/images/slot/slot_hacksaw_slot.png';
+import slot_micro from '@/assets/images/slot/slot_MICRO_Slot.png';
+import slot_nlc from '@/assets/images/slot/slot_nlc.png';
+import slot_tomhorn from '@/assets/images/slot/slot_TOMHORN_SLOT.png';
+import slot_playngo from '@/assets/images/slot/slot_PLAYNGO.png';
+
 // import slot_1x2 from '@/assets/images/slot/slot_1x2.png';
 // import slot_belatra from '@/assets/images/slot/slot_belatra.png';
 // import slot_bfgames from '@/assets/images/slot/slot_bfgames.png';
-// import slot_btg from '@/assets/images/slot/slot_btg.png';
 // import slot_conceptgaming from '@/assets/images/slot/slot_conceptgaming.png';
 // import slot_egp from '@/assets/images/slot/slot_egp.png';
 // import slot_gameart from '@/assets/images/slot/slot_gameart.png';
 // import slot_gamefishglobal from '@/assets/images/slot/slot_gamefishglobal.png';
-// import slot_habanero from '@/assets/images/slot/slot_habanero.png';
-// import slot_hacksaw from '@/assets/images/slot/slot_hacksaw_slot.png';
 // import slot_kagaming from '@/assets/images/slot/slot_kagaming.png';
 // import slot_legaplay from '@/assets/images/slot/slot_legaplay.png';
 // import slot_macaw from '@/assets/images/slot/slot_macaw.png';
-// import slot_micro from '@/assets/images/slot/slot_MICRO_Slot.png';
 // import slot_mplay from '@/assets/images/slot/slot_mplay.png';
-// import slot_nlc from '@/assets/images/slot/slot_nlc.png';
 // import slot_onetouch from '@/assets/images/slot/slot_onetouch.png';
 // import slot_patagonia from '@/assets/images/slot/slot_patagonia.png';
-// import slot_playngo from '@/assets/images/slot/slot_PLAYNGO.png';
 // import slot_playpearls from '@/assets/images/slot/slot_playpearls.png';
 // import slot_playson from '@/assets/images/slot/slot_playson.png';
 // import slot_redrake from '@/assets/images/slot/slot_redrake.png';
-// import slot_tomhorn from '@/assets/images/slot/slot_TOMHORN_SLOT.png';
 // import slot_vibragaming from '@/assets/images/slot/slot_vibragaming.png';
 // import slot_wazdan from '@/assets/images/slot/slot_wazdan.png';
 
@@ -866,11 +867,11 @@ const ClientProviderGrid = ({ tab }: Props) => {
       mobileLogoScale: 2.0,
     },
     {
-      name: 'VOTA',
-      sub: '보타 카지노',
-      labelImage: vota_c,
-      logoScale: 1.5,
-      marginLeft: 25,
+      name: 'oriental',
+      sub: '오리엔탈 카지노',
+      labelImage: oriental_c,
+      logoScale: 1.0,
+      marginLeft: 0,
       mobileLogoScale: 2.0,
     },
     {
@@ -947,10 +948,10 @@ const ClientProviderGrid = ({ tab }: Props) => {
       labelImage: slot_pragmatic,
     },
     { name: 'cq9_slot', gameKey: 'cq9', sub: 'CQ9 슬롯', labelImage: slot_cq9 },
-    // { name: 'TOMHORN_SLOT', gameKey: 'TOMHORN_SLOT', sub: '탐혼 슬롯', labelImage: slot_tomhorn },
     { name: 'booongo', gameKey: 'booongo', sub: '부옹고', labelImage: slot_booongo },
+    { name: 'TOMHORN_SLOT', gameKey: 'TOMHORN_SLOT', sub: '탐혼 슬롯', labelImage: slot_tomhorn },
+    { name: 'habanero', gameKey: 'habanero', sub: '하바네로', labelImage: slot_habanero },
     // { name: 'playson', sub: '플레이손', labelImage: slot_playson },
-    // { name: 'habanero', gameKey: 'habanero', sub: '하바네로', labelImage: slot_habanero },
     // { name: '1x2gaming', sub: '1x2 게이밍', labelImage: slot_1x2 },
     // { name: 'belatra', sub: '벨라트라', labelImage: slot_belatra },
     // { name: 'bfgames', sub: 'BF 게임즈', labelImage: slot_bfgames },
@@ -968,11 +969,11 @@ const ClientProviderGrid = ({ tab }: Props) => {
     // { name: 'redrake', sub: '레드레이크', labelImage: slot_redrake },
     // { name: 'vibragaming', sub: '비브라 게이밍', labelImage: slot_vibragaming },
     // { name: 'wazdan', sub: '와즈단', labelImage: slot_wazdan },
-    // { name: 'PLAYNGO', gameKey: 'PLAYNGO', sub: '플레이앤고', labelImage: slot_playngo },
-    // { name: 'MICRO_Slot', gameKey: 'MICRO_Slot', sub: '마이크로 슬롯', labelImage: slot_micro },
-    // { name: 'btg', gameKey: 'btg', sub: '빅타임 게이밍', labelImage: slot_btg },
-    // { name: 'nlc', gameKey: 'nlc', sub: '노리밋시티', labelImage: slot_nlc },
-    // { name: 'hacksaw', gameKey: 'hacksaw_slot', sub: '핵쏘 게이밍', labelImage: slot_hacksaw },
+    { name: 'PLAYNGO', gameKey: 'PLAYNGO', sub: '플레이앤고', labelImage: slot_playngo },
+    { name: 'MICRO_Slot', gameKey: 'MICRO_Slot', sub: '마이크로 슬롯', labelImage: slot_micro },
+    { name: 'btg', gameKey: 'btg', sub: '빅타임 게이밍', labelImage: slot_btg },
+    { name: 'nlc', gameKey: 'nlc', sub: '노리밋시티', labelImage: slot_nlc },
+    { name: 'hacksaw', gameKey: 'hacksaw_slot', sub: '핵쏘 게이밍', labelImage: slot_hacksaw },
   ];
 
   const cards = tab === 'slot' ? slotCards : casinoCards;

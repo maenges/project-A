@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { DepositHistoryItem, MenuInfo, MenuKey } from '../ClientMenu.types';
-import { formatWon, normalizeAmount, parseAmountText } from '../ClientMenu.utils';
+import { normalizeAmount, parseAmountText } from '../ClientMenu.utils';
+import { useClientBalanceStore } from '@/store/clientBalance';
+import { callApi, Method } from '@utils/ApiUtil';
+import { Service } from '@models/common/Service';
 import {
+  AlertBtn,
+  AlertContainer,
+  AlertIcon,
+  AlertMessage,
+  AlertOverlay,
   AmountGrid,
-  Badge,
   DepositInner,
   DepositPanel,
   FieldAmount,
@@ -13,18 +20,19 @@ import {
   FormRow,
   FormTable,
   Hint,
-  HistoryBody,
-  HistoryHead,
-  HistoryRow,
-  HistoryScroll,
-  HistoryTable,
-  HistoryTitle,
   Inline,
   MiniBtn,
   SubmitBtn,
   SubmitWrap,
   ValueText,
   Wrap,
+  HistoryBody,
+  HistoryHead,
+  HistoryRow,
+  HistoryScroll,
+  HistoryTable,
+  HistoryTitle,
+  Badge,
 } from '../ClientMenu.styles';
 
 type Props = {
@@ -32,70 +40,77 @@ type Props = {
   menu: MenuInfo;
 };
 
-const INITIAL_DEPOSIT_HISTORY: DepositHistoryItem[] = [
-  {
-    depositor: 'mmpuu02',
-    amount: 5_000_000,
-    requestedAt: '2025-11-15 12:26:57',
-    processedAt: '2025-11-15 12:26:57',
-    result: '상부지급',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 1_000_000,
-    requestedAt: '2026-01-22 10:03:12',
-    processedAt: '2026-01-22 10:05:40',
-    result: '처리완료',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 500_000,
-    requestedAt: '2026-01-21 22:18:09',
-    processedAt: '2026-01-21 22:22:11',
-    result: '처리완료',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 100_000,
-    requestedAt: '2026-01-20 14:44:01',
-    processedAt: '2026-01-20 14:48:27',
-    result: '처리완료',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 50_000,
-    requestedAt: '2026-01-19 09:11:33',
-    processedAt: '2026-01-19 09:15:02',
-    result: '처리완료',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 10_000,
-    requestedAt: '2026-01-18 02:05:17',
-    processedAt: '2026-01-18 02:10:55',
-    result: '처리완료',
-  },
-  {
-    depositor: 'mmpuu02',
-    amount: 300_000,
-    requestedAt: '2026-01-17 19:36:58',
-    processedAt: undefined,
-    result: '처리중',
-  },
-];
+type AlertState = {
+  open: boolean;
+  type: 'success' | 'error' | 'info';
+  message: string;
+};
 
 const ClientDepositPage = (_props: Props) => {
+  const { balance: clientBalance } = useClientBalanceStore();
+  const balance = clientBalance?.money ?? 0;
   const navigate = useNavigate();
 
-  const balance = 2346;
   const quickAmounts = [10_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000];
 
-  const [depositHistory, setDepositHistory] =
-    useState<DepositHistoryItem[]>(INITIAL_DEPOSIT_HISTORY);
-  const [withdrawPassword, setWithdrawPassword] = useState('');
   const [amountText, setAmountText] = useState('0');
   const [depositorName, setDepositorName] = useState('');
+  const [depositHistory, setDepositHistory] = useState<DepositHistoryItem[]>([]);
+  const [alert, setAlert] = useState<AlertState>({ open: false, type: 'info', message: '' });
 
+  const showAlert = (type: AlertState['type'], message: string) => {
+    setAlert({ open: true, type, message });
+  };
+
+  const closeAlert = () => {
+    setAlert((prev) => ({ ...prev, open: false }));
+  };
+
+  const fetchChargeList = async () => {
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/chargeList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      showAlert('error', res.HeaderMsg || '조회에 실패했습니다.');
+      return;
+    }
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const data = res.data ?? [];
+    const mappedData = (Array.isArray(data) ? data : []).map((item: any) => ({
+      depositor: item.trans_bank_won || '-',
+      amount: Number(item.trans_amount) || 0,
+      requestedAt: item.created ? formatDate(item.created) : '-',
+      processedAt:
+        item.trans_permission !== null && item.updated ? formatDate(item.updated) : undefined,
+      result:
+        item.trans_permission === null
+          ? '처리중'
+          : item.trans_permission === true
+            ? '처리완료'
+            : '승인거절',
+    }));
+    setDepositHistory(mappedData);
+  };
+
+  useEffect(() => {
+    fetchChargeList();
+  }, []);
   return (
     <>
       <Wrap>
@@ -123,18 +138,6 @@ const ClientDepositPage = (_props: Props) => {
                   </MiniBtn>
                   <Hint>*계좌를 먼저 확인해주세요</Hint>
                 </Inline>
-              </FormRow>
-
-              <FormRow>
-                <FormLabel>출금비밀번호</FormLabel>
-                <FieldShort
-                  value={withdrawPassword}
-                  onChange={(e) => setWithdrawPassword(e.target.value)}
-                  placeholder=""
-                  type="password"
-                  inputMode="numeric"
-                  autoComplete="off"
-                />
               </FormRow>
 
               <FormRow>
@@ -187,39 +190,55 @@ const ClientDepositPage = (_props: Props) => {
             <SubmitWrap>
               <SubmitBtn
                 type="button"
-                onClick={() => {
+                $tone="gold"
+                onClick={async () => {
                   const amountValue = parseAmountText(amountText);
-                  if (!withdrawPassword.trim()) {
-                    window.alert('출금비밀번호를 입력해주세요.');
-                    return;
-                  }
                   if (!amountValue) {
-                    window.alert('입금액을 입력해주세요.');
+                    showAlert('error', '입금액을 입력해주세요.');
                     return;
                   }
                   if (!depositorName.trim()) {
-                    window.alert('입금자명을 입력해주세요.');
+                    showAlert('error', '입금자명을 입력해주세요.');
                     return;
                   }
-                  window.alert(
-                    `충전신청(데모)\n- 충전액: ${formatWon(amountValue)}\n- 입금자명: ${depositorName}`
-                  );
+
+                  const res = await callApi({
+                    service: Service.POSTMAN,
+                    url: '/api/client/charge',
+                    method: Method.POST,
+                    params: {
+                      bodyParams: {
+                        amount: amountValue,
+                        depositor: depositorName,
+                      },
+                    },
+                    config: { isLoading: true },
+                  });
+
+                  if (res.successOrNot !== 'Y') {
+                    showAlert('error', res.HeaderMsg || '충전신청에 실패했습니다.');
+                    return;
+                  }
+
+                  showAlert('success', '충전신청이 완료되었습니다.');
+                  setAmountText('0');
+                  setDepositorName('');
+                  fetchChargeList();
                 }}
               >
                 충전신청
               </SubmitBtn>
             </SubmitWrap>
 
-            <HistoryTitle>입금내역</HistoryTitle>
+            <HistoryTitle>충전내역</HistoryTitle>
             <HistoryTable aria-label="deposit history">
               <HistoryScroll data-scroll={depositHistory.length > 5 ? 'true' : 'false'}>
                 <HistoryHead>
                   <div>입금자명</div>
-                  <div style={{ textAlign: 'center' }}>신청금액</div>
+                  <div style={{ textAlign: 'center' }}>충전금액</div>
                   <div className="requested">신청일자</div>
                   <div className="processed">처리일자</div>
                   <div style={{ textAlign: 'center' }}>진행결과</div>
-                  <div style={{ textAlign: 'center' }}>삭제</div>
                 </HistoryHead>
                 <HistoryBody>
                   {depositHistory.map((x) => (
@@ -229,26 +248,6 @@ const ClientDepositPage = (_props: Props) => {
                       <div className="requested">{x.requestedAt}</div>
                       <div className="processed">{x.processedAt ?? '-'}</div>
                       <Badge>{x.result}</Badge>
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <MiniBtn
-                          type="button"
-                          $tone="gray"
-                          onClick={() =>
-                            setDepositHistory((prev) =>
-                              prev.filter(
-                                (row) =>
-                                  !(
-                                    row.depositor === x.depositor &&
-                                    row.requestedAt === x.requestedAt &&
-                                    row.amount === x.amount
-                                  )
-                              )
-                            )
-                          }
-                        >
-                          삭제
-                        </MiniBtn>
-                      </div>
                     </HistoryRow>
                   ))}
                 </HistoryBody>
@@ -257,6 +256,20 @@ const ClientDepositPage = (_props: Props) => {
           </DepositInner>
         </DepositPanel>
       </Wrap>
+
+      {alert.open && (
+        <AlertOverlay onClick={closeAlert}>
+          <AlertContainer $type={alert.type} onClick={(e) => e.stopPropagation()}>
+            <AlertIcon $type={alert.type}>
+              {alert.type === 'success' ? '✓' : alert.type === 'error' ? '!' : 'i'}
+            </AlertIcon>
+            <AlertMessage>{alert.message}</AlertMessage>
+            <AlertBtn $type={alert.type} onClick={closeAlert}>
+              확인
+            </AlertBtn>
+          </AlertContainer>
+        </AlertOverlay>
+      )}
     </>
   );
 };
