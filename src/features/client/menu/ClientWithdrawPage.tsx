@@ -5,6 +5,7 @@ import { useClientBalanceStore } from '@/store/clientBalance';
 import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
 import { AccountKeyOptions } from '@models/common/CommonSelectCodes';
+import { TransactionAddEventListeners } from '@/utils/transactionEventBus';
 import {
   AlertBtn,
   AlertContainer,
@@ -114,6 +115,26 @@ const ClientWithdrawPage = (_props: Props) => {
 
   useEffect(() => {
     fetchExchangeList();
+
+    // 충전/환전 처리 완료 알림 구독
+    const unsubscribe = TransactionAddEventListeners((eventName, payload) => {
+      console.log('💬 [Client] 거래 이벤트 수신:', eventName, payload);
+      if (eventName === 'transaction_processed' && payload.type === 'EXCHANGE') {
+        // 환전 처리 완료 시
+        const message = payload.approved
+          ? `환전이 승인되었습니다. (${payload.amount.toLocaleString('ko-KR')}원)`
+          : `환전이 거절되었습니다. (${payload.amount.toLocaleString('ko-KR')}원)`;
+
+        showAlert(payload.approved ? 'success' : 'error', message);
+
+        // 목록 새로고침
+        fetchExchangeList();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (

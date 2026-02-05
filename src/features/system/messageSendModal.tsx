@@ -40,7 +40,7 @@ const MessageSendModal = ({ open, onClose, onSaved }: MessageSendModalProps) => 
   useEffect(() => {
     if (!open) return;
     reset({ partner: 'ALL', title: '' });
-    setContent('<p>내용입력</p>');
+    setContent('');
     setCheckedGroupKeys([]);
   }, [open, reset]);
 
@@ -96,6 +96,7 @@ const MessageSendModal = ({ open, onClose, onSaved }: MessageSendModalProps) => 
             placeholder="제목을 입력해주세요."
             width={250}
             required={true}
+            autoComplete="off"
           />
           <EtsSelectComponent
             control={control}

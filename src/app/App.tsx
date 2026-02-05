@@ -74,7 +74,7 @@ function App() {
                     <AppLayout>
                       <div className="App">
                         <Routes>
-                          <Route path="/" />
+                          {/* <Route path="/" element={<DashboardPage />} /> */}
                           <Route
                             path="/system/notice"
                             element={

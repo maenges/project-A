@@ -2,6 +2,9 @@ import { io, Socket } from 'socket.io-client';
 import { useClientBalanceStore } from '@/store/clientBalance';
 import { useUnreadSupportStore } from '@/store/unreadSupport';
 import { SupportAnswerEventDispatch } from './supportAnswerEventBus';
+import { useUnreadInboxStore } from '@/store/unreadInbox';
+import { InboxMessageEventDispatch } from './inboxMessageEventBus';
+import { TransactionEventDispatch } from './transactionEventBus';
 
 let userSocket: Socket | null = null;
 
@@ -84,9 +87,85 @@ export function connectUserSocket(): void {
     const { incrementUnreadCount } = useUnreadSupportStore.getState();
     incrementUnreadCount();
 
+    // 음성 알림 재생
+    try {
+      const audio = new Audio('/voice/answer-client2.mp3');
+      audio.play().catch((err) => console.warn('음성 재생 실패:', err));
+    } catch (err) {
+      console.warn('음성 재생 오류:', err);
+    }
+
     // EventBus로 이벤트 전파 (ClientSupportPage 등에서 구독 가능)
     SupportAnswerEventDispatch('answer_completed', undefined);
   });
+
+  // 쪽지 수신 알림
+  userSocket.on('message_received', () => {
+    console.log('📨 쪽지 수신 알림');
+    const { incrementUnreadCount } = useUnreadInboxStore.getState();
+    incrementUnreadCount();
+
+    // 음성 알림 재생
+    try {
+      const audio = new Audio('/voice/message-client.mp3');
+      audio.play().catch((err) => console.warn('음성 재생 실패:', err));
+    } catch (err) {
+      console.warn('음성 재생 오류:', err);
+    }
+
+    // EventBus로 이벤트 전파 (ClientInboxPage 등에서 구독 가능)
+    InboxMessageEventDispatch('message_received', undefined);
+  });
+
+  // 충전/환전 처리 완료 알림
+  userSocket.on(
+    'transaction_processed',
+    (data: { type: 'RECHARGE' | 'EXCHANGE'; approved: boolean; amount: number }) => {
+      console.log('💳 거래 처리 알림 수신:', data);
+
+      let message = '';
+      let audioFile = '';
+
+      if (data.type === 'RECHARGE') {
+        // 충전
+        if (data.approved) {
+          message = `충전이 승인되었습니다. (${data.amount.toLocaleString('ko-KR')}원)`;
+          audioFile = '/voice/recharge-ok.mp3';
+        } else {
+          message = `충전이 거절되었습니다. (${data.amount.toLocaleString('ko-KR')}원)`;
+          audioFile = '/voice/recharge-deny.mp3';
+        }
+      } else if (data.type === 'EXCHANGE') {
+        // 환전
+        if (data.approved) {
+          message = `환전이 승인되었습니다. (${data.amount.toLocaleString('ko-KR')}원)`;
+          audioFile = '/voice/exchange-ok.mp3';
+        } else {
+          message = `환전이 거절되었습니다. (${data.amount.toLocaleString('ko-KR')}원)`;
+          audioFile = '/voice/exchange-deny.mp3';
+        }
+      }
+
+      // 음성 알림 재생
+      if (audioFile) {
+        try {
+          const audio = new Audio(audioFile);
+          audio.play().catch((err) => console.warn('음성 재생 실패:', err));
+        } catch (err) {
+          console.warn('음성 재생 오류:', err);
+        }
+      }
+
+      // EventBus로 이벤트 전파 (ClientDepositPage, ClientWithdrawPage에서 구독)
+      TransactionEventDispatch('transaction_processed', {
+        type: data.type,
+        approved: data.approved,
+        amount: data.amount,
+      });
+
+      console.log('📢', message);
+    }
+  );
 }
 
 /**

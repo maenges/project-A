@@ -62,6 +62,13 @@ const NoticeContentInner = styled.div`
   word-break: break-word;
 `;
 
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+
 const stripHtmlTags = (html: string): string => {
   return html.replace(/<[^>]*>/g, '').trim();
 };
@@ -127,7 +134,9 @@ const ClientNoticePage = ({ menu }: Props) => {
       <Wrap>
         <NoticePanel aria-label="notice panel">
           <NoticeInner>
-            <NoticeTitle>{menu.title}</NoticeTitle>
+            <TitleRow>
+              <NoticeTitle style={{ margin: 3.5 }}>{menu.title}</NoticeTitle>
+            </TitleRow>
             <NoticeTable role="table" aria-label="notice list">
               <NoticeHead role="row">
                 <div>제목</div>

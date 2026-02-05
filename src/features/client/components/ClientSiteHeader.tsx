@@ -30,6 +30,7 @@ import {
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
 import { disconnectUserSocket, connectUserSocket } from '@/utils/userConnectionSocket';
 import { useUnreadSupportStore } from '@/store/unreadSupport';
+import { useUnreadInboxStore } from '@/store/unreadInbox';
 
 type MenuKey = 'deposit' | 'withdraw' | 'notice' | 'support' | 'inbox';
 type MobileMenuKey = MenuKey | 'login';
@@ -664,6 +665,8 @@ const ClientSiteHeader = () => {
 
   // 문의 미읽음 카운트 (깜빡임 용도)
   const supportUnreadCount = useUnreadSupportStore((s) => s.unreadCount);
+  // 쪽지 미읽음 카운트 (깜빡임 용도)
+  const inboxUnreadCount = useUnreadInboxStore((s) => s.unreadCount);
 
   const isLoggedIn = !!balance?.userId;
 
@@ -689,6 +692,39 @@ const ClientSiteHeader = () => {
     if (unread.length > 0) {
       setUnreadNotices(unread);
       setNoticePopupOpen(true);
+    }
+  }, []);
+
+  // 미읽음 카운트 조회 (문의, 쪽지)
+  const fetchUnreadCounts = useCallback(async () => {
+    // 문의 미읽음 카운트 조회
+    const supportRes = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/answerList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: false },
+    });
+
+    if (supportRes.successOrNot === 'Y') {
+      const supportUnread = (supportRes.data ?? []).filter(
+        (item: any) => item.notice_process === true && item.notice_recive === false
+      ).length;
+      useUnreadSupportStore.getState().setUnreadCount(supportUnread);
+    }
+
+    // 쪽지 미읽음 카운트 조회
+    const inboxRes = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/messageList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: false },
+    });
+
+    if (inboxRes.successOrNot === 'Y') {
+      const inboxUnread = (inboxRes.data ?? []).filter((item: any) => !item.notice_recive).length;
+      useUnreadInboxStore.getState().setUnreadCount(inboxUnread);
     }
   }, []);
 
@@ -735,6 +771,9 @@ const ClientSiteHeader = () => {
       // 로그인 상태면 회원 접속 WebSocket 연결 (새로고침 대응)
       connectUserSocket();
 
+      // 미읽음 카운트 조회 (문의, 쪽지)
+      void fetchUnreadCounts();
+
       // balance 조회 성공 시 공지사항 체크 (시간 만료된 것도 다시 표시)
       void fetchAndShowNotices();
     } finally {
@@ -761,8 +800,13 @@ const ClientSiteHeader = () => {
       disconnectUserSocket();
       // 게임 iframe 닫기
       useGameFrameStore.getState().closeGame();
+      // 미읽음 카운트 초기화
+      useUnreadSupportStore.getState().setUnreadCount(0);
+      useUnreadInboxStore.getState().setUnreadCount(0);
       void ClientAuthEventDispatch('logout', { source: 'client' });
       clearBalance();
+      // 로그아웃 후 메인 페이지로 이동
+      navigate('/client');
     }
   };
 
@@ -899,7 +943,7 @@ const ClientSiteHeader = () => {
                 onClick={() => void goMenu(x.key)}
                 $pulse={
                   (x.key === 'support' && supportUnreadCount > 0) ||
-                  (x.key === 'inbox' && balance?.inbox_alarm)
+                  (x.key === 'inbox' && inboxUnreadCount > 0)
                 }
               >
                 {getMenuIcon(x.key)}

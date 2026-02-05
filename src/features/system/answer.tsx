@@ -14,6 +14,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 import AnswerModal from './answerModal';
 import AnswerMacroModal from './answerMacroModal';
+import { AdminDashboardAddEventListeners } from '@/utils/adminDashboardEventBus';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { EtsSelectComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
@@ -141,6 +142,18 @@ const Answer: React.FC = () => {
 
   useEffect(() => {
     handleSubmit(onSearch)();
+
+    // 새 문의 실시간 갱신
+    const unsubscribe = AdminDashboardAddEventListeners((eventName) => {
+      if (eventName === 'new_support') {
+        // 새 문의가 들어오면 목록 자동 갱신
+        handleSubmit(onSearch)();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const { control, handleSubmit, getValues } = useForm<FormValues>({

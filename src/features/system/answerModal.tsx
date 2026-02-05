@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
 import { useNotify } from '@hooks/useNotify';
+import { useAdminDashboardStore } from '@/store/adminDashboard';
 
 export type AnswerModalProps = {
   open: boolean;
@@ -31,17 +32,6 @@ type FormValues = {
   notice_title: string;
   notice_content: string;
   macro_title: string;
-};
-
-// HTML 엔티티 디코딩 및 줄바꿈을 HTML로 변환
-const decodeHtmlEntities = (html: string): string => {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = html;
-  const decoded = textarea.value;
-
-  // 줄바꿈을 <p> 태그로 변환
-  const paragraphs = decoded.split('\n').filter((line) => line.trim());
-  return paragraphs.map((p) => `<p>${p}</p>`).join('');
 };
 
 const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
@@ -83,18 +73,15 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
       notice_content: data.content || '',
       macro_title: (macroOptions[0]?.value as string) ?? '',
     }));
-    // CKEditor 초기값을 문의 내용으로 설정 (HTML 디코딩)
-    const decoded = decodeHtmlEntities(data.content || '');
-    setContent(decoded);
+    const initialMacroContent = macroOptions[0]?.content ?? '';
+    setContent(initialMacroContent || '');
   }, [data]);
 
   useEffect(() => {
     if (!selectedMacroValue) return;
-    // 직접 입력이면 기존 내용 유지, 매크로 선택시에만 덧씀움
-    if (selectedMacroValue === 'CUSTOM') return;
     const found = macroOptions.find((opt) => opt.value === selectedMacroValue);
     if (found) {
-      setContent(decodeHtmlEntities(found.content || ''));
+      setContent(found.content || '');
     }
   }, [selectedMacroValue, macroOptions]);
 
@@ -117,6 +104,17 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
           />
         </searchForm.Col>
       </searchForm.Row>
+      {/* <searchForm.Row>
+        <searchForm.Col>
+          <EtsInputComponent
+            control={control}
+            name="notice_content"
+            label="내용"
+            width={480}
+            readOnly
+          />
+        </searchForm.Col>
+      </searchForm.Row> */}
       <searchForm.Row>
         <EtsSelectComponent
           control={control}
@@ -164,6 +162,10 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
             }
 
             toast.success('저장되었습니다.');
+
+            // 답변 완료 시 문의 카운트 차감
+            useAdminDashboardStore.getState().decrementSupportCount();
+
             onSaved?.();
             onClose();
           }}
@@ -173,15 +175,60 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
       </searchForm.Row>
     </searchForm.Container>
   );
+  // 고객 문의 내용 (HTML 태그 제거하여 표시)
+  const stripHtml = (html: string) => {
+    const doc = new DOMParser().parseFromString(html || '', 'text/html');
+    return doc.body.textContent || '';
+  };
+
   const component = (
     <Fragment>
-      <CustomEditor
-        value={content}
-        onChange={isEditorReadOnly ? undefined : setContent}
-        isDarkMode={theme.palette.mode === 'dark'}
-        height={350}
-        readOnly={isEditorReadOnly}
-      />
+      <searchForm.Container>
+        {/* 고객 문의 내용 영역 */}
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'rgba(255, 255, 255, 0.7)',
+          }}
+        >
+          고객 문의 내용
+        </div>
+        <textarea
+          readOnly
+          value={stripHtml(data?.content || '')}
+          style={{
+            width: '100%',
+            height: 130,
+            padding: '12px 14px',
+            fontSize: 14,
+            lineHeight: 1.6,
+            color: 'rgba(255, 255, 255, 0.85)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: 6,
+            resize: 'none',
+            outline: 'none',
+          }}
+        />
+        {/* 답변 작성 영역 */}
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'rgba(255, 255, 255, 0.7)',
+          }}
+        >
+          답변 내용
+        </div>
+        <CustomEditor
+          value={content}
+          onChange={isEditorReadOnly ? undefined : setContent}
+          isDarkMode={theme.palette.mode === 'dark'}
+          height={200}
+          readOnly={isEditorReadOnly}
+        />
+      </searchForm.Container>
     </Fragment>
   );
   return (

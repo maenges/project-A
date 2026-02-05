@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import MainHeader from './MainHeader';
+import { connectAdminSocket, disconnectAdminSocket } from '@/utils/adminConnectionSocket';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -75,6 +76,14 @@ const MainContent = styled.main`
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = React.useState(true);
+
+  // 관리자 WebSocket 연결
+  useEffect(() => {
+    connectAdminSocket();
+    return () => {
+      disconnectAdminSocket();
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {

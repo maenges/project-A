@@ -140,13 +140,10 @@ type Props = {
 };
 
 type SupportItem = {
-  support_key: string;
   notice_title: string;
   notice_content: string;
   user_id: string;
-  content: string;
   created: string;
-  is_read: boolean;
   notice_process?: boolean;
   notice_recive?: boolean;
   notice_key?: string;
@@ -230,20 +227,20 @@ const ClientSupportPage = ({ menu }: Props) => {
   };
 
   const handleMarkAllRead = async () => {
-    const unreadItems = supportList.filter((item) => !item.is_read);
+    const unreadItems = supportList.filter((item) => !item.notice_recive && item.notice_process);
     if (unreadItems.length === 0) {
       showAlert('info', '모든 문의를 읽었습니다.');
       return;
     }
 
-    const supportKeys = unreadItems.map((item) => item.support_key);
-
     const res = await callApi({
       service: Service.POSTMAN,
-      url: '/api/client/answerRead',
+      url: '/api/client/answerReads',
       method: Method.PATCH,
       params: {
-        bodyParams: { support_keys: supportKeys },
+        bodyParams: {
+          noticeKeys: unreadItems.map((item) => item.notice_key),
+        },
       },
       config: { isLoading: true },
     });

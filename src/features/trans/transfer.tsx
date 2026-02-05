@@ -18,6 +18,7 @@ import {
   EtsDatePickerComponent,
   EtsSelectComponent,
 } from '@/components/EtsComponents';
+import { useAdminDashboardStore } from '@/store/adminDashboard';
 
 type Customer = {
   [key: string]: any;
@@ -44,7 +45,6 @@ const AlTransfer: React.FC = () => {
   ): string => {
     if (value === null || value === undefined) return '';
     const stringValue = String(value);
-    console.log('getLabelByValue', value, stringValue);
 
     const exact = options.find((o) => String(o.value) === stringValue);
     if (exact) return exact.label;
@@ -80,6 +80,17 @@ const AlTransfer: React.FC = () => {
       return;
     }
     toast.success(permission ? '승인 처리되었습니다.' : '거절 처리되었습니다.');
+
+    // 승인 또는 거절 시 MainHeader 건수 차감
+    const transType = row?.trans_type_original || row?.trans_type;
+    if (transType === 'RECHARGE') {
+      // 충전 건수 차감
+      useAdminDashboardStore.getState().decrementDepositCount();
+    } else if (transType === 'EXCHANGE') {
+      // 환전 건수 차감
+      useAdminDashboardStore.getState().decrementWithdrawCount();
+    }
+
     if (selectedGroupKey) fetchCustomerListByGroupKey(selectedGroupKey);
   };
 

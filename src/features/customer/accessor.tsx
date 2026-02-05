@@ -70,7 +70,7 @@ const CustomerAccessorPage: React.FC = () => {
 
     // ApiUtil처럼 상대 경로 사용 → CloudFront를 통해 요청 → 쿠키 자동 전송
     // CloudFront에서 /socket.io/* 경로를 API Gateway로 프록시해야 함
-    const socket = io('/user-status', {
+    const socket = io('/admin-connection', {
       withCredentials: true,
       transports: ['websocket', 'polling'], // WebSocket 우선, 실패 시 polling fallback
       upgrade: true, // polling에서 websocket으로 업그레이드 허용
@@ -115,7 +115,6 @@ const CustomerAccessorPage: React.FC = () => {
 
     // 5초마다 데이터 수신
     socket.on('userStatus', (data: UserStatusData) => {
-      console.log('userStatus 수신:', data);
       // last_activity 날짜 포맷 변환
       const formattedUsers = (data.users || []).map((user) => ({
         ...user,
@@ -166,7 +165,6 @@ const CustomerAccessorPage: React.FC = () => {
       headerName: '상태',
       width: 80,
       cellRenderer: (params: any) => {
-        console.log('is_online:', params.value);
         const isOnline = params.value;
         return (
           <Box

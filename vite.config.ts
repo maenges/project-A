@@ -72,6 +72,11 @@ export default defineConfig(({ mode }) => {
     port: 3000,
     host: true,
     open: true,
+    allowedHosts: [
+      'client.local',
+      'admin.local',
+      'partner.local',
+    ],
   },
   };
 });
