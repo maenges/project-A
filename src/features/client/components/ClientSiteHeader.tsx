@@ -480,19 +480,60 @@ const NoticePopupWrapper = styled.div<{ $index: number; $total: number }>`
   /* PC: 각 팝업의 고정 위치 */
   @media (min-width: 981px) {
     position: absolute;
-    top: ${({ $index }) => {
-      // 각 팝업의 세로 위치를 다르게
-      if ($index % 3 === 0) return '150px';
-      if ($index % 3 === 1) return '180px';
-      return '40px';
+    z-index: ${({ $index }) => 1 + $index}; // 나중에 나오는 팝업이 위에 표시
+
+    top: ${({ $index, $total }) => {
+      // 4개 이하: 계단식 (위→아래→아래→위)
+      const stairTop = [40, 110, 180, 110];
+      // 5개: 기존 mod-3 패턴
+      const fiveTop = (i: number) => {
+        if (i % 3 === 0) return 150;
+        if (i % 3 === 1) return 180;
+        return 40;
+      };
+
+      if ($total <= 4) {
+        return (stairTop[$index] ?? 40) + 'px';
+      } else if ($total === 5) {
+        return fiveTop($index) + 'px';
+      } else {
+        // 6개 이상
+        if ($index < 5) {
+          return fiveTop($index) + 'px';
+        } else {
+          const basePosition = ($index - 5) % 5;
+          const cascadeLevel = Math.floor(($index - 5) / 5) + 1;
+          return `${fiveTop(basePosition) + cascadeLevel * 30}px`;
+        }
+      }
     }};
+
     left: ${({ $index, $total }) => {
-      // 전체 팝업들을 중앙 정렬하기 위한 계산
       const popupWidth = 320;
       const gap = 20;
-      const totalWidth = $total * popupWidth + ($total - 1) * gap;
-      const startX = `calc(50% - ${totalWidth / 2}px)`;
-      return `calc(${startX} + ${$index * (popupWidth + gap)}px)`;
+
+      if ($total <= 5) {
+        // 5개 이하: 가로로 펼쳐서 배치
+        const displayCount = $total;
+        const totalWidth = displayCount * popupWidth + (displayCount - 1) * gap;
+        const startX = `calc(50% - ${totalWidth / 2}px)`;
+        return `calc(${startX} + ${$index * (popupWidth + gap)}px)`;
+      } else {
+        // 6개 이상일 때
+        const displayCount = 5;
+        const totalWidth = displayCount * popupWidth + (displayCount - 1) * gap;
+        const startX = `calc(50% - ${totalWidth / 2}px)`;
+
+        if ($index < 5) {
+          // 처음 5개는 가로로 나열
+          return `calc(${startX} + ${$index * (popupWidth + gap)}px)`;
+        } else {
+          // 6번째부터는 1,2,3,4,5 위치에 순서대로 캐스케이딩
+          const basePosition = ($index - 5) % 5;
+          const cascadeLevel = Math.floor(($index - 5) / 5) + 1;
+          return `calc(${startX} + ${basePosition * (popupWidth + gap)}px + ${cascadeLevel * 30}px)`;
+        }
+      }
     }};
   }
 
