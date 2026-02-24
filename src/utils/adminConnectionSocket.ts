@@ -140,7 +140,6 @@ export function connectAdminSocket(): void {
 
   // 실시간 접속자 수 업데이트 (5초마다)
   adminSocket.on('userStatus', (data: { timestamp: string; total: number; online: number }) => {
-    console.log('👥 [Admin] 실시간 접속자 수:', data);
     const { setOnlineCount } = useAdminDashboardStore.getState();
     setOnlineCount(data.online || 0);
   });
