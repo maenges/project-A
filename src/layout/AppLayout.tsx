@@ -1,9 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import MainHeader from './MainHeader';
+import PartnerHeader from './PartnerHeader';
 import { connectAdminSocket, disconnectAdminSocket } from '@/utils/adminConnectionSocket';
+import { connectPartnerSocket, disconnectPartnerSocket } from '@/utils/partnerConnectionSocket';
+import { callApi, Method } from '@/utils/ApiUtil';
+import { Service } from '@/models/common/Service';
+import { useGroupTypeStore } from '@/store/groupType';
+import AdminNoticePopup from '@/components/AdminNoticePopup';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -63,27 +69,62 @@ const FloatingToggle = styled.button<StyledButtonProps>`
   }
 `;
 
-const MainContent = styled.main`
+const MainContent = styled.main<{ $hasHeader: boolean }>`
   flex: 1;
-  padding: 104px 50px 20px; /* 헤더 높이(84px) + 상단 여백(20px) */
-  /* background-color: #d6d6d6; */
-  border-top-left-radius: 24px;
+  padding: ${({ $hasHeader }) => ($hasHeader ? '104px 50px 20px' : '20px 50px 20px')};
+  border-top-left-radius: ${({ $hasHeader }) => ($hasHeader ? '24px' : '0')};
   background-color: ${({ theme }) => theme.colors.background.default};
-  /* @media (max-width: 768px) {
-    padding: 84px 20px 20px;
-  } */
 `;
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = React.useState(true);
+  const [groupType, setGroupType] = useState<string>('');
 
-  // 관리자 WebSocket 연결
+  // 쿠키 기반 인증 → API로 사용자 groupType 조회
   useEffect(() => {
-    connectAdminSocket();
-    return () => {
-      disconnectAdminSocket();
+    const fetchGroupType = async () => {
+      try {
+        const res = await callApi({
+          service: Service.POSTMAN,
+          url: '/api/menu/headerPermission',
+          method: Method.GET,
+          config: { isLoading: false },
+          redirect: false,
+          suppressAuthEvent: true,
+        });
+        if (res.successOrNot === 'Y' && res.data) {
+          // 파트너: groupType 문자열 (예: "ST")
+          setGroupType(res.data);
+          useGroupTypeStore.getState().setGroupType(res.data);
+        }
+      } catch {
+        // ignore
+      }
     };
+    fetchGroupType();
   }, []);
+
+  // const isPartner = groupType !== '' && groupType !== 'HQ';
+
+  // 관리자 WebSocket 연결 (HQ만)
+  useEffect(() => {
+    if (groupType === 'HQ') {
+      connectAdminSocket();
+      return () => {
+        disconnectAdminSocket();
+      };
+    }
+  }, [groupType]);
+
+  // 파트너: 전용 WebSocket 연결 (balance_update, transaction_processed 수신)
+  useEffect(() => {
+    if (groupType !== '' && groupType !== 'HQ') {
+      connectPartnerSocket();
+      return () => {
+        disconnectPartnerSocket();
+      };
+    }
+  }, [groupType]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -109,9 +150,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {isSidebarOpen ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
       </FloatingToggle>
       <ContentWrapper $isSidebarOpen={isSidebarOpen}>
-        <MainHeader toggleSidebar={toggleSidebar} $isSidebarOpen={isSidebarOpen} />
-        <MainContent>{children}</MainContent>
+        {groupType === 'HQ' && (
+          <MainHeader toggleSidebar={toggleSidebar} $isSidebarOpen={isSidebarOpen} />
+        )}
+        {groupType !== '' && groupType !== 'HQ' && (
+          <PartnerHeader toggleSidebar={toggleSidebar} $isSidebarOpen={isSidebarOpen} />
+        )}
+        {/* groupType === '' → API 미응답 시 헤더 없음 */}
+        <MainContent $hasHeader={groupType !== ''}>{children}</MainContent>
       </ContentWrapper>
+      {/* 공지사항 팝업 (HQ + 파트너 공통) */}
+      <AdminNoticePopup groupType={groupType} />
     </LayoutContainer>
   );
 };

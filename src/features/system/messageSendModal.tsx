@@ -56,7 +56,7 @@ const MessageSendModal = ({ open, onClose, onSaved }: MessageSendModalProps) => 
       return false;
     }
 
-    const ok = await confirm('저장하시겠습니까?');
+    const ok = await confirm('메세지를 보내시겠습니까?');
     if (!ok) return;
 
     const res = await callApi({
@@ -79,7 +79,7 @@ const MessageSendModal = ({ open, onClose, onSaved }: MessageSendModalProps) => 
       return false;
     }
 
-    toast.success('저장되었습니다.');
+    toast.success('메세지를 보냈습니다.');
     onClose();
     onSaved?.();
     return true;
@@ -126,7 +126,7 @@ const MessageSendModal = ({ open, onClose, onSaved }: MessageSendModalProps) => 
               await handleSubmit(onSave, onInvalid)();
             }}
           >
-            저장
+            보내기
           </EtsButton>
         </>
       </buttonForm.Row>

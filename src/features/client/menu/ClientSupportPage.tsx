@@ -340,7 +340,7 @@ const ClientSupportPage = ({ menu }: Props) => {
               <NoticeHead role="row">
                 <div>제목</div>
                 <div className="author" style={{ textAlign: 'right' }}>
-                  글쓴이
+                  보낸사람
                 </div>
                 <div style={{ textAlign: 'right' }}>날짜</div>
               </NoticeHead>

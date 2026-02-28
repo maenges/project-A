@@ -5,7 +5,7 @@ import { EtsButton } from '@/components/EtsCommon';
 import { PageModalTemplate } from '@/components/Teamplate';
 import CustomEditor from '@/components/Teamplate/CustomEditor';
 import { EtsInputComponent, EtsSelectComponent } from '@/components/EtsComponents';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
 import { useNotify } from '@hooks/useNotify';
@@ -132,7 +132,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
               return;
             }
 
-            const ok = await confirm('저장하시겠습니까?');
+            const ok = await confirm('답변을 등록 하시겠습니까?');
             if (!ok) return;
 
             // 직접 입력인 경우, 매크로 키와 제목을 빈값으로 설정
@@ -161,7 +161,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
               return;
             }
 
-            toast.success('저장되었습니다.');
+            toast.success('답변이 등록되었습니다.');
 
             // 답변 완료 시 문의 카운트 차감
             useAdminDashboardStore.getState().decrementSupportCount();
@@ -170,7 +170,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
             onClose();
           }}
         >
-          저장
+          답변하기
         </EtsButton>
       </searchForm.Row>
     </searchForm.Container>
@@ -189,7 +189,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
           style={{
             fontSize: 13,
             fontWeight: 600,
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: theme.palette.text.secondary,
           }}
         >
           고객 문의 내용
@@ -203,12 +203,21 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
             padding: '12px 14px',
             fontSize: 14,
             lineHeight: 1.6,
-            color: 'rgba(255, 255, 255, 0.85)',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: 6,
+            color: theme.palette.text.secondary,
+            background:
+              theme.palette.mode === 'light'
+                ? alpha(theme.palette.primary.main, 0.06)
+                : theme.palette.action.disabledBackground,
+            border: `1px solid ${
+              theme.palette.mode === 'light'
+                ? alpha(theme.palette.primary.main, 0.35)
+                : theme.palette.divider
+            }`,
+            borderRadius: 8,
             resize: 'none',
             outline: 'none',
+            boxSizing: 'border-box' as const,
+            fontFamily: 'inherit',
           }}
         />
         {/* 답변 작성 영역 */}
@@ -216,7 +225,7 @@ const AnswerModal = ({ open, onClose, onSaved, data }: AnswerModalProps) => {
           style={{
             fontSize: 13,
             fontWeight: 600,
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: theme.palette.text.secondary,
           }}
         >
           답변 내용

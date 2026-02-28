@@ -4,8 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { CLIENT_MAX_WIDTH, CLIENT_SIDE_PADDING } from './clientStyleTokens';
 import { ensureClientLoggedIn } from '@/utils/clientAuthGuard';
+import { callApi, Method } from '@/utils/ApiUtil';
+import { Service } from '@/models/common/Service';
+import dayjs from 'dayjs';
 
 type SimpleItem = {
+  key?: string;
   title: string;
 };
 
@@ -278,7 +282,7 @@ const renderSimpleList = (items: SimpleItem[], onItemClick: (item: SimpleItem) =
         items={items}
         visibleCount={VISIBLE_COUNT}
         rowHeight={44}
-        getKey={(item) => item.title}
+        getKey={(item, idx) => item.key ?? `${item.title}-${idx}`}
         renderRow={(x) => (
           <DemoLink type="button" onClick={() => onItemClick(x)}>
             <ListRow>
@@ -295,47 +299,89 @@ const renderSimpleList = (items: SimpleItem[], onItemClick: (item: SimpleItem) =
 const ClientHomeInfoGrid = () => {
   const navigate = useNavigate();
 
-  const noticeItems: SimpleItem[] = [
-    { title: '테더 사용 안내 (USDT)' },
-    { title: '통합 배팅 한도 및 당첨 상한 규정' },
-    { title: '이벤트/쿠폰 정책 안내' },
-    { title: '입금 및 출금 규정 안내' },
-    { title: '악성 배팅 근절 안내' },
-  ];
+  const [noticeItems, setNoticeItems] = useState<SimpleItem[]>([]);
+  const [inquiryItems, setInquiryItems] = useState<SimpleItem[]>([]);
+  const [deposits, setDeposits] = useState<TxItem[]>([]);
+  const [withdraws, setWithdraws] = useState<TxItem[]>([]);
 
-  const inquiryItems: SimpleItem[] = [
-    { title: '1:1 문의 접수 안내' },
-    { title: '가입/로그인 문의' },
-    { title: '입출금 문의' },
-    { title: '게임 이용 문의' },
-    { title: '기타 문의' },
-  ];
+  // 유저ID 마스킹: 앞 2~3글자 + '***'
+  const maskUserId = (id: string): string => {
+    if (!id) return '***';
+    const show = id.length <= 3 ? 1 : id.length <= 5 ? 2 : 3;
+    return id.slice(0, show) + '***';
+  };
 
-  const deposits: TxItem[] = [
-    { kind: '입금', amount: '10,000원', user: 'jjs***', date: '2026-01-22' },
-    { kind: '입금', amount: '200,000원', user: 'an***', date: '2026-01-22' },
-    { kind: '입금', amount: '130,000원', user: 'tm***', date: '2026-01-22' },
-    { kind: '입금', amount: '500,000원', user: 'go***', date: '2026-01-22' },
-    { kind: '입금', amount: '1,904,370원', user: 'wp***', date: '2026-01-22' },
-    { kind: '입금', amount: '30,000원', user: 'joy***', date: '2026-01-22' },
-    { kind: '입금', amount: '20,000원', user: 'm***', date: '2026-01-22' },
-    { kind: '입금', amount: '700,000원', user: 'kim***', date: '2026-01-22' },
-    { kind: '입금', amount: '4,577,048원', user: 'red***', date: '2026-01-22' },
-    { kind: '입금', amount: '100,000원', user: 'C3***', date: '2026-01-22' },
-  ];
+  useEffect(() => {
+    // 공지사항 목록 조회
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/noticeList',
+      method: Method.GET,
+      params: {
+        queryParams: { noticeTargetType: 'CUSTOMER' },
+      },
+      config: { isLoading: false },
+    }).then((res) => {
+      if (res.successOrNot === 'Y' && Array.isArray(res.data)) {
+        setNoticeItems(
+          res.data.map((item: any) => ({
+            key: item.notice_key,
+            title: item.notice_title ?? '',
+          }))
+        );
+      }
+    });
 
-  const withdraws: TxItem[] = [
-    { kind: '출금', amount: '5,100,000원', user: 'rka***', date: '2026-01-22' },
-    { kind: '출금', amount: '4,500,000원', user: 'kk***', date: '2026-01-22' },
-    { kind: '출금', amount: '4,000,000원', user: 'kb***', date: '2026-01-22' },
-    { kind: '출금', amount: '3,800,000원', user: 'po***', date: '2026-01-22' },
-    { kind: '출금', amount: '3,400,000원', user: 'sw***', date: '2026-01-22' },
-    { kind: '출금', amount: '1,200,000원', user: 'als***', date: '2026-01-22' },
-    { kind: '출금', amount: '900,000원', user: 'pm***', date: '2026-01-22' },
-    { kind: '출금', amount: '2,100,000원', user: 'dy***', date: '2026-01-22' },
-    { kind: '출금', amount: '650,000원', user: 'lov***', date: '2026-01-22' },
-    { kind: '출금', amount: '3,000,000원', user: 'nx***', date: '2026-01-22' },
-  ];
+    // 문의 목록 조회
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/answerList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: false },
+    }).then((res) => {
+      if (res.successOrNot === 'Y' && Array.isArray(res.data)) {
+        setInquiryItems(
+          res.data.map((item: any) => ({
+            key: item.notice_key,
+            title: item.notice_title ?? '',
+          }))
+        );
+      }
+    });
+
+    // 실시간 입출금 조회 (서버에서 승인 건만 반환)
+    callApi({
+      service: Service.POSTMAN,
+      url: '/api/client/transferList',
+      method: Method.GET,
+      params: {},
+      config: { isLoading: false },
+    }).then((res) => {
+      if (res.successOrNot === 'Y' && Array.isArray(res.data)) {
+        const dep: TxItem[] = [];
+        const wit: TxItem[] = [];
+
+        res.data.forEach((row: any) => {
+          const item: TxItem = {
+            kind: row.trans_type === 'RECHARGE' ? '입금' : '출금',
+            amount: `${Number(row.trans_amount ?? 0).toLocaleString('ko-KR')}원`,
+            user: maskUserId(row.trans_bank_won ?? ''),
+            date: row.created ? dayjs(row.created).format('YYYY-MM-DD') : '',
+          };
+
+          if (row.trans_type === 'RECHARGE') {
+            dep.push(item);
+          } else if (row.trans_type === 'EXCHANGE') {
+            wit.push(item);
+          }
+        });
+
+        setDeposits(dep);
+        setWithdraws(wit);
+      }
+    });
+  }, []);
 
   const goNoticePage = async (item: SimpleItem) => {
     const ok = await ensureClientLoggedIn({ openModal: true });

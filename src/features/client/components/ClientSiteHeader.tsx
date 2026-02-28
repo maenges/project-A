@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -628,8 +628,28 @@ const NoticePopupCloseBtn = styled.button`
 
 const NoticePopupBody = styled.div`
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 24px;
+
+  /* 범용 브라우저 스크롤바 색상 */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 205, 120, 0.5) transparent;
+
+  /* Webkit 브라우저 스크롤바 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 205, 120, 0.5);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 205, 120, 0.75);
+  }
 
   .content {
     color: #ffffff;
@@ -699,6 +719,8 @@ const ClientSiteHeader = () => {
   const [currentNoticeIndex, setCurrentNoticeIndex] = useState(0);
   const [closedNoticeKeys, setClosedNoticeKeys] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialLoaded = useRef(false);
 
   const balance = useClientBalanceStore((s) => s.balance);
   const setBalance = useClientBalanceStore((s) => s.setBalance);
@@ -720,7 +742,9 @@ const ClientSiteHeader = () => {
       service: Service.POSTMAN,
       url: '/api/client/noticeList',
       method: Method.GET,
-      params: {},
+      params: {
+        queryParams: { noticeTargetType: 'CUSTOMER' },
+      },
       config: { isLoading: false },
     });
 
@@ -735,6 +759,16 @@ const ClientSiteHeader = () => {
       setNoticePopupOpen(true);
     }
   }, []);
+
+  // 페이지 이동 시 만료된 공지 재체크 (팝업이 닫혀 있을 때만)
+  useEffect(() => {
+    if (!initialLoaded.current) {
+      initialLoaded.current = true;
+      return; // 최초 마운트는 스킵 (balance/login에서 처리)
+    }
+    if (noticePopupOpen) return; // 이미 팝업이 열려 있으면 스킵
+    void fetchAndShowNotices();
+  }, [location.pathname]);
 
   // 미읽음 카운트 조회 (문의, 쪽지)
   const fetchUnreadCounts = useCallback(async () => {
@@ -868,6 +902,23 @@ const ClientSiteHeader = () => {
       void fetchBalance({ suppressAuthEvent: true });
     });
   }, []);
+
+  // 안읽은 쪽지/문의가 있으면 10초마다 알림 음성 반복 재생
+  useEffect(() => {
+    if (inboxUnreadCount <= 0 && supportUnreadCount <= 0) return;
+
+    const playAlarm = () => {
+      try {
+        const audio = new Audio('/voice/notification-alert.mp3');
+        audio.play().catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const interval = setInterval(playAlarm, 10000);
+    return () => clearInterval(interval);
+  }, [inboxUnreadCount, supportUnreadCount]);
 
   const getMenuIcon = (key: MobileMenuKey) => {
     switch (key) {

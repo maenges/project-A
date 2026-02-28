@@ -5,6 +5,7 @@ import { AccountKeyOptions, rollingFee } from '@/models/common/CommonSelectCodes
 import { useNotify } from '@/hooks/useNotify';
 import { callApi, Method } from '@/utils/ApiUtil';
 import { Service } from '@/models/common/Service';
+import { useGroupTypeStore } from '@/store/groupType';
 
 type CustomerInfoTabProps = {
   detail?: any | null;
@@ -500,7 +501,7 @@ const EggPermissionSettings = ({
 
     const res = await callApi({
       service: Service.POSTMAN,
-      url: '/api/user',
+      url: '/api/user/permission',
       method: Method.PATCH,
       params: {
         bodyParams: {
@@ -622,7 +623,7 @@ const PasswordSettings = ({
       return;
     }
 
-    const ok = await confirm('저장하시겠습니까?');
+    const ok = await confirm('비밀번호를 초기화하시겠습니까?');
     if (!ok) return;
 
     const res = await callApi({
@@ -677,23 +678,23 @@ const PasswordSettings = ({
         <TextField
           name="adminNewPassword"
           id="customer-admin-new-password"
-          autoComplete="new-password"
+          autoComplete="off"
           value={pw}
           onChange={(e) => onChangePw(e.target.value)}
           placeholder="변경할 비밀번호"
-          type="password"
           fullWidth
+          inputProps={{ style: { WebkitTextSecurity: 'disc' } as React.CSSProperties }}
           sx={styles.outlinedField}
         />
         <TextField
           name="adminNewPasswordConfirm"
           id="customer-admin-new-password-confirm"
-          autoComplete="new-password"
+          autoComplete="off"
           value={pw2}
           onChange={(e) => onChangePw2(e.target.value)}
           placeholder="비밀번호확인"
-          type="password"
           fullWidth
+          inputProps={{ style: { WebkitTextSecurity: 'disc' } as React.CSSProperties }}
           sx={styles.outlinedField}
         />
       </Stack>
@@ -1197,13 +1198,15 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
           onChangeSlot={(next) => setForm((p) => ({ ...p, rollingSlotPct: next }))}
           onChangeCasino={(next) => setForm((p) => ({ ...p, rollingCasinoPct: next }))}
         />
-        <EggPermissionSettings
-          userKey={detail?.user_key}
-          grantEgg={form.grantEgg}
-          revokeEgg={form.revokeEgg}
-          onChangeGrantEgg={(next) => setForm((p) => ({ ...p, grantEgg: next }))}
-          onChangeRevokeEgg={(next) => setForm((p) => ({ ...p, revokeEgg: next }))}
-        />
+        {useGroupTypeStore.getState().groupType === 'HQ' && (
+          <EggPermissionSettings
+            userKey={detail?.user_key}
+            grantEgg={form.grantEgg}
+            revokeEgg={form.revokeEgg}
+            onChangeGrantEgg={(next) => setForm((p) => ({ ...p, grantEgg: next }))}
+            onChangeRevokeEgg={(next) => setForm((p) => ({ ...p, revokeEgg: next }))}
+          />
+        )}
       </Stack>
 
       {/* 오른쪽 컬럼 */}
@@ -1224,11 +1227,13 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
           onChangeSlot={(next) => setForm((p) => ({ ...p, losingSlotPct: next }))}
           onChangeCasino={(next) => setForm((p) => ({ ...p, losingCasinoPct: next }))}
         />
-        <RollingFeeSettings
-          userKey={detail?.user_key}
-          value={form.rollingFee}
-          onChange={(next) => setForm((p) => ({ ...p, rollingFee: next }))}
-        />
+        {useGroupTypeStore.getState().groupType === 'HQ' && (
+          <RollingFeeSettings
+            userKey={detail?.user_key}
+            value={form.rollingFee}
+            onChange={(next) => setForm((p) => ({ ...p, rollingFee: next }))}
+          />
+        )}
         <PersonalInfoSettings
           userKey={detail?.user_key}
           phone={form.phone}

@@ -14,6 +14,26 @@ export const MemberTypeOptions = [
   { value: 'CU', label: '고객' },
 ];
 
+/** groupType 계층 순서 (상위 → 하위) */
+const MEMBER_TYPE_HIERARCHY = ['HQ', 'SH', 'BR', 'DM', 'ST', 'CU'] as const;
+
+/**
+ * 현재 사용자의 groupType 등급 이하의 MemberTypeOptions만 반환
+ * - HQ: 전체, 본사, 부본사, 지사, 총판, 매장
+ * - SH: 전체, 부본사, 지사, 총판, 매장
+ * - BR: 전체, 지사, 총판, 매장
+ * - DM: 전체, 총판, 매장
+ * - ST: 전체, 매장
+ */
+export const getMemberTypeOptionsByGroupType = (groupType: string) => {
+  const idx = MEMBER_TYPE_HIERARCHY.indexOf(groupType as any);
+  // 알 수 없는 groupType이면 전체 반환
+  if (idx < 0) return MemberTypeOptions;
+  const allowed = new Set(MEMBER_TYPE_HIERARCHY.slice(idx));
+  allowed.add('ALL' as any);
+  return MemberTypeOptions.filter((o) => allowed.has(o.value as any));
+};
+
 export const AccountKeyOptions = [
   { value: 'ALL', label: '전체' },
   { value: '004', label: '국민은행' },
@@ -58,6 +78,7 @@ export const transactionStatusOptions = [
   { value: 'ALL', label: '전체' },
   { value: 'PAYOUT', label: '지급' },
   { value: 'RECOVERY', label: '회수' },
+  { value: 'CONVERT', label: '롤링' },
 ];
 
 export const transStatusOptions = [

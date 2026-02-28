@@ -16,6 +16,7 @@ import { EtsButton } from '@/components/EtsCommon';
 import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
 import CustomerListModal from './customerListModal';
 import CustomerChargeModal, { type CustomerChargeModalMode } from './customerChargeModal';
+import { useGroupTypeStore } from '@/store/groupType';
 
 type Customer = {
   [key: string]: any;
@@ -125,7 +126,7 @@ const CustomerList: React.FC = () => {
 
   const defaultViewVisibleColKeys = [
     'charge_pay',
-    'charge_recover',
+    ...(['HQ', 'ST'].includes(useGroupTypeStore.getState().groupType) ? ['charge_recover'] : []),
     'user_money',
     'user_rolling_money',
     'group_name',
@@ -201,22 +202,26 @@ const CustomerList: React.FC = () => {
           }),
           colId: 'charge_pay',
         },
-        {
-          ...EtsColumnPreset.CheckButtonPreset2({
-            field: 'charge_recover',
-            headerName: '회수',
-            width: 100,
-            context: {
-              label: '회수',
-              onClick: async (p: any) => {
-                setChargeTargetRow((p?.data ?? null) as Customer | null);
-                setChargeModalMode('RECOVERY');
-                setChargeModalOpen(true);
+        ...(['HQ', 'ST'].includes(useGroupTypeStore.getState().groupType)
+          ? [
+              {
+                ...EtsColumnPreset.CheckButtonPreset2({
+                  field: 'charge_recover',
+                  headerName: '회수',
+                  width: 100,
+                  context: {
+                    label: '회수',
+                    onClick: async (p: any) => {
+                      setChargeTargetRow((p?.data ?? null) as Customer | null);
+                      setChargeModalMode('RECOVERY');
+                      setChargeModalOpen(true);
+                    },
+                  },
+                }),
+                colId: 'charge_recover',
               },
-            },
-          }),
-          colId: 'charge_recover',
-        },
+            ]
+          : []),
       ],
     },
     EtsColumnPreset.TextPreset({

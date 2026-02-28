@@ -1,7 +1,7 @@
 import { EventBus } from './EventBus';
 
 type SupportAnswerEvents = {
-  answer_completed: void;
+  answer_completed: { notice_key: string } | void;
 };
 
 export const supportAnswerEventBus = new EventBus<SupportAnswerEvents>();

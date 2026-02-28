@@ -115,6 +115,15 @@ export const EtsColumnPreset = {
         type: params?.context?.formatType,
         decimalPlaces: params?.context?.decimalPlaces,
       }),
+      ...(params?.context?.formatType === 'number'
+        ? {
+            comparator: (a: any, b: any) => {
+              const numA = Number(a) || 0;
+              const numB = Number(b) || 0;
+              return numA - numB;
+            },
+          }
+        : {}),
       ...params,
     };
   },

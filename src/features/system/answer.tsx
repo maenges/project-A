@@ -15,6 +15,7 @@ import { useNotify } from '@hooks/useNotify';
 import AnswerModal from './answerModal';
 import AnswerMacroModal from './answerMacroModal';
 import { AdminDashboardAddEventListeners } from '@/utils/adminDashboardEventBus';
+import { useAdminDashboardStore } from '@/store/adminDashboard';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { EtsSelectComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
@@ -280,6 +281,17 @@ const Answer: React.FC = () => {
         return;
       }
       toast.success('저장되었습니다.');
+
+      // 삭제된 문의 중 미처리(답변 전) 건수만큼 메인헤더 카운트 차감
+      const pendingDeleteCount = deleteNodes.filter((node) => {
+        const processLabel = node?.data?.notice_process;
+        const completedLabel = processStatusOptions.find((opt) => opt.value === 'COMPLETED')?.label;
+        return processLabel !== completedLabel;
+      }).length;
+      for (let i = 0; i < pendingDeleteCount; i++) {
+        useAdminDashboardStore.getState().decrementSupportCount();
+      }
+
       handleSubmit(onSearch)();
       setIsEditable(false);
     });

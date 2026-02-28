@@ -62,7 +62,7 @@ const LogoContainer = styled.div`
   justify-content: center; /* 로고 가로 중앙 정렬 */
   gap: 10px;
   width: 100%;
-  padding: 8px 12px 16px 12px; /* 좌우 동일 패딩으로 치우침 제거 */
+  padding: 12px;
   margin-top: 12px; /* 살짝 아래로 */
 `;
 
@@ -422,9 +422,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         service: Service.POSTMAN,
         url: '/api/menu',
         method: Method.GET,
-        params: {
-          queryParams: { groupType: 'HQ' },
-        },
+        params: {},
       });
       if (response.successOrNot === 'Y') {
         const transformedData = transformMenuData(response.data);
@@ -492,7 +490,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     <SidebarContainer $isOpen={isOpen}>
       {/* 펼침 상태에서만 로고/텍스트 노출 */}
       {!collapsed && (
-        <LogoContainer>
+        <LogoContainer onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <Star color="primary" sx={{ fontSize: 28 }} />
           <LogoText>스타솔루션</LogoText>
         </LogoContainer>

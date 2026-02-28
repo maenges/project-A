@@ -85,7 +85,7 @@ type NoticeItem = {
   notice_target_type: string;
   notice_order: string;
   created: string;
-  author?: string;
+  sender?: string;
 };
 
 const isToday = (dateString: string): boolean => {
@@ -114,7 +114,9 @@ const ClientNoticePage = ({ menu }: Props) => {
       service: Service.POSTMAN,
       url: '/api/client/noticeList',
       method: Method.GET,
-      params: {},
+      params: {
+        queryParams: { noticeTargetType: 'CUSTOMER' },
+      },
       config: { isLoading: true },
     });
 
@@ -141,7 +143,7 @@ const ClientNoticePage = ({ menu }: Props) => {
               <NoticeHead role="row">
                 <div>제목</div>
                 <div className="author" style={{ textAlign: 'right' }}>
-                  글쓴이
+                  보낸사람
                 </div>
                 <div style={{ textAlign: 'right' }}>날짜</div>
               </NoticeHead>
@@ -161,7 +163,7 @@ const ClientNoticePage = ({ menu }: Props) => {
                           {isToday(x.created) ? <span className="new">NEW</span> : null}
                         </span>
                       </NoticeCellTitle>
-                      <NoticeCell className="author">{x.author ?? '관리자'}</NoticeCell>
+                      <NoticeCell className="author">{x.sender ?? '관리자'}</NoticeCell>
                       <NoticeCell>{x.created}</NoticeCell>
                     </NoticeRowHeader>
                     <NoticeContent $expanded={isExpanded}>

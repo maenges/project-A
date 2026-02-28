@@ -283,6 +283,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="비밀번호를 입력해주세요."
             width={200}
             required={true}
+            inputProps={{ style: { WebkitTextSecurity: 'disc' } }}
             autoComplete="off"
           />
           <EtsInputComponent
@@ -292,6 +293,7 @@ const NoticeNewModal = ({ open, onClose, onSaved, groupKey }: NoticeNewModalProp
             placeholder="비밀번호를 다시 입력해주세요."
             width={200}
             required={true}
+            inputProps={{ style: { WebkitTextSecurity: 'disc' } }}
             autoComplete="off"
           />
         </searchForm.Col>

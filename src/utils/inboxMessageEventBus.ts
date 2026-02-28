@@ -1,7 +1,7 @@
 import { EventBus } from './EventBus';
 
 type InboxMessageEvents = {
-  message_received: void;
+  message_received: { notice_key: string } | void;
 };
 
 export const inboxMessageEventBus = new EventBus<InboxMessageEvents>();

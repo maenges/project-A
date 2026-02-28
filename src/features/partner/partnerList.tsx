@@ -18,9 +18,13 @@ import {
   EtsDatePickerComponent,
   EtsSelectComponent,
 } from '@/components/EtsComponents';
-import { MemberTypeOptions } from '@models/common/CommonSelectCodes';
+import {
+  MemberTypeOptions,
+  getMemberTypeOptionsByGroupType,
+} from '@models/common/CommonSelectCodes';
 import CustomerChargeModal, { type CustomerChargeModalMode } from '../customer/customerChargeModal';
 import PartnerListModal from './partnerListModal';
+import { useGroupTypeStore } from '@/store/groupType';
 
 const MEMBER_TYPE_LABEL_BY_VALUE = new Map(
   MemberTypeOptions.map((x) => [String(x.value).toUpperCase(), x.label] as const)
@@ -103,7 +107,7 @@ const PartnerList: React.FC = () => {
 
   const defaultViewVisibleColKeys = [
     'charge_pay',
-    'charge_recover',
+    ...(['HQ', 'ST'].includes(useGroupTypeStore.getState().groupType) ? ['charge_recover'] : []),
     'user_money',
     'user_rolling_money',
     'user_bonus_money',
@@ -131,12 +135,12 @@ const PartnerList: React.FC = () => {
     if (!api) return;
 
     if (showCasinoSlot) {
-      // compact: No, 회원ID, 카지노, 슬롯만 표시
+      // compact: No, 파트너명, 카지노, 슬롯만 표시
       api.setColumnsVisible([...defaultViewVisibleColKeys], false);
-      api.setColumnsVisible(['no', 'user_id', ...casinoSlotFields], true);
+      api.setColumnsVisible(['no', 'user_nick', ...casinoSlotFields], true);
     } else {
       // default: 기존 화면 복원(카지노/슬롯은 숨김)
-      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible(['no', 'user_nick', ...defaultViewVisibleColKeys], true);
       api.setColumnsVisible([...casinoSlotFields], false);
     }
   }, [showCasinoSlot]);
@@ -160,6 +164,11 @@ const PartnerList: React.FC = () => {
     EtsColumnPreset.TextPreset({
       field: 'user_id',
       headerName: '파트너 ID',
+      hide: true,
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'user_nick',
+      headerName: '파트너명',
       width: 150,
       context: {
         clickable: true,
@@ -189,22 +198,26 @@ const PartnerList: React.FC = () => {
           }),
           colId: 'charge_pay',
         },
-        {
-          ...EtsColumnPreset.CheckButtonPreset2({
-            field: 'charge_recover',
-            headerName: '회수',
-            width: 100,
-            context: {
-              label: '회수',
-              onClick: async (p: any) => {
-                setChargeTargetRow((p?.data ?? null) as Partner | null);
-                setChargeModalMode('RECOVERY');
-                setChargeModalOpen(true);
+        ...(['HQ', 'ST'].includes(useGroupTypeStore.getState().groupType)
+          ? [
+              {
+                ...EtsColumnPreset.CheckButtonPreset2({
+                  field: 'charge_recover',
+                  headerName: '회수',
+                  width: 100,
+                  context: {
+                    label: '회수',
+                    onClick: async (p: any) => {
+                      setChargeTargetRow((p?.data ?? null) as Partner | null);
+                      setChargeModalMode('RECOVERY');
+                      setChargeModalOpen(true);
+                    },
+                  },
+                }),
+                colId: 'charge_recover',
               },
-            },
-          }),
-          colId: 'charge_recover',
-        },
+            ]
+          : []),
       ],
     },
     EtsColumnPreset.TextPreset({
@@ -392,7 +405,7 @@ const PartnerList: React.FC = () => {
     setShowCasinoSlot(false);
     const api = (gridRef.current as any)?.api;
     if (api) {
-      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible(['no', 'user_nick', ...defaultViewVisibleColKeys], true);
       api.setColumnsVisible([...casinoSlotFields], false);
     }
     saveUiState({ groupKey: selectedTreeId, firstRow: 0, showCasinoSlot: false });
@@ -403,7 +416,7 @@ const PartnerList: React.FC = () => {
   // 상세 화면으로 이동
   const handleCellClicked = (params: any) => {
     const field = params?.colDef?.field;
-    if (field !== 'user_id') return;
+    if (field !== 'user_nick') return;
 
     const row = params?.data as Partner | undefined;
     if (!row) return;
@@ -521,7 +534,7 @@ const PartnerList: React.FC = () => {
     setShowCasinoSlot(false);
     const api = (gridRef.current as any)?.api;
     if (api) {
-      api.setColumnsVisible(['no', 'user_id', ...defaultViewVisibleColKeys], true);
+      api.setColumnsVisible(['no', 'user_nick', ...defaultViewVisibleColKeys], true);
       api.setColumnsVisible([...casinoSlotFields], false);
     }
 
@@ -576,7 +589,9 @@ const PartnerList: React.FC = () => {
             control={control}
             name="userType"
             label="파트너 유형"
-            options={MemberTypeOptions.filter((opt) => opt.value !== 'CU')}
+            options={getMemberTypeOptionsByGroupType(useGroupTypeStore.getState().groupType).filter(
+              (opt) => opt.value !== 'CU'
+            )}
           />
           <EtsInputComponent
             control={control}

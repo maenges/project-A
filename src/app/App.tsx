@@ -10,7 +10,7 @@ import { GlobalStyles } from '@style/GlobalStyles';
 import { ThemeModeProvider } from '@/contexts/ThemeContext';
 // import axios from 'axios';
 
-// import { DashboardPage } from '@/features/dashboard';
+import { DashboardPage } from '@/features/dashboard';
 // import DashboardLoginPage from '@/features/DashboardLoginPage';
 import NotifyProvider from '@/components/Provider/NotifyProvider';
 import EtsLoading from '@/components/EtsCommon/EtsLoading';
@@ -40,7 +40,7 @@ import {
   CustomerDetailPage,
 } from '@features/customer';
 import { BetBetListPage, BetLosePage } from '@features/bet';
-import { GameRecordDailyPage, GameRecordOriginPage } from '@/features/gameRecord';
+import { GameRecordDailyPage, GameRecordOriginPage, GameStatPage } from '@/features/gameRecord';
 // import { SettlementLoosingPage } from '@/features/settlement';
 // import DashboardLoginPage from '@/features/DashboardLoginPage';
 import LoginPage from '@/features/LoginPage';
@@ -74,7 +74,7 @@ function App() {
                     <AppLayout>
                       <div className="App">
                         <Routes>
-                          {/* <Route path="/" element={<DashboardPage />} /> */}
+                          <Route path="/" element={<DashboardPage />} />
                           <Route
                             path="/system/notice"
                             element={
@@ -224,6 +224,14 @@ function App() {
                             element={
                               <PrivateRoute>
                                 <GameRecordOriginPage />
+                              </PrivateRoute>
+                            }
+                          />
+                          <Route
+                            path="/gameRecord/gameStat"
+                            element={
+                              <PrivateRoute>
+                                <GameStatPage />
                               </PrivateRoute>
                             }
                           />

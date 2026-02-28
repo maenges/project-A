@@ -4,7 +4,6 @@ import { Box, Paper, Tab, Tabs, Typography } from '@mui/material';
 import { alpha, type Theme } from '@mui/material/styles';
 import AccountBoxOutlinedIcon from '@mui/icons-material/AccountBoxOutlined';
 import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
@@ -14,7 +13,6 @@ import { useNotify } from '@hooks/useNotify';
 import { MemberTypeOptions } from '@models/common/CommonSelectCodes';
 import CustomerInfoTab from '../customer/customerDetailTabs/CustomerInfoTab';
 import RecentLoginTab from '../customer/customerDetailTabs/RecentLoginTab';
-import MemoTab from '../customer/customerDetailTabs/MemoTab';
 import BalanceHistoryTab from '../customer/customerDetailTabs/BalanceHistoryTab';
 import DepositWithdrawTab from '../customer/customerDetailTabs/DepositWithdrawTab';
 import GameHistoryTab from '../customer/customerDetailTabs/GameHistoryTab';
@@ -233,7 +231,6 @@ const PartnerDetail: React.FC = () => {
     () => [
       { label: '회원정보', icon: <AccountBoxOutlinedIcon fontSize="small" /> },
       { label: '최근 로그인 기록', icon: <LoginOutlinedIcon fontSize="small" /> },
-      { label: '쪽지', icon: <MailOutlineIcon fontSize="small" /> },
       { label: '알 이력', icon: <PaidOutlinedIcon fontSize="small" /> },
       { label: '충/환전 이력', icon: <ReceiptLongOutlinedIcon fontSize="small" /> },
       { label: '게임 이력', icon: <SportsEsportsOutlinedIcon fontSize="small" /> },
@@ -291,15 +288,12 @@ const PartnerDetail: React.FC = () => {
         <RecentLoginTab userId={detail?.user_id} />
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
-        <MemoTab />
-      </TabPanel>
-      <TabPanel value={tabIndex} index={3}>
         <BalanceHistoryTab userId={detail?.user_id} groupKey={detail?.group_key} />
       </TabPanel>
-      <TabPanel value={tabIndex} index={4}>
+      <TabPanel value={tabIndex} index={3}>
         <DepositWithdrawTab userId={detail?.user_id} groupKey={detail?.group_key} />
       </TabPanel>
-      <TabPanel value={tabIndex} index={5}>
+      <TabPanel value={tabIndex} index={4}>
         <GameHistoryTab groupKey={detail?.group_key} />
       </TabPanel>
     </Box>

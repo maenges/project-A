@@ -45,6 +45,12 @@ const Notice: React.FC = () => {
       field: 'notice_target_type',
       headerName: '공지대상',
       width: 200,
+      valueGetter: (params) => {
+        const val = params.data?.notice_target_type;
+        if (val === 'CUSTOMER') return '고객';
+        if (val === 'PARTNER') return '파트너';
+        return val ?? '';
+      },
     }),
     EtsColumnPreset.TextPreset({
       field: 'notice_title',
@@ -107,7 +113,7 @@ const Notice: React.FC = () => {
       if (status !== 'I' && status !== 'U' && status !== 'D') return;
       if (!node?.data) return;
 
-      const { originData, ...rest } = node.data as any;
+      const { originData: _originData, ...rest } = node.data as any;
       const payloadRow: any = {
         ...rest,
         rowStatus: status,

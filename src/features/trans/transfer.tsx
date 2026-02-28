@@ -1,6 +1,7 @@
 import React from 'react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { Box } from '@mui/material';
@@ -32,6 +33,8 @@ type FormValues = {
 };
 
 const AlTransfer: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTransType = searchParams.get('transType') || '';
   const gridRef = useRef<EtsGridRef<Customer>>(null);
   const { toast, confirm } = useNotify();
   const [rowData, setRowData] = useState<Customer[]>([]);
@@ -290,15 +293,34 @@ const AlTransfer: React.FC = () => {
     }),
   ];
 
-  const { control, handleSubmit, getValues } = useForm<FormValues>({
+  const validTransTypes = ['ALL', 'RECHARGE', 'EXCHANGE'];
+  const initialTransType = validTransTypes.includes(urlTransType)
+    ? urlTransType
+    : (transStatusOptions[0]?.value ?? '');
+
+  const { control, handleSubmit, getValues, setValue } = useForm<FormValues>({
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
-      transType: transStatusOptions[0]?.value ?? '',
+      transType: initialTransType,
       userId: '',
     },
     mode: 'onChange',
   });
+
+  // URL transType 파라미터 변경 시 폼 값 동기화
+  useEffect(() => {
+    if (urlTransType && validTransTypes.includes(urlTransType)) {
+      setValue('transType', urlTransType);
+      // URL 파라미터 소비 후 제거 (뒤로가기 시 재적용 방지)
+      searchParams.delete('transType');
+      setSearchParams(searchParams, { replace: true });
+      // 트리 선택이 되어 있으면 자동 조회
+      if (selectedGroupKey) {
+        setTimeout(() => fetchCustomerListByGroupKey(selectedGroupKey), 0);
+      }
+    }
+  }, [urlTransType]);
 
   const onSearch = () => {
     if (!selectedGroupKey) {

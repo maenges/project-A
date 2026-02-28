@@ -10,6 +10,8 @@ import { useNotify } from '@hooks/useNotify';
 
 import { EtsButton } from '@/components/EtsCommon';
 import { buttonForm } from '@/assets/style';
+import { useAdminDashboardStore } from '@/store/adminDashboard';
+import { AdminDashboardAddEventListeners } from '@/utils/adminDashboardEventBus';
 
 type Customer = {
   [key: string]: any;
@@ -78,6 +80,16 @@ const CustomerWait: React.FC = () => {
     onSearch();
   }, []);
 
+  // 웹소켓 이벤트 구독 (새 가입신청 시 목록 자동 갱신)
+  useEffect(() => {
+    const unsubscribe = AdminDashboardAddEventListeners((eventName) => {
+      if (eventName === 'new_signup') {
+        onSearch();
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const onSearch = () => {
     callApi({
       service: Service.POSTMAN,
@@ -144,6 +156,13 @@ const CustomerWait: React.FC = () => {
     }
 
     toast.success('저장되었습니다.');
+
+    // 승인/삭제 처리된 건수만큼 메인헤더 카운트 차감
+    const processedCount = changedRows.length;
+    for (let i = 0; i < processedCount; i++) {
+      useAdminDashboardStore.getState().decrementPendingApprovalCount();
+    }
+
     onSearch();
     setIsEditable(false);
   };

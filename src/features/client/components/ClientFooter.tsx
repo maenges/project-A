@@ -78,32 +78,32 @@ const Brand = styled.button`
   }
 `;
 
-const Links = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 900;
-  font-size: 12px;
+// const Links = styled.div`
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 10px;
+//   color: rgba(255, 255, 255, 0.6);
+//   font-weight: 900;
+//   font-size: 12px;
 
-  button {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.82);
-    border-radius: 999px;
-    padding: 8px 10px;
-    cursor: pointer;
+//   button {
+//     border: 1px solid rgba(255, 255, 255, 0.12);
+//     background: rgba(255, 255, 255, 0.04);
+//     color: rgba(255, 255, 255, 0.82);
+//     border-radius: 999px;
+//     padding: 8px 10px;
+//     cursor: pointer;
 
-    &:hover {
-      border-color: rgba(255, 205, 120, 0.28);
-      background: rgba(255, 205, 120, 0.08);
-    }
-  }
+//     &:hover {
+//       border-color: rgba(255, 205, 120, 0.28);
+//       background: rgba(255, 205, 120, 0.08);
+//     }
+//   }
 
-  @media (max-width: 720px) {
-    justify-content: center;
-  }
-`;
+//   @media (max-width: 720px) {
+//     justify-content: center;
+//   }
+// `;
 
 const Copy = styled.div`
   margin-top: 12px;
@@ -127,18 +127,6 @@ const ClientFooter = () => {
             <div className="sub">CASINO &amp; SLOT</div>
           </div>
         </Brand>
-
-        <Links aria-label="footer links">
-          <button type="button" onClick={() => window.alert('이용약관(데모)')}>
-            이용약관
-          </button>
-          <button type="button" onClick={() => window.alert('개인정보처리방침(데모)')}>
-            개인정보처리방침
-          </button>
-          <button type="button" onClick={() => window.alert('고객센터(데모)')}>
-            고객센터
-          </button>
-        </Links>
       </Inner>
 
       <Inner>

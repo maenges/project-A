@@ -173,6 +173,24 @@ const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, $isSidebarOpen }
     return () => clearInterval(interval);
   }, []);
 
+  // 승인대기/충전/환전/문의가 있으면 10초마다 알림 음성 반복 재생
+  useEffect(() => {
+    if (pendingApprovalCount <= 0 && depositCount <= 0 && withdrawCount <= 0 && supportCount <= 0)
+      return;
+
+    const playAlarm = () => {
+      try {
+        const audio = new Audio('/voice/notification-alert.mp3');
+        audio.play().catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const interval = setInterval(playAlarm, 10000);
+    return () => clearInterval(interval);
+  }, [pendingApprovalCount, depositCount, withdrawCount, supportCount]);
+
   // 테마 컬러
   const themedSoft = withAlpha(theme?.colors?.primary?.main ?? '#00AB55', 0.16);
   const blinkingColor = blink ? '#e4c57a' : themedSoft;
@@ -185,7 +203,8 @@ const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, $isSidebarOpen }
 
   // 네비게이션 핸들러
   const handleGoToApproval = () => navigate('/customer/customerWait');
-  const handleGoToTransfer = () => navigate('/trans/transfer');
+  const handleGoToDeposit = () => navigate('/trans/transfer?transType=RECHARGE');
+  const handleGoToWithdraw = () => navigate('/trans/transfer?transType=EXCHANGE');
   const handleGoToSupport = () => navigate('/system/answer');
   const handleGoToOnline = () => navigate('/customer/accessor');
 
@@ -198,18 +217,18 @@ const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, $isSidebarOpen }
       </HeaderLeft>
       <HeaderRight>
         <InfoCard bgcolor={themedSoft}>
-          <CardTitle style={{ fontWeight: 'bold' }}>보유금</CardTitle>
+          <CardTitle style={{ fontWeight: 'bold' }}>보유 금액</CardTitle>
           <CardValue>{balance.toLocaleString('ko-KR')}</CardValue>
         </InfoCard>
         <InfoCard bgcolor={approvalBgColor} $clickable onClick={handleGoToApproval}>
-          <CardTitle style={{ fontWeight: 'bold' }}>승인대기</CardTitle>
+          <CardTitle style={{ fontWeight: 'bold' }}>승인 대기</CardTitle>
           <CardValue>{pendingApprovalCount}건</CardValue>
         </InfoCard>
-        <InfoCard bgcolor={depositBgColor} $clickable onClick={handleGoToTransfer}>
+        <InfoCard bgcolor={depositBgColor} $clickable onClick={handleGoToDeposit}>
           <CardTitle style={{ fontWeight: 'bold' }}>충전</CardTitle>
           <CardValue>{depositCount}건</CardValue>
         </InfoCard>
-        <InfoCard bgcolor={withdrawBgColor} $clickable onClick={handleGoToTransfer}>
+        <InfoCard bgcolor={withdrawBgColor} $clickable onClick={handleGoToWithdraw}>
           <CardTitle style={{ fontWeight: 'bold' }}>환전</CardTitle>
           <CardValue>{withdrawCount}건</CardValue>
         </InfoCard>
@@ -218,7 +237,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({ toggleSidebar, $isSidebarOpen }
           <CardValue>{supportCount}건</CardValue>
         </InfoCard>
         <InfoCard bgcolor={themedSoft} $clickable onClick={handleGoToOnline}>
-          <CardTitle style={{ fontWeight: 'bold' }}>접속자수</CardTitle>
+          <CardTitle style={{ fontWeight: 'bold' }}>접속자 수</CardTitle>
           <CardValue>{onlineCount}명</CardValue>
         </InfoCard>
       </HeaderRight>

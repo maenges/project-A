@@ -27,9 +27,16 @@ const MyEditor: FC<Props> = ({ value = '', isDarkMode, onChange, width, height, 
     if (current !== value) {
       editor.setData(value || '');
     }
-    const body = editor.document.getBody();
-    body.setStyle('background', isDarkMode ? theme.palette.background.paper : '#ffffff');
-    body.setStyle('color', isDarkMode ? '#ffffff' : '#111827');
+
+    try {
+      const body = editor.document?.getBody?.();
+      if (body) {
+        body.setStyle('background', isDarkMode ? theme.palette.background.paper : '#ffffff');
+        body.setStyle('color', isDarkMode ? '#ffffff' : '#111827');
+      }
+    } catch {
+      // CKEditor document가 아직 준비되지 않은 경우 무시
+    }
   }, [isDarkMode, value, readOnly]);
 
   return (

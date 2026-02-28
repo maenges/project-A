@@ -273,7 +273,7 @@ const Message: React.FC = () => {
     <>
       {sendModal}
       <PageTemplate
-        title="메세지"
+        title="보낸쪽지함"
         gridRef={gridRef}
         columnDefs={columnDefs}
         buttonComponent={buttonComponent}

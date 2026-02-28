@@ -5,7 +5,6 @@ import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { PageTemplate } from '@/components/Teamplate';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
-import dayjs from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 
 type GameStatRecord = {
@@ -161,13 +160,14 @@ const GameHistoryTab: React.FC<GameHistoryTabProps> = ({ userId: userIdProp, gro
         return;
       }
 
-      const startDate = dayjs().subtract(3, 'day').format('YYYYMMDD');
-      const endDate = dayjs().format('YYYYMMDD');
+      // 날짜 지정없이 제한 100 LIMIT으로 API 호출 (최신 100일치 데이터)
+      // const startDate = dayjs().subtract(3, 'day').format('YYYYMMDD');
+      // const endDate = dayjs().format('YYYYMMDD');
 
       const queryParams: any = {
         groupKey: resolvedGroupKey,
-        startDate,
-        endDate,
+        // startDate,
+        // endDate,
       };
 
       // 고객 뷰일 때만 userId 추가
