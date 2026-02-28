@@ -1,11 +1,36 @@
 import React from 'react';
 import { useState } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { callApi, Method } from '@utils/ApiUtil';
 import { Service } from '@models/common/Service';
 import { StatusCode } from '@models/common/CommonResponse';
 import { useNotify } from '../hooks/useNotify';
+
+const LoginTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : undefined,
+    '& fieldset': {
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : undefined,
+    },
+    '&:hover fieldset': {
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.5)' : undefined,
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.mode === 'dark' ? '#90caf9' : undefined,
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : undefined,
+    '&.Mui-focused': {
+      color: theme.palette.mode === 'dark' ? '#fff' : undefined,
+    },
+  },
+  '& .MuiOutlinedInput-input': {
+    color: theme.palette.mode === 'dark' ? '#fff' : undefined,
+  },
+}));
 
 async function getPublicIp(): Promise<string | null> {
   const controller = new AbortController();
@@ -83,7 +108,7 @@ const LoginPage = () => {
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 360 }}>
         <Stack spacing={2}>
-          <TextField
+          <LoginTextField
             label="ID"
             value={id}
             onChange={(e) => setId(e.target.value)}
@@ -91,7 +116,7 @@ const LoginPage = () => {
             disabled={isSubmitting}
             fullWidth
           />
-          <TextField
+          <LoginTextField
             label="Password"
             type="password"
             value={password}

@@ -282,7 +282,13 @@ const PartnerDetail: React.FC = () => {
       </Box>
 
       <TabPanel value={tabIndex} index={0}>
-        <CustomerInfoTab detail={detail} />
+        <CustomerInfoTab
+          detail={detail}
+          onDeleted={() => {
+            sessionStorage.removeItem('partnerList.uiState');
+            navigate('/partner/partnerList', { replace: true });
+          }}
+        />
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
         <RecentLoginTab userId={detail?.user_id} />

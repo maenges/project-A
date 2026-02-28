@@ -283,9 +283,8 @@ const CustomerChargeModal = ({ open, onClose, onSaved, mode, row }: CustomerChar
             label="비밀번호"
             placeholder="비밀번호를 입력해 주세요."
             width={400}
-            type="password"
-            autoComplete="one-time-code"
-            inputProps={{ autoComplete: 'one-time-code' }}
+            autoComplete="off"
+            inputProps={{ style: { WebkitTextSecurity: 'disc' } }}
             required
           />
         </searchForm.Row>

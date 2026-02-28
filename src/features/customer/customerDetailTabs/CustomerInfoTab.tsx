@@ -9,6 +9,7 @@ import { useGroupTypeStore } from '@/store/groupType';
 
 type CustomerInfoTabProps = {
   detail?: any | null;
+  onDeleted?: () => void;
 };
 
 type SettingsSectionTone = 'primary' | 'danger';
@@ -471,6 +472,68 @@ const BlockSettings = ({
           sx={styles.outlinedField}
         />
       </Stack>
+    </SettingsSection>
+  );
+};
+
+const AccountDeleteSettings = ({
+  userKey,
+  onDeleted,
+}: {
+  userKey?: string;
+  onDeleted?: () => void;
+}) => {
+  const { toast, confirm } = useNotify();
+
+  const onDeleteAccount = async () => {
+    if (!userKey) {
+      toast.error('회원 키(userKey)가 없어 계정을 삭제할 수 없습니다.');
+      return;
+    }
+
+    const ok = await confirm(
+      '정말로 이 계정을 삭제하시겠습니까?\n삭제된 계정은 복구할 수 없습니다.'
+    );
+    if (!ok) return;
+
+    const res = await callApi({
+      service: Service.POSTMAN,
+      url: '/api/user',
+      method: Method.DELETE,
+      params: {
+        bodyParams: {
+          user_key: userKey,
+        },
+      },
+      config: { isLoading: true },
+    });
+
+    if (res.successOrNot !== 'Y') {
+      toast.error(res.HeaderMsg);
+      return;
+    }
+
+    toast.success('계정이 삭제되었습니다.');
+    onDeleted?.();
+  };
+
+  return (
+    <SettingsSection
+      title="계정 삭제"
+      tone="danger"
+      actions={
+        <>
+          <Button variant="contained" color="error" disableElevation onClick={onDeleteAccount}>
+            계정 삭제
+          </Button>
+        </>
+      }
+    >
+      <Box sx={{ minHeight: 54, display: 'flex', alignItems: 'center' }}>
+        <Typography sx={{ color: 'text.secondary', fontSize: 14 }}>
+          계정을 삭제하면 복구할 수 없습니다.
+        </Typography>
+      </Box>
     </SettingsSection>
   );
 };
@@ -1132,7 +1195,7 @@ const RollingFeeSettings = ({
   );
 };
 
-const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
+const CustomerInfoTab = ({ detail, onDeleted }: CustomerInfoTabProps) => {
   const [form, setForm] = useState<CustomerInfoFormState>(defaultFormState);
 
   useEffect(() => {
@@ -1206,6 +1269,9 @@ const CustomerInfoTab = ({ detail }: CustomerInfoTabProps) => {
             onChangeGrantEgg={(next) => setForm((p) => ({ ...p, grantEgg: next }))}
             onChangeRevokeEgg={(next) => setForm((p) => ({ ...p, revokeEgg: next }))}
           />
+        )}
+        {useGroupTypeStore.getState().groupType === 'HQ' && (
+          <AccountDeleteSettings userKey={detail?.user_key} onDeleted={onDeleted} />
         )}
       </Stack>
 

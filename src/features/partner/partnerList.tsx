@@ -624,17 +624,19 @@ const PartnerList: React.FC = () => {
   const buttonComponent = (
     <buttonForm.Container>
       <buttonForm.Row>
-        <EtsButton
-          type="grey"
-          onClick={async () => {
-            const canProceed = await storeConfirm();
-            if (canProceed) {
-              setNewModalOpen(true);
-            }
-          }}
-        >
-          파트너 등록
-        </EtsButton>
+        {useGroupTypeStore.getState().groupType !== 'ST' && (
+          <EtsButton
+            type="grey"
+            onClick={async () => {
+              const canProceed = await storeConfirm();
+              if (canProceed) {
+                setNewModalOpen(true);
+              }
+            }}
+          >
+            파트너 등록
+          </EtsButton>
+        )}
         <EtsButton
           type="grey"
           aria-label={showCasinoSlot ? '카지노/슬롯 컬럼 숨기기' : '카지노/슬롯 컬럼 보기'}
