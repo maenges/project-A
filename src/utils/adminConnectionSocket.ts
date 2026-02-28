@@ -63,12 +63,12 @@ export function connectAdminSocket(): void {
   // ========== 이벤트 수신 ==========
 
   // 보유금 업데이트
-  //   adminSocket.on('balance_update', (data: { balance: number }) => {
-  //     console.log('💰 [Admin] 보유금 업데이트:', data);
-  //     const { setBalance } = useAdminDashboardStore.getState();
-  //     setBalance(data.balance);
-  //     AdminDashboardEventDispatch('balance_update', data);
-  //   });
+  adminSocket.on('balance_update', (data: { money: number }) => {
+    console.log('💰 [Admin] 보유금 업데이트:', data);
+    const { setBalance } = useAdminDashboardStore.getState();
+    setBalance(data.money);
+    AdminDashboardEventDispatch('balance_update', { balance: data.money });
+  });
 
   // 가입신청 (승인대기)
   adminSocket.on('pending_approval_count', (data?: { count?: number }) => {
