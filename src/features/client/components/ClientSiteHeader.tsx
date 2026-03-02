@@ -891,6 +891,14 @@ const ClientSiteHeader = () => {
 
   useEffect(() => {
     return ClientAuthAddEventListeners('authRequired', () => {
+      // 세션 만료 시 로그아웃 처리 (쿠키 만료로 401 발생 등)
+      disconnectUserSocket();
+      useGameFrameStore.getState().closeGame();
+      useUnreadSupportStore.getState().setUnreadCount(0);
+      useUnreadInboxStore.getState().setUnreadCount(0);
+      clearBalance();
+      void ClientAuthEventDispatch('logout', { source: 'client' });
+
       setOpen(false);
       setLoginShowVisual(true);
       setLoginOpen(true);
