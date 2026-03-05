@@ -12,7 +12,12 @@ import { callApi, Method } from '@utils/ApiUtil';
 import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 import { EtsButton } from '@/components/EtsCommon';
-import { EtsInputComponent, EtsDatePickerComponent } from '@/components/EtsComponents';
+import {
+  EtsInputComponent,
+  EtsDatePickerComponent,
+  EtsSelectComponent,
+} from '@/components/EtsComponents';
+import { gameSortOptions } from '@/models/common/CommonSelectCodes';
 
 type GameStatDaily = {
   [key: string]: any;
@@ -22,6 +27,7 @@ type FormValues = {
   startDate: string;
   endDate: string;
   userId: string;
+  gameSort: string;
 };
 
 const DAILY_UI_STATE_KEY = 'gameRecordDaily.uiState';
@@ -95,18 +101,9 @@ const GameRecordDailyPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'bet_amount',
-      headerName: '베팅',
+      headerName: '베팅금액',
       width: 130,
       flex: 1,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
-      },
-    }),
-    EtsColumnPreset.TextPreset({
-      field: 'bet_count',
-      headerName: '베팅건수',
-      width: 100,
       context: {
         formatType: 'number',
         decimalPlaces: 0,
@@ -114,7 +111,7 @@ const GameRecordDailyPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'win_amount',
-      headerName: '당첨',
+      headerName: '당첨금액',
       width: 130,
       flex: 1,
       context: {
@@ -123,17 +120,28 @@ const GameRecordDailyPage: React.FC = () => {
       },
     }),
     EtsColumnPreset.TextPreset({
-      field: 'win_count',
-      headerName: '당첨건수',
-      width: 100,
+      field: 'net_amount',
+      headerName: '베팅금액 - 당첨금액',
+      width: 160,
+      flex: 1,
       context: {
         formatType: 'number',
         decimalPlaces: 0,
       },
     }),
     EtsColumnPreset.TextPreset({
-      field: 'net_amount',
-      headerName: '순수익',
+      field: 'rolling_amount',
+      headerName: '롤링금액',
+      width: 130,
+      flex: 1,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'net_after_rolling',
+      headerName: '베팅손익',
       width: 130,
       flex: 1,
       context: {
@@ -162,20 +170,20 @@ const GameRecordDailyPage: React.FC = () => {
       stat_date: '',
       user_id: '',
       bet_amount: 0,
-      bet_count: 0,
       win_amount: 0,
-      win_count: 0,
       net_amount: 0,
+      rolling_amount: 0,
+      net_after_rolling: 0,
       rtp: '-',
     };
 
     // 숫자 필드 합계 계산
     for (const row of rowData) {
       totals.bet_amount += Number(row.bet_amount) || 0;
-      totals.bet_count += Number(row.bet_count) || 0;
       totals.win_amount += Number(row.win_amount) || 0;
-      totals.win_count += Number(row.win_count) || 0;
       totals.net_amount += Number(row.net_amount) || 0;
+      totals.rolling_amount += Number(row.rolling_amount) || 0;
+      totals.net_after_rolling += Number(row.net_after_rolling) || 0;
     }
 
     // RTP 계산: 총 당첨 / 총 베팅 * 100
@@ -191,6 +199,7 @@ const GameRecordDailyPage: React.FC = () => {
       startDate: dayjs().subtract(3, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
       userId: '',
+      gameSort: 'ALL',
     },
     mode: 'onChange',
   });
@@ -206,7 +215,7 @@ const GameRecordDailyPage: React.FC = () => {
   };
 
   const fetchDailyStatByGroupKey = (groupKey: string) => {
-    const { startDate, endDate, userId } = getValues();
+    const { startDate, endDate, userId, gameSort } = getValues();
     callApi({
       service: Service.POSTMAN,
       url: '/api/game-stat/daily',
@@ -217,6 +226,7 @@ const GameRecordDailyPage: React.FC = () => {
           startDate,
           endDate,
           userId: userId?.trim() || '',
+          gameSort: gameSort === 'ALL' ? '' : gameSort,
         },
       },
       config: { isLoading: true },
@@ -296,6 +306,12 @@ const GameRecordDailyPage: React.FC = () => {
             setStartDate={setStartRangeDate}
             setEndDate={setEndRangeDate}
           />
+          <EtsSelectComponent
+            control={control}
+            name="gameSort"
+            label="게임종류"
+            options={gameSortOptions}
+          />
           <EtsInputComponent
             control={control}
             name="userId"
@@ -349,7 +365,7 @@ const GameRecordDailyPage: React.FC = () => {
         selectedId: selectedTreeId ?? undefined,
       }}
       rowSelection="single"
-      size="one-search-no-button"
+      size="two-search"
       customTotalRowData={customTotalRowData}
     />
   );

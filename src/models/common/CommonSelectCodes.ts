@@ -129,6 +129,7 @@ export const hourOptions = [
 ];
 
 export const gameSortOptions = [
+  { value: 'ALL', label: '전체' },
   { value: 'casino', label: '카지노' },
   { value: 'slot', label: '슬롯' },
 ];

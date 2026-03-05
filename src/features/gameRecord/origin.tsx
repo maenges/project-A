@@ -180,7 +180,7 @@ const GameRecordOriginPage: React.FC = () => {
             control={control}
             name="gameSort"
             label="게임분류"
-            options={gameSortOptions}
+            options={gameSortOptions.filter((o) => o.value !== 'ALL')}
           />
           <EtsInputComponent
             control={control}

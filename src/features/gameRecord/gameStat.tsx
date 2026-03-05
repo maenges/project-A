@@ -11,7 +11,8 @@ import { callApi, Method } from '@utils/ApiUtil';
 import dayjs, { Dayjs } from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 import { EtsButton } from '@/components/EtsCommon';
-import { EtsDatePickerComponent } from '@/components/EtsComponents';
+import { EtsDatePickerComponent, EtsSelectComponent } from '@/components/EtsComponents';
+import { gameSortOptions } from '@/models/common/CommonSelectCodes';
 
 type GameStatRecord = {
   [key: string]: any;
@@ -20,6 +21,7 @@ type GameStatRecord = {
 type FormValues = {
   startDate: string;
   endDate: string;
+  gameSort: string;
 };
 
 const GameStatPage: React.FC = () => {
@@ -58,24 +60,24 @@ const GameStatPage: React.FC = () => {
     EtsColumnPreset.TextPreset({
       field: 'bet_count',
       headerName: '베팅건수',
-      width: 110,
+      width: 80,
       context: {
         formatType: 'number',
         decimalPlaces: 0,
       },
     }),
-    EtsColumnPreset.TextPreset({
-      field: 'win_count',
-      headerName: '당첨건수',
-      width: 110,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
-      },
-    }),
+    // EtsColumnPreset.TextPreset({
+    //   field: 'win_count',
+    //   headerName: '당첨건수',
+    //   width: 110,
+    //   context: {
+    //     formatType: 'number',
+    //     decimalPlaces: 0,
+    //   },
+    // }),
     EtsColumnPreset.TextPreset({
       field: 'bet_amount',
-      headerName: '베팅금',
+      headerName: '베팅금액',
       width: 140,
       context: {
         formatType: 'number',
@@ -84,7 +86,7 @@ const GameStatPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'win_amount',
-      headerName: '당첨금',
+      headerName: '당첨금액',
       width: 140,
       context: {
         formatType: 'number',
@@ -93,7 +95,25 @@ const GameStatPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'net_amount',
-      headerName: '순수익',
+      headerName: '베팅금액 - 당첨금액',
+      width: 160,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'rolling_amount',
+      headerName: '롤링금액',
+      width: 140,
+      context: {
+        formatType: 'number',
+        decimalPlaces: 0,
+      },
+    }),
+    EtsColumnPreset.TextPreset({
+      field: 'net_after_rolling',
+      headerName: '베팅손익',
       width: 140,
       context: {
         formatType: 'number',
@@ -117,12 +137,13 @@ const GameStatPage: React.FC = () => {
     defaultValues: {
       startDate: dayjs().subtract(7, 'day').format('YYYYMMDD'),
       endDate: dayjs().format('YYYYMMDD'),
+      gameSort: 'ALL',
     },
     mode: 'onChange',
   });
 
   const onSearch = () => {
-    const { startDate, endDate } = getValues();
+    const { startDate, endDate, gameSort } = getValues();
 
     callApi({
       service: Service.POSTMAN,
@@ -132,6 +153,7 @@ const GameStatPage: React.FC = () => {
         queryParams: {
           startDate,
           endDate,
+          gameSort: gameSort === 'ALL' ? '' : gameSort,
         },
       },
       config: { isLoading: true },
@@ -161,6 +183,12 @@ const GameStatPage: React.FC = () => {
             endDate={endRangeDate}
             setStartDate={setStartRangeDate}
             setEndDate={setEndRangeDate}
+          />
+          <EtsSelectComponent
+            control={control}
+            name="gameSort"
+            label="게임종류"
+            options={gameSortOptions}
           />
           <Box sx={{ marginLeft: 'auto' }}>
             <EtsButton
