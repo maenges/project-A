@@ -68,11 +68,36 @@ const AlTransfer: React.FC = () => {
       headerName: '받은 유저 키',
       hide: true,
     }),
-    EtsColumnPreset.TextPreset({
+    {
       field: 'al_trans_type',
       headerName: '알 이동 유형',
       width: 100,
-    }),
+      cellRenderer: (params: any) => {
+        const code = params.data?.al_trans_type_code;
+        const color =
+          code === 'PAYOUT'
+            ? 'success.main'
+            : code === 'RECOVERY'
+              ? 'error.main'
+              : code === 'CONVERT'
+                ? 'warning.main'
+                : undefined;
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              justifyContent: 'center',
+              fontWeight: 700,
+              color,
+            }}
+          >
+            {params.value ?? ''}
+          </Box>
+        );
+      },
+    },
     EtsColumnPreset.TextPreset({
       field: 'user_type',
       headerName: '회원 유형',
@@ -93,16 +118,39 @@ const AlTransfer: React.FC = () => {
       headerName: '대상 회원',
       width: 150,
     }),
-    EtsColumnPreset.TextPreset({
+    {
       field: 'al_trans_amount',
       headerName: '알 이동 금액',
       width: 150,
       flex: 1,
-      context: {
-        formatType: 'number',
-        decimalPlaces: 0,
+      cellRenderer: (params: any) => {
+        const val = Number(params.value);
+        const display = isNaN(val) ? '' : val.toLocaleString();
+        const code = params.data?.al_trans_type_code;
+        const color =
+          code === 'PAYOUT'
+            ? 'success.main'
+            : code === 'RECOVERY'
+              ? 'error.main'
+              : code === 'CONVERT'
+                ? 'warning.main'
+                : undefined;
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              justifyContent: 'center',
+              fontWeight: 700,
+              color,
+            }}
+          >
+            {display}
+          </Box>
+        );
       },
-    }),
+    },
     EtsColumnPreset.TextPreset({
       field: 'created',
       headerName: '등록일시',
@@ -152,15 +200,19 @@ const AlTransfer: React.FC = () => {
       }
 
       const data = (res.data ?? []) as Customer[];
-      const mapped = data.map((row) => ({
-        ...row,
-        al_trans_type_code: row?.al_trans_type,
-        user_type_code: row?.user_type,
-        target_user_type_code: row?.target_user_type,
-        al_trans_type: getLabelByValue(transactionStatusOptions, row?.al_trans_type),
-        user_type: getLabelByValue(MemberTypeOptions, row?.user_type),
-        target_user_type: getLabelByValue(MemberTypeOptions, row?.target_user_type),
-      }));
+      const mapped = data.map((row) => {
+        const amount = Number(row?.al_trans_amount) || 0;
+        return {
+          ...row,
+          al_trans_type_code: row?.al_trans_type,
+          user_type_code: row?.user_type,
+          target_user_type_code: row?.target_user_type,
+          al_trans_type: getLabelByValue(transactionStatusOptions, row?.al_trans_type),
+          user_type: getLabelByValue(MemberTypeOptions, row?.user_type),
+          target_user_type: getLabelByValue(MemberTypeOptions, row?.target_user_type),
+          al_trans_amount: row?.al_trans_type === 'RECOVERY' ? -Math.abs(amount) : amount,
+        };
+      });
 
       setRowData(mapped);
     });

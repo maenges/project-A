@@ -15,67 +15,65 @@ type CustomerInfoTabProps = {
 type SettingsSectionTone = 'primary' | 'danger';
 
 type PercentOptionsArgs = {
-  max: number; // 예: 2.0
-  step: number; // 예: 0.5
+  max: number; // 예: 7.0
   current?: number; // 예: 1.5 (현재 값이 리스트에 없으면 포함)
 };
 
-const selectMenuProps = { disableScrollLock: true } as const;
+const selectMenuProps = {
+  disableScrollLock: false,
+  anchorOrigin: { vertical: 'bottom' as const, horizontal: 'left' as const },
+  transformOrigin: { vertical: 'top' as const, horizontal: 'left' as const },
+  PaperProps: { style: { maxHeight: 300 } },
+} as const;
 
 // 항상 소수점 1자리 고정 표기 (요구사항: 1 -> 1.0%)
 const formatPct = (n: number) => `${n.toFixed(2)}%`;
 
-// max를 기준으로 step씩 끊어서 0 ~ max 리스트 생성
+// max를 기준으로 0 ~ max 리스트 생성
+// 3% 이하 구간은 0.1 단위, 초과 구간은 0.05 단위
 // current가 스텝과 다르게 들어와도(예: 1.7) 옵션에 포함시켜 select value mismatch 방지
-const buildPercentOptions = ({ max, step, current }: PercentOptionsArgs) => {
-  const safeStep = Number.isFinite(step) && step > 0 ? step : 0.5;
+const buildPercentOptions = ({ max, current }: PercentOptionsArgs) => {
   const safeMax = Number.isFinite(max) && max > 0 ? max : 0;
   const safeCurrent =
     typeof current === 'number' && Number.isFinite(current) && current >= 0 ? current : undefined;
 
-  // max가 0/누락이어도 current 값(예: 4.55)은 select mismatch 방지를 위해 포함
-  const effectiveMax = safeCurrent != null ? Math.max(safeMax, safeCurrent) : safeMax;
+  // HQ 등 최상위 그룹은 서버에서 max=0 으로 내려옴 → current를 상한으로 사용
+  // max > 0 인 경우에는 서버 max를 고정 상한으로 유지 (current에 의해 줄어들지 않음)
+  const effectiveMax = safeMax > 0 ? safeMax : (safeCurrent ?? 0);
 
-  const getDecimals = (n: number) => {
-    if (!Number.isFinite(n)) return 0;
-    const s = n.toString();
-
-    const eIndex = s.toLowerCase().indexOf('e-');
-    if (eIndex >= 0) {
-      const exponent = Number(s.slice(eIndex + 2));
-      const base = s.slice(0, eIndex);
-      const dot = base.indexOf('.');
-      const baseDecimals = dot >= 0 ? base.length - dot - 1 : 0;
-      return Math.min(6, exponent + baseDecimals);
-    }
-
-    const dotIndex = s.indexOf('.');
-    if (dotIndex < 0) return 0;
-    return Math.min(6, s.length - dotIndex - 1);
-  };
-
-  const decimals = Math.min(
-    6,
-    Math.max(getDecimals(safeStep), getDecimals(effectiveMax), getDecimals(safeCurrent ?? 0))
-  );
-  const scale = 10 ** decimals;
-
-  const stepInt = Math.round(safeStep * scale);
+  const scale = 100; // 소수점 2자리 정밀도
   const maxInt = Math.round(effectiveMax * scale);
-  if (stepInt <= 0 || maxInt <= 0) return [0];
+  if (maxInt <= 0 && safeCurrent == null) return [0];
+
+  const threshold = 3 * scale; // 3% 경계
+  const stepLow = 0.1 * scale; // 3% 이하: 0.1 단위
+  const stepHigh = 0.05 * scale; // 3% 초과: 0.05 단위
 
   const valueInts = new Set<number>();
-  for (let vInt = 0; vInt <= maxInt; vInt += stepInt) {
-    valueInts.add(vInt);
+  valueInts.add(0);
+
+  // 0 ~ min(max, 3%) 구간: 0.1 단위
+  const lowEnd = Math.min(maxInt, threshold);
+  for (let vInt = 0; vInt <= lowEnd; vInt += stepLow) {
+    valueInts.add(Math.round(vInt));
   }
+
+  // 3% 초과 ~ max 구간: 0.05 단위
+  if (maxInt > threshold) {
+    for (let vInt = threshold + stepHigh; vInt <= maxInt; vInt += stepHigh) {
+      valueInts.add(Math.round(vInt));
+    }
+  }
+
   valueInts.add(maxInt);
 
+  // current 값이 리스트에 없으면 포함 (select mismatch 방지)
   if (safeCurrent != null) {
     valueInts.add(Math.round(safeCurrent * scale));
   }
 
   return Array.from(valueInts)
-    .filter((vInt) => vInt >= 0 && vInt <= maxInt)
+    .filter((vInt) => vInt >= 0 && vInt <= Math.max(maxInt, Math.round((safeCurrent ?? 0) * scale)))
     .sort((a, b) => a - b)
     .map((vInt) => vInt / scale);
 };
@@ -911,14 +909,13 @@ const RollingSettings = ({
 }) => {
   const { toast, confirm } = useNotify();
 
-  // 예시: max=2.0 기준 0.5 단위
   const slotOptions = useMemo(
-    () => buildPercentOptions({ max: slotMaxPct, step: 0.05, current: slot }),
+    () => buildPercentOptions({ max: slotMaxPct, current: slot }),
     [slot, slotMaxPct]
   );
 
   const casinoOptions = useMemo(
-    () => buildPercentOptions({ max: casinoMaxPct, step: 0.05, current: casino }),
+    () => buildPercentOptions({ max: casinoMaxPct, current: casino }),
     [casino, casinoMaxPct]
   );
 
@@ -1026,12 +1023,12 @@ const LosingSettings = ({
   const { toast, confirm } = useNotify();
 
   const slotOptions = useMemo(
-    () => buildPercentOptions({ max: slotMaxPct, step: 0.05, current: slot }),
+    () => buildPercentOptions({ max: slotMaxPct, current: slot }),
     [slot, slotMaxPct]
   );
 
   const casinoOptions = useMemo(
-    () => buildPercentOptions({ max: casinoMaxPct, step: 0.05, current: casino }),
+    () => buildPercentOptions({ max: casinoMaxPct, current: casino }),
     [casino, casinoMaxPct]
   );
 

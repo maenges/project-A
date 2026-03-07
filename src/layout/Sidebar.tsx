@@ -67,7 +67,7 @@ const LogoContainer = styled.div`
 `;
 
 const LogoText = styled.span`
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.text.primary};
 `;
@@ -130,7 +130,9 @@ function DarkModeToggle({ collapsed }: ToggleProps) {
         {mode === 'light' ? '🌙' : '☀️'}
       </span>
       {!collapsed && (
-        <span style={{ fontWeight: 700 }}>{mode === 'light' ? '라이트모드' : '다크모드'}</span>
+        <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>
+          {mode === 'light' ? '라이트모드' : '다크모드'}
+        </span>
       )}
     </ToggleButtonContainer>
   );
@@ -177,7 +179,9 @@ function BrandSwitcher({ collapsed }: BrandSwitcherProps) {
   return (
     <BrandRow $collapsed={collapsed}>
       {!collapsed && (
-        <span style={{ fontSize: 12, color: 'inherit', opacity: 0.9 }}>Theme color</span>
+        <span style={{ fontSize: '1rem', fontWeight: 700, color: 'inherit', opacity: 0.9 }}>
+          Theme color
+        </span>
       )}
       <div
         style={{
@@ -252,6 +256,11 @@ const MenuList = styled(List)<{ $collapsed: boolean }>`
     color: ${({ theme }) => theme.colors.text.secondary};
     margin-right: 0; /* 레일에서는 오른쪽 마진 제거 */
     margin-left: 0; /* 레일에서는 왼쪽 마진 제거 */
+
+    .MuiListItemText-root .MuiTypography-root {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
 
     .MuiListItemIcon-root {
       color: ${({ theme }) => theme.colors.text.secondary};
@@ -363,7 +372,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         return <Group />;
       case '베팅':
         return <SportsEsports />;
-      case '게임기록':
+      case '게임정산':
         return <History />;
       case '정산':
         return <Calculate />;
@@ -610,7 +619,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           aria-label="logout"
         >
           <Logout fontSize="small" />
-          {!collapsed && <span style={{ fontWeight: 700 }}>로그아웃</span>}
+          {!collapsed && <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>로그아웃</span>}
         </LogoutButtonContainer>
       </MenuList>
     </SidebarContainer>
