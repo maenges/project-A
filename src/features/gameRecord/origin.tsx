@@ -218,7 +218,7 @@ const GameRecordOriginPage: React.FC = () => {
 
   return (
     <PageTemplate
-      title="원본 로그"
+      title="원본 정산"
       gridRef={gridRef}
       columnDefs={columnDefs}
       searchComponent={searchComponent}

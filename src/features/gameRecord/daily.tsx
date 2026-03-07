@@ -348,7 +348,7 @@ const GameRecordDailyPage: React.FC = () => {
 
   return (
     <PageTemplate
-      title="날짜별 기록"
+      title="날짜별 정산"
       columnDefs={columnDefs}
       rowData={rowData}
       searchComponent={searchComponent}

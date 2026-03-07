@@ -213,7 +213,7 @@ const GameStatPage: React.FC = () => {
 
   return (
     <PageTemplate
-      title="게임별 통계"
+      title="게임별 정산"
       columnDefs={columnDefs}
       rowData={rowData}
       searchComponent={searchComponent}
