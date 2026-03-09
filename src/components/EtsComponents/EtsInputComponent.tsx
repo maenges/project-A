@@ -13,6 +13,8 @@ export interface EtsInputComponentProps {
   required?: boolean;
   width?: number;
   rules?: any;
+  /** 입력값을 가공하여 반환하는 콜백 (콤마 포맷 등) */
+  formatValue?: (value: string) => string;
   [key: string]: any;
 }
 
@@ -27,6 +29,7 @@ const EtsInputComponent = ({
   required = false,
   width,
   rules,
+  formatValue,
   ...props
 }: EtsInputComponentProps) => (
   <searchForm.SelectField>
@@ -49,6 +52,7 @@ const EtsInputComponent = ({
             let value = e.target.value;
             if (onlyNumber) value = value.replace(/[^0-9]/g, '');
             if (maxLength) value = value.slice(0, maxLength);
+            if (formatValue) value = formatValue(value);
             field.onChange(value);
           }}
           error={!!error}

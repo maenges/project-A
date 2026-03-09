@@ -221,7 +221,7 @@ const PartnerDetail: React.FC = () => {
   const summary: Array<{ label: string; value: React.ReactNode }> = [
     { label: '파트너 구분', value: getMemberTypeLabel(detail?.user_type ?? detail?.userType) },
     { label: '파트너 ID', value: detail?.user_id },
-    { label: '닉네임', value: detail?.user_nick },
+    { label: '조직명', value: detail?.user_nick },
     { label: '보유금액', value: formatMoney(detail?.user_money) },
     { label: '롤링금액', value: formatMoney(detail?.user_rolling_money) },
     { label: '루징금액', value: formatMoney(detail?.user_bonus_money) },

@@ -596,7 +596,7 @@ const PartnerList: React.FC = () => {
           <EtsInputComponent
             control={control}
             name="userId"
-            label="파트너 ID"
+            label="파트너명"
             placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
             onKeyDown={(e: React.KeyboardEvent) => {

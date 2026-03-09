@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ColDef, ColGroupDef } from 'ag-grid-community';
 import { EtsGridRef, EtsColumnPreset } from '@/components/EtsGrid';
 import { Box, Typography, Chip, Stack } from '@mui/material';
 import { PageTemplate } from '@/components/Teamplate';
 import { Circle } from '@mui/icons-material';
+import { useNotify } from '@hooks/useNotify';
 
 export function formatDate(dateString?: string | null): string {
   if (!dateString) return '';
@@ -55,6 +57,8 @@ type UserStatusData = {
 const CustomerAccessorPage: React.FC = () => {
   const gridRef = useRef<EtsGridRef<AccessorUser>>(null);
   const socketRef = useRef<Socket | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useNotify();
   const [rowData, setRowData] = useState<AccessorUser[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
@@ -184,6 +188,9 @@ const CustomerAccessorPage: React.FC = () => {
       field: 'user_id',
       headerName: '회원 ID',
       width: 120,
+      context: {
+        clickable: true,
+      },
     }),
     EtsColumnPreset.TextPreset({
       field: 'user_nick',
@@ -300,6 +307,22 @@ const CustomerAccessorPage: React.FC = () => {
     </Box>
   );
 
+  const handleCellClicked = (params: any) => {
+    const field = params?.colDef?.field;
+    if (field !== 'user_id') return;
+
+    const row = params?.data as AccessorUser | undefined;
+    if (!row) return;
+
+    const userKey = row?.user_key;
+    if (!userKey) {
+      toast.info('회원 키(userKey)가 없어 상세보기로 이동할 수 없습니다.');
+      return;
+    }
+
+    navigate('/customer/customerDetail', { state: { userKey } });
+  };
+
   return (
     <PageTemplate
       title="실시간 접속자"
@@ -314,6 +337,7 @@ const CustomerAccessorPage: React.FC = () => {
       }}
       rowSelection="single"
       size="one-search"
+      onCellClicked={handleCellClicked}
     />
   );
 };

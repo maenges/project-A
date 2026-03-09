@@ -17,6 +17,7 @@ type SettingsSectionTone = 'primary' | 'danger';
 type PercentOptionsArgs = {
   max: number; // 예: 7.0
   current?: number; // 예: 1.5 (현재 값이 리스트에 없으면 포함)
+  threshold?: number; // 스텝 전환 경계 (기본 3%) — 슬롯: 3%, 카지노: 0.5%
 };
 
 const selectMenuProps = {
@@ -30,9 +31,9 @@ const selectMenuProps = {
 const formatPct = (n: number) => `${n.toFixed(2)}%`;
 
 // max를 기준으로 0 ~ max 리스트 생성
-// 3% 이하 구간은 0.1 단위, 초과 구간은 0.05 단위
+// threshold 이하 구간은 0.1 단위, 초과 구간은 0.05 단위 (슬롯: 3%, 카지노: 0.5%)
 // current가 스텝과 다르게 들어와도(예: 1.7) 옵션에 포함시켜 select value mismatch 방지
-const buildPercentOptions = ({ max, current }: PercentOptionsArgs) => {
+const buildPercentOptions = ({ max, current, threshold: thresholdPct = 3 }: PercentOptionsArgs) => {
   const safeMax = Number.isFinite(max) && max > 0 ? max : 0;
   const safeCurrent =
     typeof current === 'number' && Number.isFinite(current) && current >= 0 ? current : undefined;
@@ -45,20 +46,20 @@ const buildPercentOptions = ({ max, current }: PercentOptionsArgs) => {
   const maxInt = Math.round(effectiveMax * scale);
   if (maxInt <= 0 && safeCurrent == null) return [0];
 
-  const threshold = 3 * scale; // 3% 경계
-  const stepLow = 0.1 * scale; // 3% 이하: 0.1 단위
-  const stepHigh = 0.05 * scale; // 3% 초과: 0.05 단위
+  const threshold = thresholdPct * scale; // 경계 (슬롯 3%, 카지노 0.5%)
+  const stepLow = 0.1 * scale; // threshold 이하: 0.1 단위
+  const stepHigh = 0.05 * scale; // threshold 초과: 0.05 단위
 
   const valueInts = new Set<number>();
   valueInts.add(0);
 
-  // 0 ~ min(max, 3%) 구간: 0.1 단위
+  // 0 ~ min(max, threshold) 구간: 0.1 단위
   const lowEnd = Math.min(maxInt, threshold);
   for (let vInt = 0; vInt <= lowEnd; vInt += stepLow) {
     valueInts.add(Math.round(vInt));
   }
 
-  // 3% 초과 ~ max 구간: 0.05 단위
+  // threshold 초과 ~ max 구간: 0.05 단위
   if (maxInt > threshold) {
     for (let vInt = threshold + stepHigh; vInt <= maxInt; vInt += stepHigh) {
       valueInts.add(Math.round(vInt));
@@ -915,7 +916,7 @@ const RollingSettings = ({
   );
 
   const casinoOptions = useMemo(
-    () => buildPercentOptions({ max: casinoMaxPct, current: casino }),
+    () => buildPercentOptions({ max: casinoMaxPct, current: casino, threshold: 0.5 }),
     [casino, casinoMaxPct]
   );
 
@@ -1028,7 +1029,7 @@ const LosingSettings = ({
   );
 
   const casinoOptions = useMemo(
-    () => buildPercentOptions({ max: casinoMaxPct, current: casino }),
+    () => buildPercentOptions({ max: casinoMaxPct, current: casino, threshold: 0.5 }),
     [casino, casinoMaxPct]
   );
 

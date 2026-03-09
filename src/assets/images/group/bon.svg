@@ -1,0 +1,8 @@
+<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="18" height="18" rx="3" fill="#2F67D8" stroke="#1E4FAF"/>
+  <text x="10" y="13.8" text-anchor="middle" font-size="9" font-weight="700"
+        fill="#FFFFFF"
+        font-family="Malgun Gothic, Apple SD Gothic Neo, sans-serif">
+    본
+  </text>
+</svg>

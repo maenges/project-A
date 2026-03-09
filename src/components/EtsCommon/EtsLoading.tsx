@@ -45,7 +45,7 @@ const EtsLoading = ({ open, hasBackdrop = true }: EtsLoadingProps) => {
             color: theme.palette.primary.main,
           }}
         />
-        <LoadingText style={{ color: theme.palette.text.primary }}>Loading...</LoadingText>
+        <LoadingText style={{ color: theme.palette.text.primary }} />
       </LoadingContainer>
     </Backdrop>
   );

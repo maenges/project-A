@@ -15,11 +15,11 @@ import { useNotify } from '@/hooks/useNotify';
 import { alpha } from '@mui/material/styles';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ChevronRight from '@mui/icons-material/ChevronRight';
-import CorporateFare from '@mui/icons-material/CorporateFare';
-import Apartment from '@mui/icons-material/Apartment';
-import Business from '@mui/icons-material/Business';
-import LocalShipping from '@mui/icons-material/LocalShipping';
-import Storefront from '@mui/icons-material/Storefront';
+import bonIcon from '@/assets/images/group/bon.svg';
+import buIcon from '@/assets/images/group/bu.svg';
+import jiIcon from '@/assets/images/group/ji.svg';
+import chongIcon from '@/assets/images/group/chong.svg';
+import maeIcon from '@/assets/images/group/mae.svg';
 
 export type EtsTreeNode = {
   id: string;
@@ -74,19 +74,15 @@ const TreeNode: React.FC<{
   };
 
   const getLevelIcon = (lvl: number) => {
-    switch (lvl) {
-      case 0:
-        return <CorporateFare fontSize="small" />; // 본사
-      case 1:
-        return <Apartment fontSize="small" />; // 부본사
-      case 2:
-        return <Business fontSize="small" />; // 지사
-      case 3:
-        return <LocalShipping fontSize="small" />; // 총판
-      case 4:
-      default:
-        return <Storefront fontSize="small" />; // 매장 및 기타
-    }
+    const iconMap: Record<number, string> = {
+      0: bonIcon, // 본사
+      1: buIcon, // 부본사
+      2: jiIcon, // 지사
+      3: chongIcon, // 총판
+      4: maeIcon, // 매장
+    };
+    const src = iconMap[lvl] ?? maeIcon;
+    return <img src={src} alt="" width={28} height={28} style={{ display: 'block' }} />;
   };
 
   return (

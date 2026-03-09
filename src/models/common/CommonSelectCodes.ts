@@ -133,3 +133,9 @@ export const gameSortOptions = [
   { value: 'casino', label: '카지노' },
   { value: 'slot', label: '슬롯' },
 ];
+
+export const sortOptions = [
+  { value: 'ALL', label: '전체' },
+  { value: 'BET', label: '베팅' },
+  { value: 'WIN', label: '당첨' },
+];

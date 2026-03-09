@@ -8,7 +8,7 @@ import { searchForm, buttonForm } from '@/assets/style';
 import { PageTemplate } from '@/components/Teamplate';
 import { Service } from '@models/common/Service';
 import { callApi, Method } from '@utils/ApiUtil';
-import { hourOptions, gameSortOptions } from '@/models/common/CommonSelectCodes';
+import { hourOptions, gameSortOptions, sortOptions } from '@/models/common/CommonSelectCodes';
 import dayjs from 'dayjs';
 import { useNotify } from '@hooks/useNotify';
 
@@ -27,7 +27,9 @@ type FormValues = {
   searchDate: string;
   hour: string;
   gameSort: string;
+  sort: string;
   userId: string;
+  minAmount: string;
 };
 
 const GameRecordOriginPage: React.FC = () => {
@@ -80,7 +82,7 @@ const GameRecordOriginPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'round_id',
-      headerName: '회차 ID',
+      headerName: '라운드 ID',
       width: 120,
     }),
     EtsColumnPreset.TextPreset({
@@ -100,7 +102,7 @@ const GameRecordOriginPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'amount',
-      headerName: '요청금액',
+      headerName: '베팅(당첨)금액',
       width: 120,
       context: {
         formatType: 'number',
@@ -109,7 +111,7 @@ const GameRecordOriginPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'balance',
-      headerName: '보유금',
+      headerName: '보유금액',
       width: 120,
       context: {
         formatType: 'number',
@@ -128,7 +130,7 @@ const GameRecordOriginPage: React.FC = () => {
     }),
     EtsColumnPreset.TextPreset({
       field: 'created',
-      headerName: '등록일시',
+      headerName: '베팅(당첨)일시',
       width: 180,
     }),
   ];
@@ -138,13 +140,16 @@ const GameRecordOriginPage: React.FC = () => {
       searchDate: dayjs().format('YYYY-MM-DD'),
       hour: '00',
       gameSort: 'casino',
+      sort: 'ALL',
       userId: '',
+      minAmount: '',
     },
     mode: 'onChange',
   });
 
   const onSearch: SubmitHandler<FormValues> = () => {
-    const { searchDate, hour, gameSort, userId } = getValues();
+    const { searchDate, hour, gameSort, sort, userId, minAmount } = getValues();
+    const rawMin = minAmount?.replace(/,/g, '').trim();
 
     callApi({
       service: Service.POSTMAN,
@@ -154,8 +159,10 @@ const GameRecordOriginPage: React.FC = () => {
         queryParams: {
           searchDate,
           hour,
-          gameSort,
+          type: gameSort,
+          ...(sort && sort !== 'ALL' ? { sort } : {}),
           userId: userId?.trim() || '',
+          ...(rawMin ? { minAmount: Number(rawMin) || 0 } : {}),
         },
       },
       config: { isLoading: true },
@@ -182,12 +189,35 @@ const GameRecordOriginPage: React.FC = () => {
             label="게임분류"
             options={gameSortOptions.filter((o) => o.value !== 'ALL')}
           />
+          <EtsSelectComponent
+            control={control}
+            name="sort"
+            label="처리유형"
+            options={sortOptions}
+          />
           <EtsInputComponent
             control={control}
             name="userId"
             label="회원 ID"
             placeholder="아이디를 입력해 주세요."
             sx={{ width: 250 }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key !== 'Enter') return;
+              if ((e.nativeEvent as any)?.isComposing) return;
+              e.preventDefault();
+              handleSubmit(onSearch)();
+            }}
+          />
+          <EtsInputComponent
+            control={control}
+            name="minAmount"
+            label="최소 베팅(당첨)금액"
+            placeholder="금액을 입력해 주세요."
+            sx={{ width: 250 }}
+            formatValue={(val: string) => {
+              const raw = val.replace(/[^0-9]/g, '');
+              return raw ? Number(raw).toLocaleString() : '';
+            }}
             onKeyDown={(e: React.KeyboardEvent) => {
               if (e.key !== 'Enter') return;
               if ((e.nativeEvent as any)?.isComposing) return;
